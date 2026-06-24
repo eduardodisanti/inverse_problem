@@ -159,13 +159,14 @@ This technical note connects to the following prior and concurrent work:
 If you use this work, please cite:
 
 ```bibtex
-@techreport{diSanti2026Scarcity,
+@techreport{diSanti2026SelfSupervision,
   author      = {Di Santi, Eduardo},
-  title       = {Learning from Scarce Observations as Inverse Recovery 
-                 of Compact Functional Structures},
-  institution = {University of Colorado Boulder, 
-                 College of Engineering and Applied Science},
-  year        = {2026}
+  title       = {Self-Supervision, Manifold Saturation, and Emergent Operational Classes:
+                 Learning from Scarce Observations as Inverse Recovery of Compact Functional Structure},
+  institution = {University of Colorado Boulder, College of Engineering and Applied Science},
+  type        = {Working paper},
+  year        = {2026},
+  url         = {https://scholar.colorado.edu/concern/reports/fn107102t}
 }
 ```
 
