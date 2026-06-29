@@ -1,0 +1,138 @@
+%=============================================================================
+% TECHNICAL NOTE
+% Bearing Fault Detection as an Inverse Problem:
+% Quotient-Space Manifolds and Adaptive Threshold Estimation
+%=============================================================================
+
+\documentclass[11pt, letterpaper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{microtype}
+\usepackage{authblk}
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+
+\newcommand{\Mhealthy}{\mathcal{M}_{\mathrm{healthy}}}
+\newcommand{\Gnuis}{G_{\mathrm{nuis}}}
+\newcommand{\Lspace}{\mathcal{Z}}
+\newcommand{\Xspace}{\mathcal{X}}
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+
+\title{\textbf{Bearing Fault Detection as an Inverse Problem:}\\
+\textbf{Quotient-Space Manifolds and Per-Bearing Adaptive Thresholds}
+\large Technical Note --- Precedence Record
+\normalsize Department of Applied Mathematics \& Computer Science\ University of Colorado Boulder}  \author[1]{[Author Name]} \affil[1]{University of Colorado Boulder, Boulder, CO 80309} \date{June 28, 2026 \quad\textit{(Initial deposit for precedence)}} \maketitle  \begin{abstract} We formulate rotating machinery health monitoring as a structured inverse problem: given an observed vibration signal \(x \in \Xspace\), recover the latent health state \(z \in \Lspace\) and decide whether the bearing belongs to the healthy functional manifold \(\Mhealthy\) or has migrated to a fault manifold. Two separable sub-problems are identified. First, a quotient-space construction collapses the nuisance orbit \(\Gnuis \cdot x\) (amplitude, phase, speed, DC offset, additive noise) onto a single equivalence class so that healthy signals are distinguishable from faulty ones independently of operating-point variation. Second, a per-bearing adaptive threshold estimated from a sliding window of healthy residuals localises the alarm to each physical asset, eliminating cross-unit contamination. A Conv1D autoencoder trained exclusively on healthy synthetic data realises the quotient projection; its reconstruction mean-squared error (MSE) serves as the inverse-problem residual. Experiments on simulated signals from four simultaneous bearings achieve a false-alarm rate (FAR) \(\leq 2\%\) and detection rates (DR) of 100\% for outer-race and inner-race faults and 86\% for ball faults, using a 200-sample adaptive window and \(z\_{\mathrm{MC}} = 2.79\). [file:96] \end{abstract}  \section{Introduction}  Condition monitoring of rolling-element bearings is classically posed as a pattern recognition task. We recast it here as an inverse problem: infer latent health state from observed vibration under nuisance transformations. This note records precedence for a two-level formulation: quotient-space learning plus per-bearing adaptive thresholding.  \section{Inverse Problem Formulation}  Let \(\Xspace \subseteq \R^n\) denote vibration windows and let \(z\) denote the latent health state. The forward map is \[  x = F(z,g) = g \cdot x\_z^{\mathrm{canonical}},\]
+where \(g \in \Gnuis\) parameterises nuisance factors such as amplitude scaling, phase shift, speed perturbation, DC shift, and additive noise.
+
+The inverse problem is to construct \(\Phi: \Xspace \to \Lspace\) such that \(\Phi(x) \approx z\) modulo the nuisance orbit.
+
+Define the equivalence relation
+\[x \sim x' \iff \exists g \in \Gnuis \text{ such that } x' = g \cdot x.\]
+
+Then the relevant geometry is not raw signal space but the quotient space
+\[\widetilde{\Xspace} = \Xspace/\sim.\]
+
+Healthy signals form a manifold \(\Mhealthy\) in that quotient space, while fault signals lie outside it.
+
+\section{Method}
+
+A Conv1D autoencoder is trained only on healthy signals sampled across the nuisance orbit. The encoder therefore learns a practical quotient projection, while reconstruction MSE acts as the inverse-problem residual. Using the Monte Carlo healthy validation set, we estimate \(\mu\_{\mathrm{MC}}=0.0636\), \(\sigma\_{\mathrm{MC}}=0.0241\), \(\tau\_{\mathrm{MC}}=0.1308\), and \(z\_{\mathrm{MC}}=2.79\). [file:96]
+
+For each physical bearing \(b\), the adaptive threshold is
+\[\tau\_t^{(b)} = \mu\_t^{(b)} + z\_{\mathrm{MC}}\,\sigma\_t^{(b)},\]
+where \(\mu\_t^{(b)}\) and \(\sigma\_t^{(b)}\) are computed from a sliding buffer of recent non-anomalous residuals. This separates the shared statistical meaning of the threshold from bearing-specific baseline scale. [file:96]
+
+\section{Experiments}
+
+The synthetic experiment uses four parallel bearings: A always healthy, B with outer-race fault onset, C with inner-race fault onset, and D with ball fault onset. [file:96]
+
+\begin{table}[H]
+\centering
+\caption{Per-bearing detection metrics.}
+\label{tab:results}
+\begin{tabular}{llcc}
+\toprule
+Bearing & Scenario & FAR (healthy) & DR (fault)\
+\midrule
+A & Always healthy & 1.5\% & N/A\
+B & Outer-race fault & 2.0\% & 100\% (100/100)\
+C & Inner-race fault & 2.0\% & 100\% (100/100)\
+D & Ball fault & 2.0\% & 86\% (86/100)\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering\vspace{2.8cm}
+[FIGURE 1 PLACEHOLDER]\
+Time-domain canonical signals and Monte Carlo nuisance envelope (p10--p90).\
+Source notebook: \texttt{bearing\_explorer.ipynb}
+\vspace{2.8cm}}}
+\caption{Canonical signals and nuisance orbit envelope for healthy, outer-race, inner-race, and ball-fault regimes.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering\vspace{2.8cm}
+[FIGURE 2 PLACEHOLDER]\
+Reconstruction MSE per regime.\
+Source notebook: \texttt{bearing\_autoencoder\_per\_bearing\_SIM\_DATA.ipynb}, Section 6
+\vspace{2.8cm}}}
+\caption{Per-regime anomaly score distributions showing clear separation between healthy and faulty signals.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering\vspace{2.5cm}
+[FIGURE 3 PLACEHOLDER]\
+Healthy MSE histogram with \(\tau\_{\mathrm{MC}}\) at the 99th percentile.\
+Source notebook: \texttt{bearing\_autoencoder\_per\_bearing\_SIM\_DATA.ipynb}, Section 7
+\vspace{2.5cm}}}
+\caption{Monte Carlo calibration of the healthy residual distribution.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering\vspace{3.2cm}
+[FIGURE 4 PLACEHOLDER]\
+Per-bearing MSE time series, adaptive threshold, and anomaly flags.\
+Source notebook: \texttt{bearing\_autoencoder\_per\_bearing\_SIM\_DATA.ipynb}, Section 9
+\vspace{3.2cm}}}
+\caption{Independent threshold trajectories for bearings A--D, showing fault localisation without cross-unit contamination.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering\vspace{2.8cm}
+[FIGURE 5 PLACEHOLDER]\
+PCA projection of 16-dimensional latent codes.\
+Source notebook: \texttt{bearing\_autoencoder\_per\_bearing\_SIM\_DATA.ipynb}, Section 11
+\vspace{2.8cm}}}
+\caption{Latent-space geometry showing the healthy cluster and separation of fault regimes.}
+\end{figure}
+
+\section{Interpretation}
+
+The first contribution is conceptual: bearing diagnosis is formulated as inversion on a quotient space rather than direct classification in raw signal space. The second contribution is operational: thresholding must be local to each bearing, even when representation learning is shared globally.
+
+This is exactly the structure needed for the follow-up journal paper: method one establishes quotient-space inversion; method two establishes per-bearing adaptive statistical decision making. The journal version can then unify both methods on field data under a single inverse-problem narrative.
+
+\section{Next Journal Version}
+
+The next paper should preserve the same framing but expand four parts: formal theory, ablations, field-data validation, and comparison against fixed-threshold baselines. The technical note is therefore not a side product; it is the precedence document for the architectural idea.
+
+\end{document}

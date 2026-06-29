@@ -1,0 +1,324 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{authblk}
+\usepackage{microtype}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\newcommand{\Mhealthy}{\mathcal{M}_{\mathrm{H}}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Z}{\mathcal{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\taumc}{\tau_{\mathrm{MC}}}
+\newcommand{\taubridge}{\tau_{\mathrm{bridge}}}
+\newcommand{\taufield}{\tau_{\mathrm{p95,field}}}
+\newcommand{\tauadapt}{\tau_{\mathrm{adaptive}}}
+
+\title{Adaptive Threshold Calibration via Quotient Space Geometry:\\
+Experimental Validation on Bearing Fault Detection}
+
+\author{Eduardo Di Santi}
+\affil{College of Engineering and Applied Science\\
+University of Colorado Boulder}
+
+\date{Working Paper --- June 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report presents an experimental validation of a quotient-space framework for rotating machinery health monitoring. A representation operator is learned exclusively from Monte Carlo synthetic signals representing normal bearing operation. In this implementation, the operator is realized by a convolutional autoencoder, but the framework itself is not tied to autoencoding. The learned representation defines a canonical quotient space for the healthy operating class. An adaptive threshold $\tau$ then bridges the synthetic geometry to real field conditions without requiring labeled fault data. Validation across four Case Western Reserve University bearing benchmark operating regimes, ranging from 1730 to 1797 RPM, demonstrates near-perfect fault detection rates while keeping false positive rates close to the nominal 5\% calibration level. These results support the view that anomaly detection in this setting is better formulated as inverse recovery of membership in a compact functional structure than as supervised classification over predefined fault labels.
+\end{abstract}
+
+\section{Background and Motivation}
+
+The companion report \cite{disanti2026selfsupervision} argued that learning from scarce observations is not fundamentally a supervised classification problem, but an inverse recovery problem over compact functional structures. Under this view, classes are not merely predefined labels. They emerge as stable compact manifolds, or equivalence classes, in an appropriate representation space. Once such a structure is stabilized, a semantic label such as normal operation, degradation, or fault can be assigned by an expert or by physical reasoning.
+
+The present work provides an experimental validation of that claim in a rotating machinery setting. The concrete question is the following: given only synthetic normal-operation signals and a small cold-start window of unlabeled field data, can the system identify bearing faults across multiple load regimes?
+
+The central contribution is not the use of an autoencoder per se. Rather, the contribution is the combination of: (i) a synthetic healthy quotient space, (ii) an adaptive calibration bridge to observed field conditions, and (iii) anomaly detection as a geometric membership test in the learned healthy class.
+
+\subsection*{Contributions}
+
+This report makes three contributions:
+
+\begin{enumerate}[label=(\roman*)]
+    \item It formulates bearing fault detection as membership recovery in a healthy quotient space learned from synthetic normal-operation signals.
+    \item It introduces an adaptive threshold calibration mechanism that transfers the synthetic healthy geometry to real operating regimes without using fault labels.
+    \item It validates the approach on four CWRU bearing benchmark regimes, including a blind borderline case in which the geometry detects anomalous behavior within data nominally labeled as normal.
+\end{enumerate}
+
+\section{Method}
+
+\subsection{Quotient Space Construction from Synthetic Normal Operation}
+
+Let $\X$ denote the space of observed vibration windows and let $\Z$ denote a representation space. A representation operator
+\begin{equation}
+    \phi : \X \rightarrow \Z
+\end{equation}
+is learned from synthetic healthy trajectories generated through Monte Carlo simulation. In the present implementation, $\phi$ is realized by the encoder of a convolutional autoencoder, with reconstruction error used as an operational proxy for distance to the learned healthy structure.
+
+The autoencoder architecture is
+\begin{equation*}
+    \mathrm{Conv1D}(32 \rightarrow 64 \rightarrow 128)
+    \rightarrow \mathrm{Dense}(16)
+    \rightarrow \mathrm{Conv1DTranspose}(128 \rightarrow 64 \rightarrow 32),
+\end{equation*}
+with a 16-dimensional latent bottleneck. The model contains 847,601 trainable parameters and is trained on windows of 1,200 samples.
+
+The key design choice is deliberate: no real bearing data is used during training. The representation learner is trained only on Monte Carlo signals simulating healthy bearing vibration. The resulting structure defines the healthy quotient class $\Mhealthy$. Operationally, healthy signals should remain close to $\Mhealthy$, whereas signals outside this class should exhibit increased distance.
+
+In this implementation, the distance-to-manifold proxy is the mean squared reconstruction error:
+\begin{equation}
+    d(x,\Mhealthy) \approx \mathrm{MSE}\bigl(x, \hat{x}\bigr).
+\end{equation}
+The same framework could be implemented with alternative geometric or probabilistic scores, such as latent likelihood, Mahalanobis distance, diffusion score, energy distance, or one-class density estimates.
+
+The synthetic reference threshold $\taumc$ is computed from held-out Monte Carlo windows as
+\begin{equation}
+    \taumc = \mu_{\mathrm{MC}} + z \cdot \sigma_{\mathrm{MC}},
+\end{equation}
+where $z = 1.668$, corresponding approximately to the 95th percentile under a normal approximation. This yields
+\begin{equation}
+    \taumc = 0.0919
+\end{equation}
+across all experiments. This value is anchored entirely in simulation.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox[c][2.2in][c]{0.88\textwidth}{\centering
+    \textbf{Placeholder: Method schematic}\\[0.5em]
+    Monte Carlo healthy generator $\rightarrow$ representation learner $\rightarrow$ healthy quotient space $\Mhealthy$\\
+    Field cold-start window $\rightarrow$ adaptive threshold $\tau$ $\rightarrow$ membership test}}
+    \caption{Conceptual pipeline. Synthetic healthy signals define the canonical quotient space. A cold-start field window calibrates the operational boundary without requiring fault examples.}
+    \label{fig:method_schematic}
+\end{figure}
+
+\subsection{Adaptive Bridge to Field Conditions}
+
+The synthetic threshold $\taumc$ cannot be used directly as an operational field threshold. The domain gap between synthetic and real vibration signals systematically inflates field reconstruction errors above the synthetic reference level. In the observed CWRU normal files, field MSE values are typically above 0.15, while $\taumc$ is approximately 0.09.
+
+The adaptive bridge resolves this mismatch without requiring labeled fault examples. During a cold-start phase, the system observes a rolling window of field signals assumed to represent normal operation. Two complementary estimators are computed.
+
+The first is the bridge threshold:
+\begin{equation}
+    \taubridge = \mu_{\mathrm{field}} + z \cdot \sigma_{\mathrm{field}}.
+\end{equation}
+
+The second is the empirical field percentile threshold:
+\begin{equation}
+    \taufield = \mathrm{percentile}_{95}\left(\{\mathrm{MSE}_i\}_{i \in \mathrm{window}}\right).
+\end{equation}
+
+The adaptive threshold $\tauadapt$ tracks the running estimate and is declared converged when the bridge and percentile estimators stabilize. Empirically, convergence is reached in approximately 150 to 400 windows, depending on regime variability.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox[c][2.2in][c]{0.88\textwidth}{\centering
+    \textbf{Placeholder: Threshold convergence plot}\\[0.5em]
+    Running $\mu_t$, $\taubridge(t)$, $\taufield(t)$, and $\tauadapt(t)$ for one or more RPM regimes.}}
+    \caption{Adaptive threshold convergence during cold-start calibration. The operational boundary is estimated from unlabeled healthy field data and stabilizes after a short warm-up period.}
+    \label{fig:threshold_convergence}
+\end{figure}
+
+\subsection{Anomaly Detection as Inverse Recovery}
+
+Once $\tauadapt$ has converged, detection is performed by the following rule:
+\begin{equation}
+\hat{y}(x) =
+\begin{cases}
+\mathrm{anomaly}, & \text{if } d(x,\Mhealthy) > \tauadapt,\\
+\mathrm{normal}, & \text{otherwise.}
+\end{cases}
+\end{equation}
+
+With reconstruction error as the distance proxy, this becomes
+\begin{equation}
+\hat{y}(x) =
+\begin{cases}
+\mathrm{anomaly}, & \text{if } \mathrm{MSE}(x,\hat{x}) > \tauadapt,\\
+\mathrm{normal}, & \text{otherwise.}
+\end{cases}
+\end{equation}
+
+This is structurally an inverse problem: given an observation $x$, recover whether it belongs to the quotient class of healthy operation. No fault signatures, fault labels, or fault examples are required during training or calibration.
+
+\section{Experimental Setup}
+
+Validation uses the Case Western Reserve University (CWRU) bearing benchmark dataset. Four files representing normal operation at distinct load conditions are used as healthy calibration data. Fault conditions, including outer race, inner race, and ball faults, are used exclusively for evaluation. They are never used for training or threshold calibration.
+
+\begin{table}[H]
+\centering
+\caption{Experimental regimes and window counts.}
+\label{tab:experimental_setup}
+\begin{tabular}{rrrrrr}
+\toprule
+RPM & Load & Healthy windows & Ball windows & Inner windows & Outer windows \\
+\midrule
+1730 & 3 HP & 404 & 405 & 406 & 712 \\
+1750 & 2 HP & 404 & 405 & 405 & 711 \\
+1772 & 1 HP & 403 & 405 & 405 & 712 \\
+1797 & 0 HP & 203 & 406 & 405 & 711 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 1797 RPM regime has approximately half the number of healthy windows available in the other regimes, making it the most constrained calibration case.
+
+\section{Results}
+
+\subsection{Threshold Calibration}
+
+All three estimators, $\taubridge$, $\taufield$, and $\tauadapt$, converge to consistent values across all regimes. This provides mutual validation between the parametric and empirical estimates.
+
+\begin{table}[H]
+\centering
+\caption{Adaptive threshold calibration across operating regimes.}
+\label{tab:threshold_calibration}
+\begin{tabular}{rrrrrr}
+\toprule
+Regime & $\mu_{\mathrm{field}}$ & $\sigma_{\mathrm{field}}$ & $\taubridge$ & $\taufield$ & $\tauadapt$ \\
+\midrule
+1730 & 0.1929 & 0.0154 & 0.2186 & 0.2183 & 0.2186 \\
+1750 & 0.1864 & 0.0133 & 0.2086 & 0.2083 & 0.2086 \\
+1772 & 0.1909 & 0.0172 & 0.2196 & 0.2197 & 0.2196 \\
+1797 & 0.2277 & 0.0211 & 0.2628 & 0.2646 & 0.2628 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The systematic variation of $\tauadapt$ across regimes, from 0.2086 to 0.2628, reflects genuine differences in the field error distributions caused by operating conditions such as load and RPM. The adaptive mechanism identifies the operating regime implicitly, without explicit regime labels.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox[c][2.2in][c]{0.88\textwidth}{\centering
+    \textbf{Placeholder: MSE distribution by regime}\\[0.5em]
+    Histogram or KDE of healthy MSE values for 1730, 1750, 1772, and 1797 RPM, with vertical lines at $\tauadapt$.}}
+    \caption{Healthy reconstruction-error distributions across operating regimes. The adaptive threshold tracks the regime-dependent shift of the healthy quotient boundary.}
+    \label{fig:mse_distributions}
+\end{figure}
+
+\subsection{Detection Rates}
+
+\begin{table}[H]
+\centering
+\caption{Fault detection performance after adaptive calibration.}
+\label{tab:detection_rates}
+\begin{tabular}{lrrrr}
+\toprule
+Regime / threshold & Healthy FPR & Ball DR & Inner DR & Outer DR \\
+\midrule
+1730, $\tauadapt=0.2186$ & 5.0\% & 100.0\% & 100.0\% & 100.0\% \\
+1750, $\tauadapt=0.2086$ & 4.5\% & 100.0\% & 100.0\% & 100.0\% \\
+1772, $\tauadapt=0.2196$ & 5.2\% & 100.0\% & 100.0\% & 100.0\% \\
+1797, $\tauadapt=0.2628$ & 5.9\% & 98.3\% & 100.0\% & 100.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The false positive rate on healthy data remains close to the nominal 5\% calibration level across all regimes. Inner race and outer race faults are detected at 100\% in every regime. Ball faults are detected at 100\% in three regimes and at 98.3\% in the 1797 RPM regime, which is also the most constrained calibration case.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox[c][2.2in][c]{0.88\textwidth}{\centering
+    \textbf{Placeholder: Detection summary plot}\\[0.5em]
+    Bar chart showing Healthy FPR, Ball DR, Inner DR, and Outer DR by regime.}}
+    \caption{Detection rates across operating regimes. Fault detection is obtained from a single geometric membership rule rather than from fault-specific supervised classifiers.}
+    \label{fig:detection_rates}
+\end{figure}
+
+\subsection{Blind Test: The 1772 Borderline Regime}
+
+The 1772 RPM regime was processed without prior knowledge of its properties. The convergence analysis revealed three notable effects:
+
+\begin{itemize}
+    \item $\tauadapt$ converged above $\taufield$ and required approximately 400 windows to stabilize, roughly 2.5 times longer than the 1730 and 1750 RPM regimes.
+    \item The MSE distribution exhibits a heavier right tail extending to approximately 0.26, compared with a cleaner cutoff near 0.22 in the 1730 and 1750 RPM cases.
+    \item The running mean $\mu_t$ settled approximately 0.003 above the long-run reference.
+\end{itemize}
+
+This behavior is consistent with the known provenance of the CWRU 1772 file: it was recorded after the 1797 file on the same physical test bearing, accumulating additional wear hours. The system therefore detected an incipient or borderline deviation within a file labeled as normal in the original dataset, without fault labels and without prior knowledge of this recording artifact. This illustrates the inverse recovery formulation directly: the healthy quotient geometry flagged a signal that deviates from the canonical class, even when the categorical annotation remained normal.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox[c][2.2in][c]{0.88\textwidth}{\centering
+    \textbf{Placeholder: 1772 blind anomaly figure}\\[0.5em]
+    Plot of running threshold, MSE tail, or comparison between 1730/1750 and 1772 distributions highlighting delayed convergence and heavy right tail.}}
+    \caption{Blind borderline behavior in the 1772 RPM regime. The adaptive geometry detects a heavier-tailed healthy distribution and delayed convergence, consistent with incipient degradation or accumulated wear.}
+    \label{fig:blind_1772}
+\end{figure}
+
+\section{Discussion}
+
+\subsection{Validation of the Quotient Space Hypothesis}
+
+Three properties of the results support the quotient-space formulation.
+
+\paragraph{Transferability.}
+The quotient space learned from synthetic healthy signals transfers to real bearing data across all four operating regimes. The domain gap is not eliminated by retraining; it is bridged adaptively through unlabeled field calibration.
+
+\paragraph{Automatic regime adaptation.}
+The adaptive threshold self-calibrates to the operating point for each RPM/load regime without requiring regime labels. The variation in threshold values is geometrically meaningful: it tracks the shift in the healthy structure under different operating conditions.
+
+\paragraph{Universality of the inverse formulation.}
+Fault detection reduces to a single geometric membership test, regardless of fault type. Inner race, outer race, and ball faults are not detected by fault-specific signatures, but by their departure from the canonical healthy structure.
+
+\subsection{Relationship to the Companion Report}
+
+The companion report argued that stable compact manifolds emerge from self-supervised learning on scarce data, and that class membership is an inverse recovery question. The present results instantiate that argument in a concrete physical system:
+
+\begin{itemize}
+    \item Synthetic healthy training produces the compact healthy quotient space.
+    \item Adaptive thresholding locates the operational boundary of that space under field conditions.
+    \item Fault detection is the inverse query: does the observation lie inside or outside the healthy quotient class?
+\end{itemize}
+
+The 1772 blind test adds a further dimension: the system can detect sub-threshold or borderline degradation that escapes categorical annotation, because quotient-space geometry can be more sensitive than dataset labels.
+
+\subsection{Practical Implications}
+
+The method requires no fault examples, no regime labels, and no manual threshold tuning. The cold-start warm-up period of approximately 150 to 400 windows is short enough for many industrial monitoring settings. The computational footprint is modest: the model contains fewer than one million trainable parameters and runs at real-time speeds on commodity hardware.
+
+\subsection{Limitations}
+
+The present validation is restricted to the CWRU bearing benchmark, which is a controlled laboratory dataset rather than a full field deployment. The reported results therefore support industrial relevance, but not yet industrial deployment readiness. Further validation should include additional rotating-machinery datasets, run-to-failure degradation data, broader fault severities, different sensors, and true field acquisitions. A second limitation is that the current distance proxy is reconstruction MSE; future work should compare this proxy with latent-space and probabilistic distance measures.
+
+\section{Conclusion}
+
+The experimental results support the core hypothesis of the quotient-space framework: anomaly detection in rotating machinery can be formulated as inverse recovery of compact functional structure. A model trained entirely on synthetic healthy signals, combined with an adaptive threshold calibrated on unlabeled field data, achieves near-perfect fault detection across multiple CWRU operating regimes while maintaining false positives close to the nominal 5\% level. The blind detection of borderline behavior in the 1772 RPM regime suggests that quotient-space geometry can capture physical deviation at a finer resolution than categorical dataset labels.
+
+This report provides the experimental foundation for a broader journal treatment integrating the theoretical inverse-problem formulation, adaptive calibration, and extended validation across fault severities and additional benchmark datasets.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{9}
+
+\bibitem{disanti2026selfsupervision}
+Di Santi, E. (2026).
+\textit{Self-Supervision, Manifold Saturation, and Emergent Operational Classes: Learning from Scarce Observations as Inverse Recovery of Compact Functional Structure}.
+Working Paper, College of Engineering and Applied Science, University of Colorado Boulder.
+\url{https://scholar.colorado.edu/concern/reports/fn107102t}
+
+\bibitem{smith2015cwru}
+Smith, W. A., and Randall, R. B. (2015).
+Rolling element bearing diagnostics using the Case Western Reserve University data: A benchmark study.
+\textit{Mechanical Systems and Signal Processing}, 64--65, 100--131.
+
+\end{thebibliography}
+
+\end{document}
