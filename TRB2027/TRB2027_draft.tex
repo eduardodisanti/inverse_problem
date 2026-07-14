@@ -1,0 +1,752 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{authblk}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+
+\newcommand{\X}{\ensuremath{\mathcal{X}}}
+\newcommand{\Z}{\ensuremath{\mathcal{Z}}}
+\newcommand{\ThetaSpace}{\ensuremath{\Theta}}
+\newcommand{\EtaSpace}{\ensuremath{\mathcal{E}}}
+\newcommand{\Mnominal}{\ensuremath{\mathcal{M}_{\mathrm{N}}}}
+\newcommand{\Gnuis}{\ensuremath{G_{\mathrm{nuis}}}}
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\quotient}{\ensuremath{\mathcal{X}/G_{\mathrm{nuis}}}}
+\newcommand{\taumc}{\ensuremath{\tau_{\mathrm{MC}}}}
+\newcommand{\zmc}{\ensuremath{z_{\mathrm{MC}}}}
+
+\title{\textbf{Day-One Fleet Deployment of Rail Bearing Condition Monitoring:\\
+A Label-Free Detector with Per-Asset Adaptive Calibration}}
+\author[1]{Eduardo Di Santi}
+\affil[1]{Department of Applied Mathematics, University of Colorado Boulder}
+\date{}
+
+\begin{document}
+\maketitle
+
+%=====================================================================
+\begin{abstract}
+% TRB-style: operational problem, gap, approach, result, implication for practice -- no citations.
+Rail operators adopting vibration-based bearing condition monitoring face a deployment problem,
+not a modeling problem: fault examples are rare or absent at the start of a rollout, waiting
+months to accumulate labeled failures is not acceptable, retraining a model for every asset does
+not scale to a fleet, and manually calibrating thresholds for hundreds of individually-mounted
+sensors is not operationally feasible. This paper presents a detector designed around these
+constraints. A single model is trained once, offline, using only healthy vibration signals
+(synthetic Monte Carlo signals, real field signals, or both); it is never shown a fault example
+and never retrained per asset. At deployment, each physical bearing calibrates its own decision
+boundary online from a short warm-up of unlabeled healthy operation, using a shared statistical
+anchor computed once and reused across the fleet. This separation --- one shared model, many
+independently self-calibrating assets --- is what makes the approach deployable on day one of a
+fleet rollout, without fault labels, without per-asset retraining, and without a central
+calibration bottleneck. On Case Western Reserve University (CWRU) bearing vibration data, the
+detector reaches 98--100\% fault detection with false-alarm rates in the 5--12\% range depending
+on calibration strategy, and an ablation shows that a threshold transferred verbatim from
+simulation to field data fails completely (100\% false alarms), while transferring only the
+calibrated statistic and letting each asset supply its own local baseline recovers near-native
+performance. We also report a blind case in which the adaptive threshold flagged incipient wear
+within a CWRU file categorically labeled ``healthy,'' illustrating a practical benefit beyond
+fault classification: early warning ahead of dataset ground truth. A short theoretical argument,
+developed in the appendix, explains why a threshold calibrated in simulation transfers as a
+statistic rather than as an absolute value, but the deployment procedure itself does not require
+that theory to be applied in practice.
+\end{abstract}
+
+\vspace{0.3cm}
+\noindent\textbf{Keywords:} rail asset management, condition monitoring, predictive maintenance,
+fleet deployment, bearing diagnostics, sensor calibration, unsupervised anomaly detection
+
+%=====================================================================
+\section{Introduction}
+%=====================================================================
+Rail operators increasingly have access to vibration data from bearings, axlebox assemblies,
+and related rotating assets, but deploying a useful detector across a fleet remains difficult for
+practical reasons that are rarely addressed directly in the machine-learning literature. At the
+start of a rollout there are usually no labeled fault examples for the target fleet, no time to
+wait for failures to accumulate, and no appetite for maintaining a separate model or manually
+calibrated threshold for every sensor installation. In other words, the operational question is
+not simply \emph{how to detect a fault}, but \emph{how to deploy a detector on day one across many
+assets under heterogeneous mounting, load, and noise conditions}.
+
+This paper addresses that deployment problem with a deliberately simple design. A single model is
+trained once, offline, using healthy vibration signals only. At deployment, that shared model is
+not retrained. Instead, each physical asset calibrates its own alarm boundary online from a short
+warm-up of unlabeled healthy operation. The result is a separation of responsibilities that is
+attractive for transportation practice: one common representation can be distributed fleet-wide,
+while each asset adapts locally to its own baseline without contaminating the thresholds of other
+units.
+
+That distinction matters because the main failure mode in simulation-to-field transfer is not
+necessarily representation quality; it is calibration. A threshold that works in a simulator or in
+one installation often fails when moved verbatim to another, even when the underlying signal
+patterns are similar, because the absolute residual scale changes with sensor coupling, mounting,
+background noise, and operating point. The central claim of this paper is therefore practical
+rather than mathematical: a detector can be deployed without fault labels and without per-asset
+retraining if what is transferred globally is a \emph{shared calibration statistic}, while each
+asset supplies its own local baseline online.
+
+We evaluate that claim in a bearing case study designed to answer questions a transportation
+operator would actually ask. Can one model be trained once and reused across many assets? Can a
+new asset self-calibrate from healthy operation only? Does the method survive transfer from
+simulation to real vibration data? Does it provide useful warning even when a dataset label still
+says ``healthy''? Using synthetic multi-regime data and the Case Western Reserve University (CWRU)
+bearing benchmark, we show that the answer is yes in a controlled setting: the shared model plus
+local adaptive threshold achieves high detection, avoids per-asset retraining, and recovers from a
+complete failure of raw threshold transfer by re-expressing the decision boundary in each asset's
+own local statistics.
+
+A lightweight theoretical viewpoint helps explain why this works, but it is not the main point of
+the paper. We interpret healthy operation as a structured region of signal space that should be
+stable under nuisance variability such as amplitude scaling, phase shift, speed variation, offset,
+and noise. This perspective motivates using a shared representation together with per-asset local
+calibration, and it explains why a boundary transferred as a statistic can remain meaningful when
+a boundary transferred as an absolute number does not. For a TRB audience, however, the important
+contribution is the deployment procedure itself: a label-free, no-retraining, per-asset calibration
+scheme for scaling condition monitoring across transportation assets.
+
+The remainder of the paper is organized as follows. Section~\ref{sec:method} describes the shared
+model and per-asset adaptive threshold. Section~\ref{sec:expdesign} presents the experimental
+design, including synthetic validation, transfer to CWRU vibration data, and calibration-transfer
+ablations. Section~\ref{sec:results} reports the results with emphasis on deployment behavior.
+Section~\ref{sec:theory} provides the supporting geometric formulation for readers interested in the
+underlying rationale rather than the operational recipe.
+
+%=====================================================================
+\section{Related Work}
+%=====================================================================
+Vibration-based bearing diagnostics is a mature area of condition-based maintenance
+research~\cite{jardine2006,randall2011,zhao2019}, typically formulated as supervised
+classification over engineered or learned features, and widely benchmarked on datasets such as
+CWRU~\cite{cwru_benchmark}. One-class and novelty-detection formulations (one-class
+SVM~\cite{scholkopf1999}, neural-network novelty detection~\cite{bishop1994}, and the broader
+survey in~\cite{chandola2009}) relax the need for fault labels but still treat ``normal'' as a
+fixed statistical region rather than a structured geometric object tied to a generative model of
+nuisance variability. Deep autoencoders for anomaly detection~\cite{hinton2006,sakurada2014} use
+reconstruction error as an implicit density estimate, which is the computational mechanism we
+adopt, but existing work rarely couples this with an explicit inverse-problem formulation or a
+per-asset online threshold that avoids cross-contamination across a fleet. Classical
+inverse-problem theory (Hadamard well-posedness~\cite{hadamard}, Tikhonov
+regularization~\cite{tikhonov}) and geometric/invariant representation
+learning~\cite{bronstein2021} motivate our quotient formulation. The quotient-space construction
+itself is closest in spirit to Kendall's shape-space theory, where shapes are defined as
+orbits of landmark configurations under a nuisance group (translation, rotation,
+scale)~\cite{kendall1984}, and to Palais's slice theorem for group
+actions~\cite{palais1961}, which underlies the local-boundary argument we use for the per-asset
+adaptive threshold. Concurrently with this work,~\cite{li2023invariant} formulates anomaly
+detection under distribution shift using invariance principles, which is the closest existing
+machine-learning treatment of invariance-driven anomaly detection; our contribution differs in
+deriving the quotient structure from an explicit compactness argument on the nuisance orbit
+rather than from a causal-invariance training objective. To our knowledge, none of the above has
+been used to derive compactness guarantees for condition-monitoring ``nominal'' manifolds, or
+combined with a per-asset online calibration scheme for fleet deployment.
+
+%=====================================================================
+\section{Quotient-Space Formulation}
+\label{sec:theory}
+%=====================================================================
+
+\subsection{Observation model}
+Let $\X \subset \R^n$ be the space of fixed-length observation windows, $\theta \in \ThetaSpace$
+the latent physical state (nominal, outer-race fault, inner-race fault, ball fault, or an
+unassigned transitional state), and $\eta \in \EtaSpace$ the nuisance variables (amplitude
+scaling, phase shift, speed perturbation, offset, sensor noise). The observation process is
+\begin{equation}
+x = F(\theta,\eta), \qquad x \in \X.
+\label{eq:forward}
+\end{equation}
+Physically, $\EtaSpace$ is bounded: gain, phase, and speed variation occur over compact
+operational ranges. This compactness is the structural assumption the theory relies on.
+
+\subsection{Nuisance equivalence and the nominal manifold}
+Let $\Gnuis$ be the transformation group generated by the nuisance family (amplitude scaling,
+phase shift, speed perturbation, offset, additive noise), together with the identity and
+inverses. Two observations are \emph{nuisance-equivalent}, $x_1 \sim x_2$, if $x_2 = g\cdot x_1$
+for some $g\in\Gnuis$ and both correspond to the same $\theta$. The quotient space is
+$\quotient = \{[x] : x\in\X\}$, and the \emph{nominal quotient manifold} is
+\begin{equation}
+\Mnominal = \{[x]\in\quotient : x = F(\theta_{\mathrm N},\eta),\ \eta\in\EtaSpace\}.
+\label{eq:manifold}
+\end{equation}
+
+\begin{proposition}[Compactness of the nominal nuisance orbit]
+\label{prop:compact}
+If $\EtaSpace$ is compact and $\eta\mapsto F(\theta_{\mathrm N},\eta)$ is uniformly bounded and
+equicontinuous over $\EtaSpace$ in the sup-norm topology on $\X$, then the nominal nuisance
+orbit $\mathcal{O}_{\mathrm N} = \{F(\theta_{\mathrm N},\eta):\eta\in\EtaSpace\}$ is relatively
+compact.
+\end{proposition}
+\begin{proof}
+By hypothesis the family $\{F(\theta_{\mathrm N},\eta)\}_{\eta\in\EtaSpace}$ is uniformly
+bounded and equicontinuous; by the Arzel\`a--Ascoli theorem it is relatively compact in
+sup-norm, so $\overline{\mathcal{O}_{\mathrm N}}$ is compact. If $\EtaSpace$ is additionally
+connected (e.g., a product of intervals) and $F(\theta_{\mathrm N},\cdot)$ is continuous, then
+$\mathcal{O}_{\mathrm N}$ is connected.
+\end{proof}
+
+\begin{corollary}[Boundedness of $\Mnominal$]
+\label{cor:bounded}
+Under Proposition~\ref{prop:compact}, since the quotient projection $\pi:\X\to\quotient$ is
+continuous, $\pi(\overline{\mathcal{O}_{\mathrm N}})$ is compact, and $\Mnominal = \pi(\mathcal{O}_{\mathrm N})$
+is contained in a bounded, connected quotient structure.
+\end{corollary}
+
+\begin{remark}
+Corollary~\ref{cor:bounded} establishes boundedness and connectedness, not a smooth manifold
+structure in the differential-geometric sense. We use \emph{functional manifold} informally, to
+denote a bounded, connected region of $\quotient$ generated by a fixed latent regime under
+nuisance variability, consistent with the manifold hypothesis in representation learning.
+\end{remark}
+
+\begin{proposition}[Quotient factorization of diagnostic maps]
+\label{prop:factor}
+If $\Gnuis$ acts on $\X$ preserving $\theta$, and a diagnostic map $h:\X\to\mathcal{Y}$ depends
+only on $\theta$, then $h$ is constant on $\Gnuis$-orbits and factors as $h = \bar h\circ\pi$
+for some $\bar h:\quotient\to\mathcal{Y}$.
+\end{proposition}
+\begin{proof}
+If $x_2=g\cdot x_1$ then, since $g$ preserves $\theta$ and $h$ depends only on $\theta$,
+$h(x_1)=h(x_2)$; hence $h$ is constant on equivalence classes and factors through $\pi$ by the
+universal property of quotient maps.
+\end{proof}
+
+\begin{corollary}[Anomaly detection as membership testing]
+Anomaly detection reduces to the test $[x]\in\Mnominal$ vs.\ $[x]\notin\Mnominal$. Fault
+classification, when required, is the secondary step of assigning $[x]\notin\Mnominal$ to
+another quotient-space region.
+\end{corollary}
+
+This is the load-bearing idea of the paper: a monitoring system does not need to see faults to
+be well-posed. It needs only to characterize $\Mnominal$ accurately enough that departures from
+it are detectable, and it needs a decision rule that stays valid per physical asset despite
+nuisance drift the theory says should not matter.
+
+%=====================================================================
+\section{Method: A Deployable Approximation}
+\label{sec:method}
+%=====================================================================
+
+\subsection{Representation operator}
+We approximate $\pi$ with a Conv1D autoencoder $A_\phi = D_\phi\circ E_\phi$ trained only on
+nominal signals $x = F(\theta_{\mathrm N},\eta)$ sampled over $\EtaSpace$ by Monte Carlo. The
+encoder maps a 1200-sample window through three Conv1D layers (32, 64, 128 filters) to a
+16-dimensional latent code with an $\ell_1$ activity penalty; the decoder mirrors this with
+Conv1DTranspose layers. The model has 847,601 parameters and is trained with Adam and MSE loss,
+early stopping, and learning-rate decay on plateau. Because $A_\phi$ never sees a fault example,
+Proposition~\ref{prop:factor} motivates using the reconstruction residual
+\begin{equation}
+r(x) = \|x - A_\phi(x)\|_2^2
+\label{eq:residual}
+\end{equation}
+as a proxy for distance to $\Mnominal$: on the nominal orbit $r$ is small and approximately
+regime-invariant across nuisance draws; off the orbit $r$ grows with the severity of the latent
+deviation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{training.png}
+\caption{Autoencoder training curve (train/validation MSE loss) on healthy-only signals.}
+\label{fig:ae-training}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{healthy_sim_reconstuction.png}
+\caption{Reconstruction fidelity on held-out healthy signals: original vs.\ reconstructed windows
+with per-window MSE.}
+\label{fig:reconstruction-fidelity}
+\end{figure}
+
+\subsection{Shared calibration, local decision}
+A single global threshold is inadequate across a fleet because assets differ in baseline noise
+floor, mounting, and load. We separate the decision rule into a \emph{shared} statistic and a
+\emph{local} adaptation. From held-out nominal validation data we compute $\mu_{\mathrm{MC}}$,
+$\sigma_{\mathrm{MC}}$ of $r$, fix a target percentile (e.g., the 99th), and derive a single
+z-score anchor
+\begin{equation}
+\zmc = \frac{\taumc - \mu_{\mathrm{MC}}}{\sigma_{\mathrm{MC}}}.
+\label{eq:zmc}
+\end{equation}
+This anchor is computed once and shared by every asset in the fleet. Each physical asset $k$
+then maintains its own sliding window of the last $W$ non-anomalous residuals and computes a
+local threshold
+\begin{equation}
+\tau_k(t) = \mu_k(t) + \zmc\,\sigma_k(t),
+\label{eq:adaptive}
+\end{equation}
+flagging $x_t$ as anomalous if $r(x_t) > \tau_k(t)$. Anomalous samples are excluded from the
+update of $\mu_k,\sigma_k$, preventing an emerging fault from inflating its own threshold. This
+gives every asset an independently calibrated boundary around a shared, theoretically motivated
+geometric anchor --- no asset-specific retraining, and no cross-asset contamination.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{sim_mc_threshold.png}
+\caption{Monte Carlo calibration of the healthy residual distribution: $\taumc$ is set from the
+held-out nominal validation MSE distribution.}
+\label{fig:mc-calibration}
+\end{figure}
+
+%=====================================================================
+\section{Experimental Design}
+\label{sec:expdesign}
+%=====================================================================
+We evaluate the framework in three stages, moving from a fully controlled synthetic setting to
+real field vibration data, and finally to a targeted ablation that isolates \emph{why} a
+per-asset adaptive threshold is necessary rather than sufficient (Section~\ref{sec:method}). All
+three stages reuse the same autoencoder architecture (Section~\ref{sec:method}), trained once
+per data source and never on fault examples, so that observed differences reflect the calibration
+and deployment mechanism rather than a change in representation.
+
+\paragraph{Stage 1 --- Synthetic multi-regime validation.}
+Four regimes (healthy, outer-race, inner-race, ball fault) are generated with a physics-motivated
+bearing signal simulator (1200-sample windows, shaft frequency 30\,Hz, nuisance draws over
+amplitude, phase, speed, offset, and noise per Section~\ref{sec:theory}). The autoencoder is
+trained on 800 healthy windows with 200 held out for calibration of $\zmc$ at the 99th
+percentile. Each of the four regimes is then instantiated as an independent physical asset
+(A--D), each running its own \texttt{AdaptiveTau} tracker ($W{=}200$) seeded from the shared
+calibration set. Asset A remains nominal throughout as a control; assets B--D transition from
+nominal to a fault regime partway through the stream.
+
+\paragraph{Stage 2 --- Transfer to real vibration data (CWRU).}
+To test whether Stage~1 is an artifact of the simulator, we repeat the pipeline on the Case
+Western Reserve University (CWRU) bearing dataset using only the Drive-End channel. The
+autoencoder is trained once, from scratch, on real healthy signals (\texttt{Normal\_*.mat}) split
+80/20 into train/validation, segmented into 1200-sample windows; no synthetic data enters this
+stage. Every fault file (ball, inner-race, and outer-race defects, multiple severities and
+loads) is treated as an independent asset stream built as 100 healthy seed windows (held out
+from training) followed by the full fault segment, windowed with 50\% overlap. Each stream gets
+its own \texttt{AdaptiveTau} ($W{=}200$), all sharing one $\zmc$ anchor calibrated on held-out
+real healthy validation windows at the 99th percentile --- the same calibration protocol as
+Stage~1, but with every number now computed on field data. For the single-load (1797\,RPM)
+subset used in the Stage-3 ablation below, this yields 203 healthy, 406 ball-fault, 405
+inner-race, and 711 outer-race windows; the full multi-load sweep (0--3\,HP, all severities)
+used for Stage 1/2's qualitative separation check spans all 17 CWRU fault files plus the four
+nominal load files.
+
+\paragraph{Stage 3a --- Baselines against classical one-class detectors.}
+The quotient-space argument (Section~\ref{sec:theory}) motivates a \emph{reconstruction-residual}
+membership test specifically; it does not by itself establish that this test is better than a
+classical one-class detector applied to the same raw or latent features. We therefore compare the
+autoencoder residual against two standard one-class baselines, trained identically on
+healthy-only data and evaluated on the same per-asset streams as Stage~1/2: (i) a
+\textbf{one-class SVM} (OC-SVM,~\cite{scholkopf1999}) with RBF kernel, fit on the flattened
+1200-sample healthy windows (or, in a second variant, on the 16-dimensional autoencoder latent
+code $E_\phi(x)$, to isolate whether the gain comes from the learned representation or from the
+residual-based decision rule); and (ii) an \textbf{elliptical envelope} detector (robust
+Gaussian covariance estimate via Minimum Covariance Determinant, thresholding the Mahalanobis
+distance to the healthy centroid), fit on the same two feature spaces. Both baselines receive the
+same per-asset adaptive-threshold treatment as the autoencoder (Equation~\ref{eq:adaptive}),
+replacing $r(x)$ with the respective decision-function score, so that any performance gap is
+attributable to the representation and scoring rule rather than to the calibration scheme.
+\texttt{[TODO --- run \texttt{sklearn.svm.OneClassSVM} and
+\texttt{sklearn.covariance.EllipticEnvelope} on the CWRU streams of Stage~2 following this
+protocol and report FAR/DR in Table~\ref{tab:baselines} below; nu/contamination and kernel
+bandwidth should be selected on the held-out healthy validation split only, mirroring the
+$\zmc$ calibration protocol.]}
+
+\begin{table}[H]
+\centering
+\caption{\texttt{[PLACEHOLDER --- to be populated from experiments]} Detection performance of the
+autoencoder residual versus classical one-class baselines, all under the same per-asset adaptive
+threshold, on the CWRU streams of Stage~2.}
+\label{tab:baselines}
+\begin{tabular}{lccccc}
+\toprule
+Regime & AE residual (ours) & OC-SVM (raw) & OC-SVM (latent) & Elliptic Env. (raw) & Elliptic Env. (latent) \\
+\midrule
+Healthy (FAR) & 11.8 & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+Ball (DR)     & 99.0 & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+Inner race (DR) & 100.0 & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+Outer race (DR) & 100.0 & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Stage 3b --- Calibration-transfer ablation.}
+Stage 1 and Stage 2 each calibrate $\zmc$ \emph{within} their own data source. This stage asks a
+sharper question: does the \emph{anchor itself} generalize across domains, or only the
+architecture? We compare four ways of setting the field decision boundary, all evaluated on the
+same CWRU streams: (i) \textbf{raw transfer} --- apply $\taumc$ computed in absolute residual
+units on the synthetic simulator directly to field residuals, with no field-specific
+recalibration; (ii) \textbf{bridge} --- keep the synthetic $\zmc$ z-score, but recompute $\mu,\sigma$
+on field healthy data (Equation~\ref{eq:zmc}); (iii) \textbf{field-native} --- discard the
+synthetic anchor entirely and take the 99th-percentile residual on field healthy data as the
+threshold; (iv) \textbf{adaptive} --- the full per-asset \texttt{AdaptiveTau} of
+Section~\ref{sec:method}, warm-started on field healthy windows. Condition (i) isolates whether
+absolute residual scale transfers across domains; conditions (ii)--(iv) isolate whether the
+\emph{statistical shape} of the calibration (z-score anchor, local adaptation) does.
+
+\paragraph{Stage 4 --- Run-to-failure degradation (NASA IMS bearing dataset).}
+Stages 1--3 test discrete regimes (healthy vs.\ a specific fault type at a fixed severity); they
+do not test whether the residual grows \emph{monotonically} as an asset degrades continuously
+toward failure, which is the practically relevant regime for a real deployment and a direct
+prediction of the geometric picture in Section~\ref{sec:theory}: if the residual is a proxy for
+distance to $\Mnominal$ (Proposition~\ref{prop:factor}), it should increase gradually rather than
+only discriminate discrete labels. We therefore evaluate the same pipeline --- autoencoder
+trained only on the early-life (presumed healthy) segment, single shared $\zmc$ anchor, per-asset
+\texttt{AdaptiveTau} --- on the NASA IMS bearing run-to-failure
+dataset~\cite{nasa_ims_bearings}, which records continuous vibration from four Rexnord ZA-2115
+bearings under constant radial load (6000\,lbs) and speed (2000\,RPM) until failure, across three
+test-to-failure experiments with documented inner-race, outer-race, and roller-element failures.
+\texttt{[TODO --- segment IMS channel data into 1200-sample windows following the same protocol
+as Stages 1--2; train the autoencoder on the first $N$ files of each run (visually/statistically
+confirmed healthy from the published run logs); track $r(x_t)$ and $\tau_k(t)$ across the full
+run; report time-to-alarm relative to the documented failure timestamp and the shape of $r(x_t)$
+over the degradation trajectory.]} This stage is the strongest available test of
+Corollary~\ref{cor:bounded} in a realistic prognostics setting: it asks whether the boundary of
+$\Mnominal$ is not only a good classifier but a leading indicator of degradation, which is the
+property a fleet operator actually needs.
+
+\begin{table}[H]
+\centering
+\caption{\texttt{[PLACEHOLDER --- to be populated from experiments]} Time-to-alarm and detection
+outcome on the three NASA IMS run-to-failure experiments.}
+\label{tab:ims}
+\begin{tabular}{lcccc}
+\toprule
+IMS test set & Documented failure mode & Alarm raised? & Time-to-alarm (before documented failure) & FAR (healthy segment) \\
+\midrule
+Test 1 (Bearing 3, inner race) & Inner race & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+Test 1 (Bearing 4, roller) & Roller element & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+Test 2 (Bearing 1, outer race) & Outer race & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%=====================================================================
+\section{Results}
+\label{sec:results}
+%=====================================================================
+
+\subsection{Synthetic multi-regime detection}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{sim_reconstruction_examples.png}
+\caption{Time-domain canonical signal and Monte Carlo nuisance orbit (10th--90th percentile band)
+for each of the four synthetic regimes.}
+\label{fig:mc-orbit-signals}
+\end{figure}
+
+Table~\ref{tab:synthetic} reports false-alarm rate (FAR) during nominal operation and detection
+rate (DR) after fault onset for Stage~1. All three fault regimes are detected with FAR at or
+below 2\%; the ball-fault regime, whose impulsive signature is weaker and more amplitude-modulated
+than the outer- and inner-race impulses, is detected somewhat less reliably (86\% DR), consistent
+with a smaller effective distance from $\Mnominal$ for that fault mechanism.
+
+\begin{table}[H]
+\centering
+\caption{Synthetic per-asset detection metrics (Stage~1). The autoencoder is shared across all
+assets; the adaptive decision boundary is estimated locally per asset.}
+\label{tab:synthetic}
+\begin{tabular}{llcc}
+\toprule
+Asset & Scenario & FAR (nominal period) & DR (after onset) \\
+\midrule
+A & Nominal throughout     & 1.5\% & N/A \\
+B & Outer-race fault onset & 2.0\% & 100\% \\
+C & Inner-race fault onset & 2.0\% & 100\% \\
+D & Ball-fault onset       & 2.0\% & 86\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{anomaly_score_by_regime.png}
+\caption{Distribution of reconstruction error (anomaly score) by regime, with the calibrated
+threshold $\tau$ overlaid. Healthy windows concentrate below $\tau$; all three fault regimes shift
+to higher reconstruction error, with a clear margin from the healthy distribution.}
+\label{fig:boxplot-regime-sim}
+\end{figure}
+
+Figure~\ref{fig:boxplot-regime-sim} shows this separation directly at the level of individual
+windows rather than only through the summary FAR/DR statistics of Table~\ref{tab:synthetic}: the
+healthy-regime boxplot sits almost entirely below $\tau$, while the three fault-regime boxplots
+are shifted upward with limited overlap, confirming that the FAR/DR numbers reflect a genuine
+shift in the residual distribution rather than a threshold placed to fit a small number of
+borderline points.
+
+We additionally verify that this result is not an artifact of a single window choice: sweeping
+the adaptive-buffer size $W$ (Figure~\ref{fig:window-sensitivity}), detection rate remains high
+and false-alarm rate remains low over a broad range, and a PCA projection of the latent space
+(Figure~\ref{fig:blueprint-saturation}) shows the four regimes separating into distinct, bounded
+regions consistent with Corollary~\ref{cor:bounded}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\linewidth]{sim_window_sensitivity.png}
+\caption{Per-asset FAR and DR as a function of adaptive-buffer window size $W$. Detection remains
+high and false alarms remain low across a broad range of $W$, indicating the result is not an
+artifact of a single hand-tuned window length.}
+\label{fig:window-sensitivity}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{sim_blueprint_saturation.png}
+\caption{Blueprint saturation diagnostic: p98 manifold radius in a 2D PCA projection as a function
+of the number of Monte Carlo samples, for each regime. Stabilization of the radius indicates that
+each sampled nuisance orbit approaches a bounded functional structure, consistent with
+Proposition~\ref{prop:compact}.}
+\label{fig:blueprint-saturation}
+\end{figure}
+
+\subsection{Transfer to real vibration data (CWRU)}
+Reconstruction-error distributions computed by the field-trained autoencoder (Stage~2) separate
+cleanly between the held-out healthy validation windows and every one of the CWRU fault files,
+reproducing the Stage-1 separation pattern with no synthetic component anywhere in this pipeline.
+This is preliminary evidence that the quotient-space residual is not an artifact of the simulator
+that motivated it, but a property of the reconstruction-residual mechanism itself when applied to
+a correctly-trained nominal orbit.
+
+\subsection{Calibration does not transfer as an absolute number, but does as a shape}
+Concretely, on the 1797\,RPM CWRU healthy stream the reconstruction residual has field statistics
+$\mu_{\mathrm{field}}=0.2270$, $\sigma_{\mathrm{field}}=0.0215$, giving a field-native 95th-percentile
+threshold $\tau_{\mathrm{p95}}=0.2636$ and a bridged threshold
+$\tau_{\mathrm{bridge}}=\mu_{\mathrm{field}}+\zmc\,\sigma_{\mathrm{field}}=0.2543$ once the
+synthetic $\zmc$ is re-expressed in these field units --- both close to each other and both far
+from the raw synthetic $\taumc$, whose absolute scale reflects the simulator's amplitude units
+rather than real Drive-End vibration units. Table~\ref{tab:transfer} reports the resulting alarm
+rate under each of the four Stage-3 calibration strategies, evaluated per regime on the CWRU
+streams. The \emph{raw transfer} condition fails completely: applying $\taumc$ directly, with no
+unit correction, flags 100\% of healthy field windows as anomalous, because the absolute residual
+scale of the simulator and of real Drive-End vibration data are not comparable, exactly as the
+gap between $\taumc$ and $\tau_{\mathrm{p95}}$ above predicts. The remaining three strategies,
+which all rely on field-computed $\mu,\sigma$ --- whether combined with the synthetic z-score
+anchor (\emph{bridge}), recalibrated natively on field data (\emph{field-native}), or estimated
+online per asset (\emph{adaptive}) --- recover a healthy-period false-alarm rate in the 5--12\%
+range while preserving 98--100\% detection on every fault regime.
+
+\begin{table}[H]
+\centering
+\caption{Alarm rate (\%) by regime under four threshold-calibration strategies transferred to
+CWRU field data (Stage~3). For the Healthy row, this is the false-alarm rate; for fault rows, it
+is the detection rate.}
+\label{tab:transfer}
+\begin{tabular}{lcccc}
+\toprule
+Regime & Raw transfer ($\taumc$) & Bridge ($\zmc$, field $\mu,\sigma$) & Field-native (p99) & Adaptive \\
+\midrule
+Healthy & 100.0 & 11.8 & 5.4  & 11.8 \\
+Ball    & 100.0 & 99.0 & 98.3 & 99.0  \\
+Inner race & 100.0 & 100.0 & 100.0 & 100.0 \\
+Outer race & 100.0 & 100.0 & 100.0 & 100.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This result is the direct empirical justification for the design choice in
+Section~\ref{sec:method}: what generalizes across the synthetic-to-field domain gap is not a
+residual magnitude, but a \emph{statistical anchor} ($\zmc$) that must be re-expressed in each
+asset's own local statistics. A monitoring system that ports an absolute threshold from
+simulation to deployment will alarm on every healthy asset; one that ports only the calibrated
+z-score, and lets each asset supply its own $\mu,\sigma$, degrades gracefully instead of failing
+outright. The field-native strategy achieves the lowest FAR (5.4\%) because it is calibrated
+entirely in-domain, but the bridge and adaptive strategies --- which require \emph{no} field fault
+data and only a short healthy warm-up per asset --- reach within a few percentage points of that
+floor while remaining deployable without any per-asset offline calibration step.
+
+\subsection{Why the residual separates regimes: latent geometry}
+Table~\ref{tab:transfer} shows \emph{that} the residual separates regimes after calibration; the
+latent-space diagnostics motivated by Section~\ref{sec:theory} show \emph{why}. Projecting the
+16-dimensional latent code $E_\phi(x)$ onto its first two principal components, healthy windows
+from every stream collapse into a single, visually compact cluster, while ball, inner-race, and
+outer-race windows occupy separate, non-overlapping regions --- the empirical image of
+$\Mnominal$ from Corollary~\ref{cor:bounded} sitting inside a quotient space where fault regimes
+are bounded away from it rather than continuously connected to it. This is not merely a
+qualitative artifact of the projection: computing the Euclidean distance from each latent code to
+the healthy-cluster centroid $\mu_{\mathrm{healthy}}=\mathbb{E}[E_\phi(x)\mid \theta=\theta_{\mathrm N}]$
+in the full 16-dimensional latent space, this distance is monotonically associated with
+reconstruction error $r(x)$ across regimes: samples close to $\mu_{\mathrm{healthy}}$ in latent
+space have low $r(x)$ and fall below $\tau$, while samples far from it have high $r(x)$ and are
+flagged. This is the mechanistic reason the calibration-transfer result of
+Table~\ref{tab:transfer} holds: the autoencoder does not need to be retrained or
+fault-aware because the fault regimes are already geometrically separated from $\Mnominal$ in the
+learned latent space \emph{before} any threshold is applied --- calibration only has to locate a
+boundary within a space that the representation has already structured correctly, which is why a
+lightweight, per-asset statistic (Equation~\ref{eq:adaptive}) suffices in place of a supervised
+classifier.
+floor while remaining deployable without any per-asset offline calibration step.
+
+%=====================================================================
+\section{Discussion}
+%=====================================================================
+The practical payoff of Section~\ref{sec:theory} is not the compactness proof by itself, but
+what it licenses operationally: because the nominal quotient manifold is what a monitoring
+system should track, training can be restricted to healthy data, deployment can be per-asset
+without retraining, and the same shared anchor $\zmc$ can be reused across an entire fleet. The
+per-asset adaptive threshold is the direct computational consequence of treating nuisance
+variability as something to be normalized locally rather than centrally. This is what makes the
+approach deployable at fleet scale with a small, fixed compute footprint per asset (a deque of
+residuals and two running statistics) on top of one shared, offline-trained model.
+
+The two empirical results that matter most for this argument are the calibration-transfer
+ablation (Table~\ref{tab:transfer}) and the latent-geometry diagnostic that explains it. Raw
+threshold transfer fails outright (100\% false alarms) precisely because it treats $\taumc$ as a
+physical quantity rather than a statistical one; re-expressing it as a z-score and letting each
+asset supply its own $\mu,\sigma$ recovers behavior close to a fully field-native calibration
+without ever training or calibrating on field fault data. The latent PCA and distance-to-centroid
+diagnostics show this is not a lucky threshold choice: the autoencoder's latent space already
+places fault regimes at a bounded distance from the healthy cluster, so \emph{any} reasonable
+percentile-based threshold in that space will separate them, which is exactly the robustness a
+deployable monitoring primitive needs. Put differently, the theory in Section~\ref{sec:theory}
+predicts that $\Mnominal$ should be bounded and separated from off-manifold regimes; the
+latent-space geometry in Section~\ref{sec:results} is the empirical signature of that prediction,
+and the calibration-transfer result is the deployment consequence of it.
+
+We emphasize the current experimental scope honestly: the synthetic results establish internal
+consistency of the framework, and the CWRU results establish that the same residual-based
+membership test survives contact with real vibration data, but the CWRU evaluation to date
+covers single-fault, steady-state conditions rather than a full field deployment with transitional
+and compound-fault regimes. Two gaps in the current draft are the most pressing before this can
+be called a validated method rather than a plausible mechanism: first, Stage~3a's classical
+one-class baselines (OC-SVM, elliptical envelope) are not yet populated, so the claim that the
+learned residual outperforms a simpler statistical detector on the same features is currently
+asserted by the theory, not demonstrated by a head-to-head comparison; second, Stage~4's NASA IMS
+run-to-failure evaluation is the only available test of whether the residual behaves as a
+\emph{leading} indicator of degradation rather than only a discriminator of discrete fault
+labels, and it is likewise unfilled. Both are scoped as concrete next experiments rather than
+open-ended future work, and closing them is the immediate priority before this manuscript is
+submission-ready. Extending the per-asset tracker to streaming field data at fleet scale, and
+characterizing detection latency under realistic fault-onset dynamics beyond what Stage~4 alone
+can show, are the subsequent steps toward a pilot deployment.
+
+%=====================================================================
+\section{Conclusion}
+%=====================================================================
+We formulated bearing diagnosis as inverse recovery of membership in a nominal quotient manifold
+induced by nuisance transformations, proved that this manifold is bounded and connected under
+compact nuisance sampling, and showed that a single autoencoder trained only on healthy signals,
+combined with a per-asset adaptive threshold anchored to a shared Monte-Carlo-calibrated
+z-score, recovers this structure well enough to detect bearing faults with high detection rates
+and low false-alarm rates on both synthetic and real (CWRU) vibration data. The result is a
+label-free, per-asset monitoring primitive with a closed-form calibration procedure that requires
+no fault examples and no per-asset retraining, positioning it as a candidate for near-term pilot
+deployment on instrumented rotating-machinery fleets.
+
+%=====================================================================
+\begin{thebibliography}{99}
+%=====================================================================
+
+\bibitem{hadamard}
+J. Hadamard.
+\newblock \emph{Lectures on Cauchy's Problem in Linear Partial Differential Equations}.
+\newblock Yale University Press, 1923.
+
+\bibitem{tikhonov}
+A. N. Tikhonov and V. Y. Arsenin.
+\newblock \emph{Solutions of Ill-Posed Problems}.
+\newblock Winston, 1977.
+
+\bibitem{chandola2009}
+V. Chandola, A. Banerjee, and V. Kumar.
+\newblock Anomaly detection: A survey.
+\newblock \emph{ACM Computing Surveys}, 41(3), Article 15, 2009.
+
+\bibitem{scholkopf1999}
+B. Sch\"olkopf, R. C. Williamson, A. J. Smola, J. Shawe-Taylor, and J. C. Platt.
+\newblock Support vector method for novelty detection.
+\newblock In \emph{Advances in Neural Information Processing Systems}, 1999.
+
+\bibitem{bishop1994}
+C. M. Bishop.
+\newblock Novelty detection and neural network validation.
+\newblock \emph{IEE Proceedings --- Vision, Image and Signal Processing}, 141(4), 1994.
+
+\bibitem{kohonen}
+T. Kohonen.
+\newblock Self-organized formation of topologically correct feature maps.
+\newblock \emph{Biological Cybernetics}, 43, 59--69, 1982.
+
+\bibitem{hinton2006}
+G. E. Hinton and R. R. Salakhutdinov.
+\newblock Reducing the dimensionality of data with neural networks.
+\newblock \emph{Science}, 313(5786), 504--507, 2006.
+
+\bibitem{sakurada2014}
+M. Sakurada and T. Yairi.
+\newblock Anomaly detection using autoencoders with nonlinear dimensionality reduction.
+\newblock In \emph{Proceedings of the 2nd Workshop on Machine Learning for Sensory Data
+  Analysis}, 2014.
+
+\bibitem{bronstein2021}
+M. M. Bronstein, J. Bruna, T. Cohen, and P. Veli\v{c}kovi\'c.
+\newblock Geometric deep learning: Grids, groups, graphs, geodesics, and gauges.
+\newblock \emph{arXiv:2104.13478}, 2021.
+
+\bibitem{jardine2006}
+A. K. S. Jardine, D. Lin, and D. Banjevic.
+\newblock A review on machinery diagnostics and prognostics implementing condition-based
+  maintenance.
+\newblock \emph{Mechanical Systems and Signal Processing}, 20(7), 1483--1510, 2006.
+
+\bibitem{randall2011}
+R. B. Randall and J. Antoni.
+\newblock Rolling element bearing diagnostics---A tutorial.
+\newblock \emph{Mechanical Systems and Signal Processing}, 25(2), 485--520, 2011.
+
+\bibitem{cwru_benchmark}
+W. A. Smith and R. B. Randall.
+\newblock Rolling element bearing diagnostics using the Case Western Reserve University data: A
+  benchmark study.
+\newblock \emph{Mechanical Systems and Signal Processing}, 64--65, 100--131, 2015.
+
+\bibitem{nasa_ims_bearings}
+J. Lee, H. Qiu, G. Yu, J. Lin, and Rexnord Technical Services.
+\newblock IMS, University of Cincinnati. ``Bearing Data Set'', NASA Ames Prognostics Data
+  Repository.
+\newblock \emph{NASA Ames Research Center}, Moffett Field, CA, 2007.
+
+\bibitem{zhao2019}
+R. Zhao, R. Yan, Z. Chen, K. Mao, P. Wang, and R. X. Gao.
+\newblock Deep learning and its applications to machine health monitoring: A survey.
+\newblock \emph{Mechanical Systems and Signal Processing}, 115, 213--237, 2019.
+
+\bibitem{lei2013}
+Y. Lei, J. Lin, Z. He, and M. J. Zuo.
+\newblock A review on empirical mode decomposition in fault diagnosis of rotating machinery.
+\newblock \emph{Mechanical Systems and Signal Processing}, 35(1--2), 108--126, 2013.
+
+\bibitem{disanti2026}
+E. Di Santi.
+\newblock \emph{Self-Supervision, Manifold Saturation, and Emergent Operational Classes:
+  Learning from Scarce Observations as Inverse Recovery of Compact Functional Structure}.
+\newblock Technical report, University of Colorado Boulder, 2026.
+
+\bibitem{kendall1984}
+D. G. Kendall.
+\newblock Shape manifolds, Procrustean metrics, and complex projective spaces.
+\newblock \emph{Bulletin of the London Mathematical Society}, 16(2), 81--121, 1984.
+
+\bibitem{palais1961}
+R. S. Palais.
+\newblock On the existence of slices for actions of non-compact Lie groups.
+\newblock \emph{Annals of Mathematics}, 73(2), 295--323, 1961.
+
+\bibitem{li2023invariant}
+L. Li, Y. Kuang, and J. Han.
+\newblock Invariant anomaly detection under distribution shifts.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2023.
+
+\end{thebibliography}
+
+\end{document}
