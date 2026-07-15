@@ -14,78 +14,77 @@
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:introduction}{{1}{1}{Introduction}{section.1}{}}
 \citation{jardine2006}
-\citation{randall2011}
 \citation{zhao2019}
-\citation{cwru_benchmark}
 \citation{scholkopf1999}
 \citation{bishop1994}
-\citation{chandola2009}
 \citation{hinton2006}
 \citation{sakurada2014}
-\citation{hadamard}
-\citation{tikhonov}
 \citation{bronstein2021}
-\citation{kendall1984}
-\citation{palais1961}
 \citation{li2023invariant}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Quotient-Space Formulation}{3}{section.3}\protected@file@percent }
-\newlabel{sec:theory}{{3}{3}{Quotient-Space Formulation}{section.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Observation model}{3}{subsection.3.1}\protected@file@percent }
-\newlabel{eq:forward}{{1}{3}{Observation model}{equation.3.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Nuisance equivalence and the nominal manifold}{3}{subsection.3.2}\protected@file@percent }
-\newlabel{eq:manifold}{{2}{3}{Nuisance equivalence and the nominal manifold}{equation.3.2}{}}
-\newlabel{prop:compact}{{1}{3}{Compactness of the nominal nuisance orbit}{proposition.1}{}}
-\newlabel{cor:bounded}{{1}{3}{Boundedness of $\Mnominal $}{corollary.1}{}}
-\newlabel{prop:factor}{{2}{3}{Quotient factorization of diagnostic maps}{proposition.2}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Method: A Deployable Approximation}{4}{section.4}\protected@file@percent }
-\newlabel{sec:method}{{4}{4}{Method: A Deployable Approximation}{section.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Representation operator}{4}{subsection.4.1}\protected@file@percent }
-\newlabel{eq:residual}{{3}{4}{Representation operator}{equation.4.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Autoencoder training curve (train/validation MSE loss) on healthy-only signals.\relax }}{4}{figure.caption.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{3}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{3}{Related Work}{section.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Method}{3}{section.3}\protected@file@percent }
+\newlabel{sec:method}{{3}{3}{Method}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Deployment architecture: shared representation, local radius}{3}{subsection.3.1}\protected@file@percent }
+\newlabel{eq:score}{{1}{3}{Deployment architecture: shared representation, local radius}{equation.3.1}{}}
+\newlabel{eq:decision}{{2}{4}{Deployment architecture: shared representation, local radius}{equation.3.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Fleet deployment architecture. One representation is distributed fleet-wide, while each physical asset converges independently to its own operational radius.\relax }}{4}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:ae-training}{{1}{4}{Autoencoder training curve (train/validation MSE loss) on healthy-only signals.\relax }{figure.caption.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Reconstruction fidelity on held-out healthy signals: original vs.\ reconstructed windows with per-window MSE.\relax }}{5}{figure.caption.2}\protected@file@percent }
-\newlabel{fig:reconstruction-fidelity}{{2}{5}{Reconstruction fidelity on held-out healthy signals: original vs.\ reconstructed windows with per-window MSE.\relax }{figure.caption.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Shared calibration, local decision}{5}{subsection.4.2}\protected@file@percent }
-\newlabel{eq:zmc}{{4}{5}{Shared calibration, local decision}{equation.4.4}{}}
-\newlabel{eq:adaptive}{{5}{5}{Shared calibration, local decision}{equation.4.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Monte Carlo calibration of the healthy residual distribution: $\ensuremath  {\tau _{\mathrm  {MC}}}$ is set from the held-out nominal validation MSE distribution.\relax }}{5}{figure.caption.3}\protected@file@percent }
-\newlabel{fig:mc-calibration}{{3}{5}{Monte Carlo calibration of the healthy residual distribution: $\taumc $ is set from the held-out nominal validation MSE distribution.\relax }{figure.caption.3}{}}
-\citation{scholkopf1999}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Experimental Design}{6}{section.5}\protected@file@percent }
-\newlabel{sec:expdesign}{{5}{6}{Experimental Design}{section.5}{}}
-\@writefile{toc}{\contentsline {paragraph}{Stage 1 --- Synthetic multi-regime validation.}{6}{section*.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Stage 2 --- Transfer to real vibration data (CWRU).}{6}{section*.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Stage 3a --- Baselines against classical one-class detectors.}{6}{section*.6}\protected@file@percent }
-\citation{nasa_ims_bearings}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces \texttt  {[PLACEHOLDER --- to be populated from experiments]} Detection performance of the autoencoder residual versus classical one-class baselines, all under the same per-asset adaptive threshold, on the CWRU streams of Stage\nobreakspace  {}2.\relax }}{7}{table.caption.7}\protected@file@percent }
-\newlabel{tab:baselines}{{1}{7}{\texttt {[PLACEHOLDER --- to be populated from experiments]} Detection performance of the autoencoder residual versus classical one-class baselines, all under the same per-asset adaptive threshold, on the CWRU streams of Stage~2.\relax }{table.caption.7}{}}
-\@writefile{toc}{\contentsline {paragraph}{Stage 3b --- Calibration-transfer ablation.}{7}{section*.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Stage 4 --- Run-to-failure degradation (NASA IMS bearing dataset).}{7}{section*.9}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces \texttt  {[PLACEHOLDER --- to be populated from experiments]} Time-to-alarm and detection outcome on the three NASA IMS run-to-failure experiments.\relax }}{7}{table.caption.10}\protected@file@percent }
-\newlabel{tab:ims}{{2}{7}{\texttt {[PLACEHOLDER --- to be populated from experiments]} Time-to-alarm and detection outcome on the three NASA IMS run-to-failure experiments.\relax }{table.caption.10}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Results}{8}{section.6}\protected@file@percent }
-\newlabel{sec:results}{{6}{8}{Results}{section.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Synthetic multi-regime detection}{8}{subsection.6.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Time-domain canonical signal and Monte Carlo nuisance orbit (10th--90th percentile band) for each of the four synthetic regimes.\relax }}{8}{figure.caption.11}\protected@file@percent }
-\newlabel{fig:mc-orbit-signals}{{4}{8}{Time-domain canonical signal and Monte Carlo nuisance orbit (10th--90th percentile band) for each of the four synthetic regimes.\relax }{figure.caption.11}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Synthetic per-asset detection metrics (Stage\nobreakspace  {}1). The autoencoder is shared across all assets; the adaptive decision boundary is estimated locally per asset.\relax }}{8}{table.caption.12}\protected@file@percent }
-\newlabel{tab:synthetic}{{3}{8}{Synthetic per-asset detection metrics (Stage~1). The autoencoder is shared across all assets; the adaptive decision boundary is estimated locally per asset.\relax }{table.caption.12}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Distribution of reconstruction error (anomaly score) by regime, with the calibrated threshold $\tau $ overlaid. Healthy windows concentrate below $\tau $; all three fault regimes shift to higher reconstruction error, with a clear margin from the healthy distribution.\relax }}{8}{figure.caption.13}\protected@file@percent }
-\newlabel{fig:boxplot-regime-sim}{{5}{8}{Distribution of reconstruction error (anomaly score) by regime, with the calibrated threshold $\tau $ overlaid. Healthy windows concentrate below $\tau $; all three fault regimes shift to higher reconstruction error, with a clear margin from the healthy distribution.\relax }{figure.caption.13}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Per-asset FAR and DR as a function of adaptive-buffer window size $W$. Detection remains high and false alarms remain low across a broad range of $W$, indicating the result is not an artifact of a single hand-tuned window length.\relax }}{9}{figure.caption.14}\protected@file@percent }
-\newlabel{fig:window-sensitivity}{{6}{9}{Per-asset FAR and DR as a function of adaptive-buffer window size $W$. Detection remains high and false alarms remain low across a broad range of $W$, indicating the result is not an artifact of a single hand-tuned window length.\relax }{figure.caption.14}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Blueprint saturation diagnostic: p98 manifold radius in a 2D PCA projection as a function of the number of Monte Carlo samples, for each regime. Stabilization of the radius indicates that each sampled nuisance orbit approaches a bounded functional structure, consistent with Proposition\nobreakspace  {}\ref {prop:compact}.\relax }}{9}{figure.caption.15}\protected@file@percent }
-\newlabel{fig:blueprint-saturation}{{7}{9}{Blueprint saturation diagnostic: p98 manifold radius in a 2D PCA projection as a function of the number of Monte Carlo samples, for each regime. Stabilization of the radius indicates that each sampled nuisance orbit approaches a bounded functional structure, consistent with Proposition~\ref {prop:compact}.\relax }{figure.caption.15}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Transfer to real vibration data (CWRU)}{9}{subsection.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Calibration does not transfer as an absolute number, but does as a shape}{9}{subsection.6.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Alarm rate (\%) by regime under four threshold-calibration strategies transferred to CWRU field data (Stage\nobreakspace  {}3). For the Healthy row, this is the false-alarm rate; for fault rows, it is the detection rate.\relax }}{10}{table.caption.16}\protected@file@percent }
-\newlabel{tab:transfer}{{4}{10}{Alarm rate (\%) by regime under four threshold-calibration strategies transferred to CWRU field data (Stage~3). For the Healthy row, this is the false-alarm rate; for fault rows, it is the detection rate.\relax }{table.caption.16}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Why the residual separates regimes: latent geometry}{10}{subsection.6.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7}Discussion}{11}{section.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{11}{section.8}\protected@file@percent }
+\newlabel{fig:deployment-architecture}{{1}{4}{Fleet deployment architecture. One representation is distributed fleet-wide, while each physical asset converges independently to its own operational radius.\relax }{figure.caption.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Representation instantiation}{4}{subsection.3.2}\protected@file@percent }
+\newlabel{eq:residual}{{3}{4}{Representation instantiation}{equation.3.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Training and validation loss of the healthy-only Conv1D autoencoder used as the shared nominal representation.\relax }}{5}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:ae-training}{{2}{5}{Training and validation loss of the healthy-only Conv1D autoencoder used as the shared nominal representation.\relax }{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Standardized anchor for day-one initialization}{5}{subsection.3.3}\protected@file@percent }
+\newlabel{eq:zanchor}{{4}{5}{Standardized anchor for day-one initialization}{equation.3.4}{}}
+\newlabel{eq:adaptive}{{5}{5}{Standardized anchor for day-one initialization}{equation.3.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Operational-radius convergence}{5}{subsection.3.4}\protected@file@percent }
+\newlabel{eq:convergence}{{6}{5}{Operational-radius convergence}{equation.3.6}{}}
+\newlabel{eq:taustar}{{8}{5}{Operational-radius convergence}{equation.3.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Guarded updates}{6}{subsection.3.5}\protected@file@percent }
+\newlabel{eq:safe-update}{{9}{6}{Guarded updates}{equation.3.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Deployment states}{6}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Scope of the Method}{6}{subsection.3.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental Design}{6}{section.4}\protected@file@percent }
+\newlabel{sec:expdesign}{{4}{6}{Experimental Design}{section.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Stage 1 --- Controlled multi-asset simulation.}{7}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Stage 2 --- Direct simulation-to-field deployment on CWRU.}{7}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Stage 3a --- Baselines.}{7}{section*.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces \texttt  {[PLACEHOLDER]} Detection and cold-start performance under a common local-radius calibration procedure.\relax }}{7}{table.caption.6}\protected@file@percent }
+\newlabel{tab:baselines}{{1}{7}{\texttt {[PLACEHOLDER]} Detection and cold-start performance under a common local-radius calibration procedure.\relax }{table.caption.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Stage 3b --- Calibration-transfer ablation.}{7}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Stage 4 --- Run-to-failure degradation on NASA IMS.}{8}{section*.8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces \texttt  {[PLACEHOLDER]} Run-to-failure deployment outcomes on NASA IMS.\relax }}{8}{table.caption.9}\protected@file@percent }
+\newlabel{tab:ims}{{2}{8}{\texttt {[PLACEHOLDER]} Run-to-failure deployment outcomes on NASA IMS.\relax }{table.caption.9}{}}
+\@writefile{toc}{\contentsline {paragraph}{Stage 5 --- Edge cost.}{8}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{8}{section.5}\protected@file@percent }
+\newlabel{sec:results}{{5}{8}{Results}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Controlled detection}{8}{subsection.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Canonical signals and Monte Carlo nuisance envelopes for nominal and fault regimes.\relax }}{8}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:mc-orbit-signals}{{3}{8}{Canonical signals and Monte Carlo nuisance envelopes for nominal and fault regimes.\relax }{figure.caption.11}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Synthetic multi-asset detection after local operational-radius calibration.\relax }}{9}{table.caption.12}\protected@file@percent }
+\newlabel{tab:synthetic}{{3}{9}{Synthetic multi-asset detection after local operational-radius calibration.\relax }{table.caption.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Reconstruction-error distributions by regime. The converged local radius defines membership in the shared nominal representation but does not modify that representation.\relax }}{9}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:boxplot-regime-sim}{{4}{9}{Reconstruction-error distributions by regime. The converged local radius defines membership in the shared nominal representation but does not modify that representation.\relax }{figure.caption.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Operational-radius convergence}{9}{subsection.5.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Per-asset operational-radius convergence. The shared representation remains fixed; only each asset's local decision radius is identified during cold start.\relax }}{9}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:tau-convergence}{{5}{9}{Per-asset operational-radius convergence. The shared representation remains fixed; only each asset's local decision radius is identified during cold start.\relax }{figure.caption.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Calibration transfer}{9}{subsection.5.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Alarm rate (\%) under alternative calibration-transfer strategies. For the healthy row, the value is false-alarm rate; for fault rows, it is detection rate.\relax }}{10}{table.caption.15}\protected@file@percent }
+\newlabel{tab:transfer}{{4}{10}{Alarm rate (\%) under alternative calibration-transfer strategies. For the healthy row, the value is false-alarm rate; for fault rows, it is detection rate.\relax }{table.caption.15}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Sensitivity and edge cost}{10}{subsection.5.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Sensitivity of false-alarm and detection rates to the local residual-buffer size.\relax }}{10}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:window-sensitivity}{{6}{10}{Sensitivity of false-alarm and detection rates to the local residual-buffer size.\relax }{figure.caption.16}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces \texttt  {[PLACEHOLDER]} Edge deployment footprint.\relax }}{10}{table.caption.17}\protected@file@percent }
+\newlabel{tab:edge}{{5}{10}{\texttt {[PLACEHOLDER]} Edge deployment footprint.\relax }{table.caption.17}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{10}{section.6}\protected@file@percent }
+\newlabel{sec:discussion}{{6}{10}{Discussion}{section.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{11}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Geometric Rationale}{11}{appendix.A}\protected@file@percent }
+\newlabel{sec:theory}{{A}{11}{Geometric Rationale}{appendix.A}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Observation model}{11}{subsection.A.1}\protected@file@percent }
 \bibcite{hadamard}{1}
 \bibcite{tikhonov}{2}
 \bibcite{chandola2009}{3}
@@ -98,6 +97,7 @@
 \bibcite{jardine2006}{10}
 \bibcite{randall2011}{11}
 \bibcite{cwru_benchmark}{12}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Compact nominal structure}{12}{subsection.A.2}\protected@file@percent }
 \bibcite{nasa_ims_bearings}{13}
 \bibcite{zhao2019}{14}
 \bibcite{lei2013}{15}
