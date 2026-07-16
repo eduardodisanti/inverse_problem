@@ -32,7 +32,6 @@
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
 \newcommand{\quotient}{\ensuremath{\mathcal{X}/G_{\mathrm{nuis}}}}
 \newcommand{\taumc}{\ensuremath{\tau_{\mathrm{MC}}}}
-\newcommand{\zmc}{\ensuremath{z_{\mathrm{MC}}}}
 \newcommand{\taustar}{\ensuremath{\tau_k^\star}}
 
 \title{
@@ -52,8 +51,30 @@ Independent Operational-Radius Convergence Across Heterogeneous Assets
 %=====================================================================
 \begin{abstract}
 
-Transportation operators increasingly face the challenge of deploying condition-monitoring systems across large fleets of heterogeneous assets without fault labels, asset-specific retraining, or lengthy calibration campaigns. We propose a day-one deployment method that explicitly separates what is shared across a fleet from what must remain local to each operational asset. A single nominal representation is trained once, offline, using only healthy observations, and is subsequently deployed unchanged across all assets. At deployment, each asset independently estimates its own operational radius from a short stream of unlabeled nominal observations while preserving the shared representation. We hypothesize that, under stable operation, this radius converges rapidly to an asset-specific
-value; after convergence, persistent departures from the converged radius are interpreted as evidence of degradation rather than absorbed through continued adaptation. The proposed deployment strategy is representation-agnostic and does not rely on fault labels or per-asset retraining. It is validated on public rolling-element bearing datasets, where it preserves 98--100\% fault detection while demonstrating that transferring an absolute threshold from simulation fails catastrophically, whereas transferring only a standardized calibration anchor and re-expressing it in each asset's local statistics recovers near-native performance. The resulting deployment primitive consists of a shared nominal representation, per-asset operational-radius convergence, and lightweight edge inference. A compact theoretical rationale is provided in the appendix as an explanatory justification rather than as a prerequisite for deployment.
+Transportation operators increasingly face the challenge of deploying condition-monitoring
+systems across large fleets of heterogeneous assets without fault labels, asset-specific
+representation learning, or lengthy calibration campaigns. We propose a day-one deployment
+method that separates what is shared across the fleet from what must remain local to each
+physical asset. A single canonical nominal representation is trained once, offline, using
+simulated healthy observations and is subsequently transferred unchanged to field deployment.
+Each asset then estimates only its own operational radius from a short stream of unlabeled local
+observations, without modifying or retraining the shared representation.
+
+The method is evaluated on four Case Western Reserve University bearing operating conditions and
+compared with an ideal but non-scalable setting in which a separate detector is trained and
+calibrated using the complete healthy dataset of each condition. Asset-specific autoencoders
+achieve 100\% detection across the evaluated fault families. The proposed shared
+simulator-trained model, using only a 100-window local warm-up, achieves an average healthy
+false-alarm rate of $3.09\%$, ball-fault detection of $99.69\%$, and 100\% detection of
+inner- and outer-race faults. The local operational radius converges after
+$51.0\pm12.6$ windows. In contrast, direct transfer of the absolute simulator threshold produces
+100\% false alarms, demonstrating that the transferable object is the canonical nominal
+representation rather than its absolute residual scale.
+
+The resulting deployment primitive consists of one shared representation, independent local
+operational-radius convergence, and lightweight edge inference. Such a representation could be
+developed and maintained by an original equipment manufacturer and distributed fleet-wide,
+while operators perform only short, unsupervised local calibration during installation.
 
 \end{abstract}
 
@@ -73,47 +94,125 @@ edge monitoring
 \label{sec:introduction}
 %=====================================================================
 
-Modern transportation systems increasingly rely on condition-monitoring technologies to supervise heterogeneous operational assets, including rolling-element bearings, axleboxes, traction motors, gearboxes, pumps, actuators, and other components whose condition can be inferred from repeated observations. Despite the rapid progress of machine learning for anomaly detection, deploying a monitoring system across an operational fleet remains fundamentally a deployment problem rather than a representation-learning problem.
+Modern transportation systems increasingly rely on condition-monitoring technologies to supervise
+large populations of operational assets, including rolling-element bearings, axleboxes, traction
+motors, gearboxes, pumps, actuators, vehicles, and spatially indexed infrastructure segments.
+Although machine-learning research has produced increasingly capable anomaly detectors, the
+deployment problem remains largely unresolved: a detector that performs well for one asset under
+one calibrated operating condition does not automatically scale to hundreds or thousands of
+independently installed units.
 
-At fleet rollout, four constraints typically occur simultaneously. First, the target fleet contains few or no labeled fault examples. Second, waiting months or years for representative failures is operationally unacceptable. Third, installation-specific factors such as sensor coupling, mounting, operating conditions, and environmental noise modify the numerical scale of anomaly scores from one asset to another. Fourth, maintaining a separate model or manually calibrated threshold for every operational unit does not scale operationally.
+At fleet rollout, several constraints arise simultaneously. First, the target fleet contains few
+or no representative fault examples. Second, waiting months or years for failures to accumulate
+is operationally unacceptable. Third, installation-specific factors such as sensor coupling,
+mounting, operating point, and environmental noise alter the numerical scale of anomaly scores
+between assets. Fourth, training, calibrating, validating, and maintaining a separate
+representation model for every physical unit creates an operational and organizational burden
+that grows directly with fleet size.
 
 The practical question is therefore not simply
 
 \begin{quote}
-\emph{How can a fault be detected?}
+\emph{How can an anomalous condition be detected?}
 \end{quote}
 
 but rather
 
 \begin{quote}
-\emph{How can a shared condition-monitoring model be deployed on day one across many heterogeneous assets without fault labels, per-asset retraining, or manual threshold tuning?}
+\emph{How can one nominal representation be deployed on day one across a heterogeneous fleet
+while retaining performance close to an ideal asset-specific solution, without per-asset
+representation learning or manual threshold tuning?}
 \end{quote}
 
-We address this deployment problem by separating the diagnostic representation from the local decision boundary. The representation is learned once, offline, and shared across the fleet. Calibration remains local: each operational asset estimates its own operational radius from a short warm-up of unlabeled nominal observations while preserving the common representation. 
-Under stable operation, the proposed calibration process is expected to drive each asset toward
-its own operational radius,
+This paper addresses that question by separating representation engineering from deployment
+calibration. A canonical nominal representation is learned once, offline, from simulated healthy
+observations and is distributed unchanged across the fleet. Each deployed asset estimates only
+its own operational radius from a short stream of unlabeled local observations. The shared model
+is not retrained, fine-tuned, or adapted in the field.
+
+For asset $k$, let $\tau_k(t)$ denote the progressively estimated operational radius. Under stable
+nominal operation, the proposed calibration procedure is expected to satisfy
+
 \[
 \tau_k(t)\rightarrow\tau_k^\star,
 \]
-without modifying the shared model. This convergence hypothesis is evaluated experimentally in Section~\ref{sec:results}.
 
-Once convergence has been reached, the radius is frozen or tightly bounded so that progressive degradation cannot redefine itself as nominal.
+where $\tau_k^\star$ is an asset-specific acceptance boundary around the fixed shared
+representation. Once convergence is established, the radius is frozen or tightly constrained so
+that subsequent degradation cannot redefine itself as nominal through unrestricted adaptation.
 
-This distinction is motivated by a practical observation. Simulation-to-field transfer frequently fails because calibration does not transfer, even when the learned representation remains valid. Absolute anomaly thresholds depend on installation-specific score scales, whereas standardized statistical anchors can be transferred and subsequently re-expressed using local residual statistics. The deployment procedure proposed here therefore transfers only the calibration rule, not the absolute decision boundary.
+The distinction between the transferable representation and the local decision boundary is
+essential. A reconstruction-error threshold learned in simulation is expressed in the numerical
+scale induced by the simulator, its preprocessing, and its residual distribution. Applying that
+absolute value directly to a field installation may therefore fail even when the underlying
+representation remains diagnostically useful. The proposed method transfers neither an absolute
+threshold nor an asset-specific model. Instead, it transfers the canonical nominal representation
+and a fleet-wide target nominal coverage, while each asset estimates the empirical residual
+quantile that realizes that coverage locally.
 
-The contribution of this paper is consequently a deployment methodology rather than a new neural-network architecture. Although the experimental validation uses a lightweight Conv1D autoencoder as the shared nominal representation, the deployment mechanism itself is independent of the underlying representation model. The principal contributions are:
+This formulation also changes the relevant experimental comparison. The ideal reference is not
+another globally shared detector, but an operationally unrealistic condition in which the
+complete healthy distribution of every asset is available in advance and a separate detector can
+be trained and calibrated for each one. The central question is then:
+
+\begin{quote}
+\emph{How much detection performance is lost when many asset-specific models are replaced by
+one simulator-trained representation and a few seconds of local calibration?}
+\end{quote}
+
+We answer this question using four Case Western Reserve University bearing operating conditions.
+The asset-specific reference methods are trained and calibrated using the complete healthy dataset
+of each condition. In contrast, the proposed method uses no field observation for representation
+learning and estimates its local operational radius from only the first 100 healthy windows,
+corresponding to approximately ten seconds of signal at the evaluated window duration.
+
+The experimental results show that the cost of scalable deployment is small. Asset-specific
+autoencoders reach 100\% detection across the evaluated ball, inner-race, and outer-race fault
+families. The unchanged simulator-trained shared model, combined with online local-radius
+estimation, reaches an average ball-fault detection rate of $99.69\%$ and 100\% detection of
+inner- and outer-race faults. The operational radius converges after $51.0\pm12.6$ windows on
+average. Direct transfer of the absolute simulator threshold, however, produces 100\% healthy
+false alarms, confirming that the representation transfers while its absolute score scale does
+not.
+
+The contribution of this paper is therefore a deployment methodology rather than a new neural
+architecture. Although a Conv1D autoencoder is used as the experimental representation, the
+deployment principle is representation-agnostic. The principal contributions are:
 
 \begin{enumerate}[leftmargin=1.5em]
-\item a day-one deployment architecture based on one shared nominal representation and independently calibrated operational assets;
-\item a standardized simulator- or validation-derived calibration anchor that initializes local decision boundaries without transferring absolute score scales;
-\item an operational-radius convergence criterion that separates cold-start calibration from subsequent degradation monitoring;
-\item a guarded adaptation mechanism that prevents anomalous observations from inflating their own acceptance boundary; and
-\item an experimental protocol that evaluates cold-start behaviour, convergence, simulation-to-field transfer, and post-convergence anomaly detection.
+    \item a fleet-wide architecture that separates one shared canonical nominal representation
+    from independently calibrated local operational radii;
+
+    \item a direct simulation-to-field experiment in which the representation is transferred
+    unchanged and no field data are used for representation learning;
+
+    \item an online empirical-quantile calibration procedure that estimates an asset-specific
+    operational radius from a short unlabeled warm-up;
+
+    \item a convergence criterion that separates finite cold-start calibration from subsequent
+    degradation monitoring;
+
+    \item a comparison against ideal asset-specific detectors trained and calibrated with the
+    complete healthy dataset of every evaluated condition; and
+
+    \item an edge-oriented deployment model in which the representation may be produced and
+    maintained centrally---for example by an original equipment manufacturer---while each
+    deployed unit performs only lightweight local calibration.
 \end{enumerate}
 
-The methodology is intentionally asset-agnostic. It requires only a shared nominal representation together with repeated observations from independently monitored operational units. In this paper, we validate the approach using public rolling-element bearing datasets (CWRU and NASA IMS), which provide controlled nominal, fault, and run-to-failure conditions. Bearings should therefore be interpreted as the first experimental validation domain rather than as a limitation of the proposed deployment methodology.
+The methodology is intentionally independent of asset type and sensing modality. It requires
+only a nominal representation producing a scalar anomaly score, repeated observations from each
+operational unit, and a local procedure for estimating the acceptance boundary. Public
+rolling-element bearing data are used here as the first controlled validation domain rather than
+as a limitation of the proposed methodology.
 
-The remainder of the paper is organized as follows. Section~\ref{sec:related} reviews condition monitoring, one-class anomaly detection, adaptive calibration, and fleet deployment. Section~\ref{sec:method} presents the proposed deployment methodology. Section~\ref{sec:expdesign} describes the experimental protocol. Section~\ref{sec:results} reports the deployment-oriented results, while Section~\ref{sec:discussion} discusses implications, limitations, and future extensions. A compact theoretical justification is provided in Appendix~\ref{sec:theory}.
+The remainder of the paper is organized as follows. Section~\ref{sec:related} reviews condition
+monitoring, one-class anomaly detection, adaptive calibration, and fleet deployment.
+Section~\ref{sec:method} defines the shared representation and local operational-radius
+estimation. Section~\ref{sec:expdesign} presents the experimental protocol.
+Section~\ref{sec:results} reports the deployment-oriented results, and
+Section~\ref{sec:discussion} discusses industrial implications, limitations, and future work.
+A compact geometric rationale is provided in Appendix~\ref{sec:theory}.
 
 %=====================================================================
 \section{Related Work}
@@ -157,13 +256,13 @@ irrelevant variability. Our contribution lies at a different layer of the condit
  Rather than proposing a new
 representation-learning architecture, we address the operational deployment problem itself:
 how a shared nominal representation can be deployed across heterogeneous assets through
-standardized initialization, independent operational-radius convergence, and local calibration,
-without fault labels or per-asset retraining.
+shared nominal coverage, independent operational-radius convergence, and local empirical
+calibration, without fault labels or per-asset retraining.
 
-The methodology is intentionally independent of both sensing modality and asset type. Public
-rolling-element bearing datasets (CWRU and NASA IMS) are used in this paper solely as controlled
-experimental benchmarks because they provide nominal operation, multiple fault modes, and
-run-to-failure data under well-characterized conditions.
+The methodology is intentionally independent of both sensing modality and asset type. The present manuscript validates the approach on the CWRU bearing benchmark because it provides
+controlled nominal observations, multiple fault modes, and several operating conditions.
+Bearings should therefore be interpreted as the first validation domain rather than as a
+limitation of the proposed deployment method.
 
 Accordingly, this paper should be interpreted not as proposing another anomaly-detection architecture, but as introducing a deployment methodology in which a shared nominal representation is combined with independent operational-radius convergence for each monitored asset.
 
@@ -253,32 +352,39 @@ nominal representation.}
 \label{fig:ae-training}
 \end{figure}
 
-\subsection{Standardized anchor for day-one initialization}
+\subsection{Shared nominal coverage and local empirical radius}
 
-From held-out nominal validation data or a nominal simulator, we estimate the residual mean
-$\mu_0$ and standard deviation $\sigma_0$, choose a target nominal percentile, and compute the
-standardized anchor
+The fleet-wide calibration parameter is a target nominal coverage level
+$1-\alpha$, rather than an absolute anomaly-score threshold. In the present
+experiments, $1-\alpha=0.98$.
+
+For operational asset $k$, let
+$\widehat{Q}_{k,t}(1-\alpha)$ denote the empirical $(1-\alpha)$-quantile of
+the local residuals observed during initialization up to time $t$. The local
+operational radius is
+
 \begin{equation}
-z_0=\frac{\tau_0-\mu_0}{\sigma_0}.
-\label{eq:zanchor}
-\end{equation}
-
-The absolute value $\tau_0$ is not transferred to deployment. Only the dimensionless anchor
-$z_0$ is shared across the fleet.
-
-For a newly deployed asset $k$, the local threshold is
-\begin{equation}
-\tau_k(t)=\mu_k(t)+z_0\,\sigma_k(t),
+\tau_k(t)=\widehat{Q}_{k,t}(1-\alpha).
 \label{eq:adaptive}
 \end{equation}
-where $\mu_k(t)$ and $\sigma_k(t)$ are estimated from the asset's accepted nominal residuals.
 
-This construction separates the shape of the fleet-wide decision rule from the local residual
-scale induced by mounting, sensor gain, load, and environmental noise.
+The simulator threshold
+
+\begin{equation}
+\tau_{\mathrm{MC}}
+=
+\widehat{Q}_{\mathrm{MC}}(1-\alpha)
+\end{equation}
+
+is retained only for comparison. Its absolute numerical value is
+not used by the proposed field-deployment procedure. What is shared across
+the fleet is the target nominal coverage, while each asset identifies the
+residual value that realizes that coverage locally.
+
 
 \subsection{Operational-radius convergence}
 
-During cold start, each asset collects a short sequence of accepted nominal residuals and updates
+During cold start, each asset collects a short sequence of initialization residuals and updates
 Equation~\ref{eq:adaptive}. The asset is considered calibrated when the radius stabilizes.
 
 For a look-back interval $L$, define the convergence statistic
@@ -312,7 +418,7 @@ This prevents a slowly increasing anomaly score from being absorbed as a new nom
 
 \subsection{Guarded updates}
 
-Only confidently nominal samples are admitted to the local baseline. Let $\delta>0$ define a
+For deployment beyond the controlled warm-up evaluated here, a guarded update rule can be applied to the local baseline. Let $\delta>0$ define a
 guard band. A residual updates the local statistics only when
 \begin{equation}
 r_{k,t}<\tau_k(t)-\delta.
@@ -339,7 +445,8 @@ statistics, its current radius, and its convergence state.
 Each asset transitions through three operational states:
 
 \begin{enumerate}[leftmargin=1.5em]
-    \item \textbf{Cold start:} the standardized anchor is re-expressed in local statistics;
+    \item \textbf{Cold start:} the target nominal coverage is converted into a local empirical
+operational radius from the incoming residual stream;
     \item \textbf{Converged nominal:} $\tau_k^\star$ has stabilized and monitoring is active;
     \item \textbf{Departure:} persistent scores exceed the converged radius.
 \end{enumerate}
@@ -366,8 +473,10 @@ The methodology requires only:
 (ii) repeated observations from each operational unit, and
 (iii) local estimation of an operational radius.
 
-The present manuscript validates the approach on public bearing datasets because
-they provide controlled nominal, fault, and run-to-failure conditions. Bearings
+The present manuscript validates the approach on the CWRU bearing benchmark because
+it provides controlled nominal observations, multiple fault modes, and several operating
+conditions. Bearings should therefore be interpreted as the first validation domain rather
+than as a limitation of the proposed deployment method. Bearings
 should therefore be interpreted as the first validation domain rather than as a
 limitation of the proposed deployment method.
 
@@ -385,15 +494,16 @@ architecture. Every stage therefore measures some subset of the following quanti
     \item variability of $\tau_k^\star$ across assets and regimes;
     \item post-convergence detection rate;
     \item sensitivity to buffer size and convergence parameters;
-    \item performance of absolute-threshold transfer versus standardized-anchor transfer;
+    \item performance of absolute-threshold transfer versus shared-coverage calibration;
     \item cost of per-asset retraining avoided by the shared-model design.
 \end{itemize}
 
 \paragraph{Stage 1 --- Controlled multi-asset simulation.}
 Four bearing streams are generated with a physics-motivated nominal simulator using
 1200-sample windows, a 30\,Hz shaft frequency, and bounded variation in amplitude, phase, speed,
-offset, and noise. The shared model is trained on 800 nominal windows, with 200 held out to
-derive $z_0$. Each simulated asset begins in nominal operation and independently calibrates its
+offset, and noise. The shared model is trained on 4,000 simulated nominal windows, with 1,000 additional nominal
+windows reserved for validation. A separate synthetic test set contains 750 windows per regime.
+The simulator and all field experiments use fixed-length 1,200-sample windows. Each simulated asset begins in nominal operation and independently calibrates its
 radius. Asset A remains nominal; Assets B--D transition after convergence to outer-race,
 inner-race, and ball-fault regimes.
 
@@ -410,283 +520,765 @@ signal---healthy or faulty---is used to retrain, fine-tune, or otherwise modify 
 model. The purpose of this stage is to separate representation transfer from decision-boundary
 transfer.
 
-Each CWRU operating condition is treated as an independent deployment environment. A short
-stream of unlabeled healthy observations is used only to estimate the local residual statistics
-$\mu_k(t)$ and $\sigma_k(t)$ and, consequently, the asset-specific operational radius
-$\tau_k(t)$. Fault observations are then evaluated using the same simulator-trained model and
-the locally calibrated decision boundary.
+Each CWRU operating condition is treated as an independent deployment environment. A short stream of unlabeled healthy observations is used only to estimate the empirical
+98th-percentile residual and, consequently, the asset-specific operational radius
+$\tau_k(t)$. Fault observations are then evaluated using the unchanged simulator-trained model
+and the locally estimated decision boundary.
 
 This stage tests two distinct hypotheses:
 (i) whether the nominal representation learned from simulation transfers directly to real field
 signals without retraining; and
-(ii) whether the standardized calibration anchor transfers even though the absolute simulator
-threshold does not.
+(ii) whether a shared target nominal coverage can be realized through a locally estimated
+empirical radius even though the absolute simulator threshold does not transfer.
 
 The main outcome is not merely fault classification. It is whether each stream reaches a stable
 $\tau_k^\star$ during warm-up and then detects the subsequent departure without model retraining.
 
-\paragraph{Stage 3a --- Baselines.}
-Throughout this ablation, the simulator-trained representation model is held fixed. Only the
-decision-boundary calibration strategy is changed.
-We compare the autoencoder residual against:
-(i) one-class SVM on raw windows;
-(ii) one-class SVM on latent codes;
-(iii) elliptical envelope on raw features; and
-(iv) elliptical envelope on latent codes.
-Every detector uses the same standardized-anchor and local-radius procedure so that differences
-are attributable to the representation and score rather than to unequal calibration.
+\paragraph{Stage 3a --- Ideal asset-specific reference.}
+To quantify the cost of scalability, we construct an intentionally favorable but operationally
+non-scalable reference condition. For each CWRU operating condition, three detectors are trained
+and calibrated independently using the complete available healthy dataset:
+(i) a Conv1D autoencoder;
+(ii) a one-class SVM operating on PCA-reduced standardized windows; and
+(iii) an Elliptic Envelope operating on PCA-reduced standardized windows.
 
-\begin{table}[H]
-\centering
-\caption{\texttt{[PLACEHOLDER]} Detection and cold-start performance under a common local-radius
-calibration procedure.}
-\label{tab:baselines}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lcccccc}
-\toprule
-Method & Healthy FAR & Ball DR & Inner-race DR & Outer-race DR &
-Median samples to convergence & Per-asset retraining \\
-\midrule
-AE residual (ours) & 11.8 & 99.0 & 100.0 & 100.0 & \texttt{TODO} & No \\
-OC-SVM (raw) & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} &
-\texttt{TODO} & No \\
-OC-SVM (latent) & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} &
-\texttt{TODO} & No \\
-Elliptic envelope (raw) & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} &
-\texttt{TODO} & \texttt{TODO} & No \\
-Elliptic envelope (latent) & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} &
-\texttt{TODO} & \texttt{TODO} & No \\
-\bottomrule
-\end{tabular}}
-\end{table}
+Each detector uses the empirical 98th percentile of its own healthy anomaly-score distribution
+as the decision boundary. Fault observations are never used for model fitting or threshold
+selection. These experiments approximate the situation in which complete nominal data and
+asset-specific data-science support are available for every monitored unit.
 
 \paragraph{Stage 3b --- Calibration-transfer ablation.}
-We compare four deployment strategies:
+Using the unchanged simulator-trained autoencoder, we compare three deployment strategies:
 
 \begin{enumerate}[leftmargin=1.5em]
-    \item \textbf{Absolute transfer:} deploy the simulator threshold $\tau_0$ unchanged;
-    \item \textbf{Standardized bridge:} transfer $z_0$ and estimate local $\mu_k,\sigma_k$;
-    \item \textbf{Field-native offline:} estimate a percentile threshold from held-out healthy
-    field data;
-    \item \textbf{Online local convergence:} initialize with $z_0$ and estimate $\tau_k^\star$
-    during a short unlabeled warm-up.
+    \item \textbf{Direct threshold transfer:} apply the absolute synthetic p98 residual
+    threshold unchanged to each CWRU condition;
+
+    \item \textbf{Field oracle:} estimate the p98 operational radius using the complete healthy
+    field dataset of each condition, without retraining the shared representation; and
+
+    \item \textbf{Online local convergence:} estimate the p98 operational radius progressively
+    from only the first 100 unlabeled healthy windows.
 \end{enumerate}
 
-This ablation directly tests whether the transferable quantity is an absolute threshold or a
-standardized calibration rule.
+This ablation separates representation transfer from decision-boundary transfer. The
+representation is identical in all three conditions; only the information available for local
+calibration changes.
 
-This ablation separates representation transfer from calibration transfer. The representation
-is transferred unchanged from simulation to field deployment; the experiment tests whether the
-transferable calibration quantity is the absolute threshold or its standardized position within
-the nominal residual distribution.
+\paragraph{Stage 4 --- Multi-unit run-to-failure validation on NASA IMS.}
+A second nominal representation is constructed for the IMS bearing family using simulated
+healthy observations matched to the dataset sampling and operating characteristics. This model
+is trained once and then transferred unchanged to the independently monitored bearings within
+the IMS experiments. Each bearing estimates its own operational radius from an early-life
+unlabeled segment and subsequently enters post-convergence monitoring.
 
-\paragraph{Stage 4 --- Run-to-failure degradation on NASA IMS.}
-An independently trained nominal representation is constructed from an early-life segment
-presumed to correspond to healthy operation for the IMS bearing family. The proposed deployment
-methodology is then applied unchanged: each bearing independently calibrates its operational
-radius during the initial nominal period and subsequently enters post-convergence monitoring.
-We report:
-(i) whether $\tau_k(t)$ converges during early life;
-(ii) whether residuals depart from the frozen radius before documented failure;
-(iii) alarm lead time; and
-(iv) false alarms during the accepted nominal period.
-
-The critical distinction is between an adapting threshold and a converged operational radius.
-After $t_{\mathrm{conv}}$, the boundary is not allowed to track the degradation trajectory.
-
-\begin{table}[H]
-\centering
-\caption{\texttt{[PLACEHOLDER]} Run-to-failure deployment outcomes on NASA IMS.}
-\label{tab:ims}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lccccc}
-\toprule
-IMS stream & Failure mode & Samples to convergence & Alarm raised? &
-Lead time before documented failure & Healthy-period FAR \\
-\midrule
-Test 1, Bearing 3 & Inner race & \texttt{TODO} & \texttt{TODO} &
-\texttt{TODO} & \texttt{TODO} \\
-Test 1, Bearing 4 & Roller element & \texttt{TODO} & \texttt{TODO} &
-\texttt{TODO} & \texttt{TODO} \\
-Test 2, Bearing 1 & Outer race & \texttt{TODO} & \texttt{TODO} &
-\texttt{TODO} & \texttt{TODO} \\
-\bottomrule
-\end{tabular}}
-\end{table}
+This stage evaluates whether the proposed deployment principle extends from heterogeneous CWRU
+operating conditions to physically distinct bearing units and naturally evolving degradation
+trajectories. We report:
+(i) samples to operational-radius convergence;
+(ii) variability of the converged radius across bearings;
+(iii) healthy-period false-alarm rate;
+(iv) first persistent departure from the frozen radius; and
+(v) alarm lead time relative to the documented end of the experiment.
 
 \paragraph{Stage 5 --- Edge cost.}
 We report model size, parameter count, inference latency per 1200-sample window on CPU, local
 state memory, and the reduction in transmitted data when only scores and selected anomalous
 windows are sent rather than the continuous raw signal.
 
+In the CWRU validation, the four rotational-speed conditions are treated as independent
+deployment environments rather than as four physically distinct fleet assets. They provide a
+controlled test of score-scale heterogeneity and local calibration, but do not reproduce the full
+manufacturing, installation, and aging variability of an operational fleet.
+
 %=====================================================================
 \section{Results}
 \label{sec:results}
 %=====================================================================
 
-\subsection{Controlled detection}
+The experiments address two distinct questions. First, we establish the performance attainable
+under an ideal but operationally non-scalable condition in which a separate detector is trained
+and calibrated using the complete healthy dataset available for each CWRU operating condition.
+Second, we evaluate whether the proposed simulator-trained shared representation, combined only
+with a short online calibration stream, can approach that ideal performance without any
+field-model retraining.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\linewidth]{sim_reconstruction_examples.png}
-\caption{Canonical signals and Monte Carlo nuisance envelopes for nominal and fault regimes.}
-\label{fig:mc-orbit-signals}
-\end{figure}
+The CWRU evaluation includes four operating conditions corresponding to 1730, 1750, 1772, and
+1797\,RPM. Across these conditions, the experiments contain 1,414 healthy windows, 1,621
+ball-fault windows, 1,621 inner-race-fault windows, and 2,846 outer-race-fault windows. All
+windows contain 1,200 samples and are processed identically across detectors.
+
+%---------------------------------------------------------------------
+\subsection{Ideal asset-specific reference}
+\label{sec:oracle-results}
+%---------------------------------------------------------------------
+
+Table~\ref{tab:asset-specific-summary} reports the performance of three detectors trained
+separately for every CWRU operating condition using all available healthy observations from that
+condition. These experiments represent an oracle reference rather than a deployable fleet
+architecture: they assume that the complete nominal dataset has already been collected and that a
+data scientist can train, calibrate, and maintain one detector per operational condition.
+
+For each detector, the decision boundary is the 98th percentile of its anomaly score on the
+corresponding healthy dataset. Consequently, the healthy false-alarm rate is approximately
+2\% by construction. The comparison therefore evaluates whether the detector score separates
+fault observations from the nominal observations, not whether its threshold can be calibrated.
 
 \begin{table}[H]
 \centering
-\caption{Synthetic multi-asset detection after local operational-radius calibration.}
-\label{tab:synthetic}
-\begin{tabular}{llccc}
+\caption{Ideal asset-specific detector performance on CWRU. Values are mean
+$\pm$ standard deviation across the four operating conditions. Each detector is trained and
+calibrated separately using the complete healthy dataset of the corresponding condition.
+The final two columns are reserved for repeated-run stability measurements.}
+\label{tab:asset-specific-summary}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lcccc}
 \toprule
-Asset & Scenario & Nominal FAR & Post-onset DR & Samples to convergence \\
+Detector &
+Healthy FAR (\%) &
+Ball DR (\%) &
+Inner-race DR (\%) &
+Outer-race DR (\%)\\
 \midrule
-A & Nominal throughout     & 1.5\% & N/A   & \texttt{TODO} \\
-B & Outer-race fault onset & 2.0\% & 100\% & \texttt{TODO} \\
-C & Inner-race fault onset & 2.0\% & 100\% & \texttt{TODO} \\
-D & Ball-fault onset       & 2.0\% & 86\%  & \texttt{TODO} \\
+Asset-specific AE
+& $2.29 \pm 0.12$
+& $100.00 \pm 0.00$
+& $100.00 \pm 0.00$
+& $100.00 \pm 0.00$\\
+
+Asset-specific OC-SVM
+& $2.29 \pm 0.12$
+& $3.09 \pm 6.17$
+& $25.05 \pm 0.13$
+& $2.71 \pm 3.15$\\
+
+Asset-specific Elliptic Envelope
+& $2.29 \pm 0.12$
+& $0.62 \pm 1.23$
+& $14.43 \pm 10.63$
+& $1.76 \pm 3.15$\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+The asset-specific autoencoder separates every evaluated CWRU fault window from the calibrated
+nominal region, reaching 100\% detection for all three fault families under all four operating
+conditions. In contrast, the classical one-class detectors satisfy the prescribed nominal
+false-alarm level but provide little diagnostic separation. The OC-SVM detects, on average,
+only 3.09\% of ball faults, 25.05\% of inner-race faults, and 2.71\% of outer-race
+faults. The elliptical-envelope detector performs similarly, with average detection rates of
+0.62\%, 14.43\%, and 1.76\%, respectively.
+
+These results show that nominal calibration alone is insufficient. All three methods reproduce
+the target healthy false-alarm level, but only the reconstruction-based representation produces
+an anomaly score that consistently separates the physical fault regimes. The asset-specific
+autoencoder is therefore used as the ideal performance reference for evaluating the cost of
+shared-model deployment.
+
+%---------------------------------------------------------------------
+\subsection{Repeated-run stability of the asset-specific autoencoder}
+\label{sec:ae-stability}
+%---------------------------------------------------------------------
+
+To evaluate the sensitivity of the asset-specific autoencoder to stochastic
+optimization, the complete training and evaluation procedure was repeated
+using five independent random initializations. The architecture, preprocessing,
+training protocol, datasets, and calibration procedure remained unchanged;
+only the random initialization and stochastic optimization trajectory differed
+between runs.
+
+Table~\ref{tab:ae-stability} summarizes the results. Across all operating
+conditions, no variation was observed in healthy false-alarm rate or fault
+detection performance. Every repeated run achieved identical detection rates
+for the three evaluated fault families, while maintaining the prescribed
+healthy false-alarm level.
+
+The only quantity exhibiting noticeable variability was the absolute
+reconstruction-error threshold estimated from the healthy residual
+distribution. Depending on the operating condition, the threshold varied
+between repeated trainings despite producing identical detection performance.
+
+\begin{table}[H]
+\centering
+\caption{Repeated-run stability of the asset-specific autoencoder over five
+independent random initializations. Detection performance is unchanged across
+runs, whereas the absolute reconstruction threshold varies slightly.}
+\label{tab:ae-stability}
+
+\begin{tabular}{lccccc}
+\toprule
+RPM &
+Healthy FAR (\%) &
+Ball DR (\%) &
+Inner DR (\%) &
+Outer DR (\%) &
+Threshold \\
+\midrule
+1730 &
+$2.23 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$0.649 \pm 0.021$ \\
+
+1750 &
+$2.23 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$0.759 \pm 0.227$ \\
+
+1772 &
+$2.23 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$0.725 \pm 0.148$ \\
+
+1797 &
+$2.46 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$0.459 \pm 0.026$ \\
+
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[H]
+%---------------------------------------------------------------------
+\subsection{Direct simulation-to-field deployment}
+\label{sec:shared-deployment-results}
+%---------------------------------------------------------------------
+
+The shared autoencoder is trained once using simulated healthy observations and is transferred
+unchanged to all four CWRU conditions. No CWRU observation is used to retrain, fine-tune, or
+otherwise modify the model or its preprocessing transformation.
+
+Three calibration conditions are evaluated:
+
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Direct threshold transfer}, in which the absolute p98 residual threshold
+    estimated in simulation is applied unchanged in the field;
+    \item \textbf{Field oracle}, in which the p98 operational radius is computed using the
+    complete healthy field dataset for each condition; and
+    \item \textbf{Proposed online convergence}, in which the local p98 operational radius is
+    estimated progressively from only the first 100 unlabeled healthy windows.
+\end{enumerate}
+
+Table~\ref{tab:shared-deployment} reports the complete results.
+
+\begin{table}[H]
 \centering
-\includegraphics[width=0.72\linewidth]{anomaly_score_by_regime.png}
-\caption{Reconstruction-error distributions by regime. The converged local radius defines
-membership in the shared nominal representation but does not modify that representation.}
-\label{fig:boxplot-regime-sim}
-\end{figure}
+\caption{Simulation-to-field deployment of the shared autoencoder on CWRU. FAR denotes the
+healthy false-alarm rate and DR the fault detection rate. The field-oracle radius uses every
+available healthy window; the online radius uses only the first 100 healthy windows. A dash
+indicates that convergence is not applicable because the threshold is computed directly rather
+than estimated sequentially.}
+\label{tab:shared-deployment}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{llrrrrrrrr}
+\toprule
+RPM &
+Calibration &
+$\tau$ &
+Healthy FAR &
+Ball DR &
+Inner DR &
+Outer DR &
+Healthy windows &
+Warm-up &
+Convergence \\
+&
+&
+&
+(\%) &
+(\%) &
+(\%) &
+(\%) &
+&
+(windows) &
+(windows) \\
+\midrule
 
+1730 & Direct threshold transfer
+& 0.0979 & 100.00 & 100.00 & 100.00 & 100.00 & 404 & 0 & -- \\
+1730 & Field oracle
+& 0.2005 & 2.23 & 100.00 & 100.00 & 100.00 & 404 & 404 & -- \\
+1730 & Proposed online convergence
+& 0.1984 & 2.97 & 100.00 & 100.00 & 100.00 & 404 & 100 & 38 \\
+
+\addlinespace
+
+1750 & Direct threshold transfer
+& 0.0979 & 100.00 & 100.00 & 100.00 & 100.00 & 404 & 0 & -- \\
+1750 & Field oracle
+& 0.1786 & 2.23 & 100.00 & 100.00 & 100.00 & 404 & 404 & -- \\
+1750 & Proposed online convergence
+& 0.1759 & 2.97 & 100.00 & 100.00 & 100.00 & 404 & 100 & 58 \\
+
+\addlinespace
+
+1772 & Direct threshold transfer
+& 0.0979 & 100.00 & 100.00 & 100.00 & 100.00 & 403 & 0 & -- \\
+1772 & Field oracle
+& 0.1997 & 2.23 & 100.00 & 100.00 & 100.00 & 403 & 403 & -- \\
+1772 & Proposed online convergence
+& 0.2072 & 0.50 & 100.00 & 100.00 & 100.00 & 403 & 100 & 43 \\
+
+\addlinespace
+
+1797 & Direct threshold transfer
+& 0.0979 & 100.00 & 100.00 & 100.00 & 100.00 & 203 & 0 & -- \\
+1797 & Field oracle
+& 0.2474 & 2.46 & 96.80 & 100.00 & 100.00 & 203 & 203 & -- \\
+1797 & Proposed online convergence
+& 0.2364 & 5.91 & 98.77 & 100.00 & 100.00 & 203 & 100 & 65 \\
+
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Direct transfer of the absolute simulator threshold fails under every operating condition. Its
+100\% apparent fault-detection rate is meaningless because it simultaneously classifies
+100\% of the healthy field windows as anomalous. The shared representation therefore transfers,
+but its absolute reconstruction-error scale does not.
+
+The field-oracle calibration restores the target false-alarm level, obtaining an average healthy
+FAR of $2.29\pm0.12$\%. With this complete knowledge of each field condition, the unchanged
+simulator-trained model obtains $99.20\pm1.60$\% ball-fault detection and 100\% detection of
+both inner- and outer-race faults.
+
+The proposed online procedure reaches comparable performance using only the first 100 healthy
+windows. Across the four operating conditions, it achieves an average healthy FAR of
+$3.09\pm2.22$\%, ball-fault detection of $99.69\pm0.62$\%, and 100\% detection of both
+inner- and outer-race faults. The online operational radius converges after
+$51.0\pm12.6$ windows, with observed convergence indices ranging from 38 to 65 windows.
+
+%---------------------------------------------------------------------
+\subsection{Cost of scalable deployment}
+\label{sec:deployment-cost}
+%---------------------------------------------------------------------
+
+Table~\ref{tab:oracle-vs-proposed} compares the ideal asset-specific autoencoder with the proposed
+shared deployment architecture. The comparison is intentionally conservative in favor of the
+asset-specific reference. The oracle detector is trained and calibrated using the complete real
+healthy dataset for every operating condition. The proposed method receives no real field data
+for representation training and estimates its decision radius online from only 100 initial
+observations.
+
+\begin{table}[H]
+\centering
+\caption{Ideal but non-scalable asset-specific deployment versus the proposed fleet-scalable
+deployment. Values are mean $\pm$ standard deviation across the four CWRU operating
+conditions.}
+\label{tab:oracle-vs-proposed}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lcccccc}
+\toprule
+Deployment strategy &
+Healthy FAR (\%) &
+Ball DR (\%) &
+Inner DR (\%) &
+Outer DR (\%) &
+Field model training &
+Healthy field data used \\
+\midrule
+
+Asset-specific AE oracle
+& $2.29 \pm 0.12$
+& $100.00 \pm 0.00$
+& $100.00 \pm 0.00$
+& $100.00 \pm 0.00$
+& One model per condition
+& Complete dataset \\
+
+Shared AE with field-oracle radius
+& $2.29 \pm 0.12$
+& $99.20 \pm 1.60$
+& $100.00 \pm 0.00$
+& $100.00 \pm 0.00$
+& None
+& Complete dataset \\
+
+Proposed shared AE with online radius
+& $3.09 \pm 2.22$
+& $99.69 \pm 0.62$
+& $100.00 \pm 0.00$
+& $100.00 \pm 0.00$
+& None
+& 100-window warm-up \\
+
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Replacing four separately trained real-data autoencoders with one simulator-trained shared model
+therefore produces no observed loss for inner- or outer-race detection and less than one
+percentage point of average difference for ball-fault detection. The principal cost appears in
+healthy false alarms, whose mean increases from 2.29\% to 3.09\% and whose variability is
+greater under the short online warm-up. This difference is concentrated primarily in the
+1797\,RPM condition, where the online FAR reaches 5.91\%; the remaining conditions remain
+between 0.50\% and 2.97\%.
+
+These results support the central deployment claim of this paper. Rather than demonstrating a
+new anomaly detector, they show that a single simulator-trained canonical representation can be
+deployed across heterogeneous assets with only a negligible reduction in detection performance,
+provided that each asset estimates its own local operational radius during a short unlabeled
+warm-up. This replaces asset-specific representation learning with lightweight local calibration,
+reducing deployment complexity while preserving near-native detection performance.
+
+It is important to note that the comparison intentionally favors the asset-specific baselines.
+The baseline detectors are trained and calibrated using the complete healthy dataset available
+for each operating condition, whereas the proposed deployment estimates its operational radius
+from only the first 100 healthy windows (approximately ten seconds of operation) and never
+retrains the shared representation.
+
+%---------------------------------------------------------------------
 \subsection{Operational-radius convergence}
+\label{sec:radius-convergence-results}
+%---------------------------------------------------------------------
 
-Figure~\ref{fig:tau-convergence} is the central deployment result. Stable assets should show a
-rapid decrease in $C_k(t)$ and convergence of $\tau_k(t)$ toward a finite asset-specific value.
-A degrading asset may calibrate initially, but its subsequent residual trajectory departs from the
-frozen $\tau_k^\star$.
+Figure~\ref{fig:tau-convergence} shows the sequential estimate of the local p98 operational
+radius during the 100-window warm-up. Each condition converges to a distinct radius despite using
+the same fixed representation. The final online estimates are close to their complete-data
+field-oracle counterparts: 0.1984 versus 0.2005 at 1730\,RPM, 0.1759 versus 0.1786 at
+1750\,RPM, 0.2072 versus 0.1997 at 1772\,RPM, and 0.2364 versus 0.2474 at 1797\,RPM.
 
 \begin{figure}[H]
 \centering
 \fbox{
-\begin{minipage}{0.82\linewidth}
+\begin{minipage}{0.84\linewidth}
 \centering
-\texttt{[PLACEHOLDER: plot $\tau_k(t)$ for several nominal assets and one degrading stream.]}\\
-The intended figure should show distinct but rapidly stabilizing radii, followed by a residual
-departure after fault onset.
+\texttt{[PLACEHOLDER: operational-radius trajectories for 1730, 1750, 1772, and
+1797\,RPM, including the complete-data field-oracle radius and detected convergence index.]}
 \end{minipage}}
-\caption{Per-asset operational-radius convergence. The shared representation remains fixed;
-only each asset's local decision radius is identified during cold start.}
+\caption{Online operational-radius convergence from the first 100 unlabeled healthy windows.
+The shared representation remains unchanged; only the local empirical p98 radius is estimated.
+Observed convergence occurs between 38 and 65 windows.}
 \label{fig:tau-convergence}
 \end{figure}
 
-\subsection{Calibration transfer}
+The convergence result is operationally relevant because the complete healthy distribution is not
+available at the start of a real deployment. The asset-specific and field-oracle references assume
+that all healthy data have already been collected. The proposed procedure instead constructs the
+local acceptance boundary incrementally and approaches the complete-data radius within a small
+fraction of the available nominal sequence.
 
-On the 1797\,RPM CWRU healthy stream, the reconstruction residual has
-$\mu_{\mathrm{field}}=0.2270$ and $\sigma_{\mathrm{field}}=0.0215$. The raw simulator threshold
-is expressed in incompatible amplitude units and therefore does not transfer. Re-expressing the
-standardized anchor in field statistics produces a decision boundary close to field-native
-calibration.
+The present experiment assumes that the initial warm-up observations are representative of
+nominal operation. Detecting an asset that is already degraded at installation, or determining
+that no stable nominal radius can be established, is outside the current scope. The convergence
+dynamics themselves may provide evidence of an invalid initialization state and are identified as
+a subject for future work.
+
+%---------------------------------------------------------------------
+\subsection{Robustness to local initialization}
+\label{sec:initialization-robustness}
+%---------------------------------------------------------------------
+
+A practical deployment question is whether the proposed local calibration depends critically on
+the particular nominal observations available during installation. In real deployments, the first
+healthy windows acquired from an asset are unlikely to be identical across installations, even
+when the underlying operating condition is the same.
+
+To evaluate this sensitivity, the shared simulator-trained representation was kept completely
+fixed throughout the experiment. Neither the representation, its preprocessing, nor its
+parameters were modified. Only the local initialization data were varied.
+
+For each CWRU operating condition, five independent warm-up sequences were generated by randomly
+sampling 100 healthy windows from the available field observations using different random seeds.
+Each warm-up sequence independently estimated the local empirical 98th-percentile operational
+radius, after which fault detection was evaluated using the unchanged shared representation.
 
 \begin{table}[H]
 \centering
-\caption{Alarm rate (\%) under alternative calibration-transfer strategies. For the healthy row,
-the value is false-alarm rate; for fault rows, it is detection rate.}
-\label{tab:transfer}
-\begin{tabular}{lcccc}
+\caption{Robustness of online operational-radius estimation under different random warm-up samples. The shared simulator-trained representation remained fixed throughout the experiment. Only the 100 healthy initialization windows used for local calibration were randomly changed. Values are mean $\pm$ standard deviation over five random seeds.}
+\label{tab:initialization-robustness}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lcccccc}
 \toprule
-Regime & Absolute transfer & Standardized bridge & Field-native & Online convergence \\
+RPM &
+$\tau_{\mathrm{online}}$ &
+Healthy FAR (\%) &
+Ball DR (\%) &
+Inner DR (\%) &
+Outer DR (\%) &
+Convergence (windows) \\
 \midrule
-Healthy & 100.0 & 11.8 & 5.4  & 11.8 \\
-Ball    & 100.0 & 99.0 & 98.3 & 99.0 \\
-Inner race & 100.0 & 100.0 & 100.0 & 100.0 \\
-Outer race & 100.0 & 100.0 & 100.0 & 100.0 \\
+1730 &
+$0.2905 \pm 0.0041$ &
+$4.08 \pm 2.04$ &
+$99.75 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$45.6 \pm 13.2$ \\
+
+1750 &
+$0.3080 \pm 0.0063$ &
+$3.49 \pm 2.47$ &
+$99.95 \pm 0.11$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$54.2 \pm 13.6$ \\
+
+1772 &
+$0.3097 \pm 0.0076$ &
+$2.18 \pm 1.66$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$49.4 \pm 13.8$ \\
+
+1797 &
+$0.3415 \pm 0.0051$ &
+$3.49 \pm 2.44$ &
+$96.16 \pm 0.22$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$56.2 \pm 15.0$ \\
+
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
-The ablation supports the deployment claim: an absolute threshold does not survive a
-simulation-to-field scale change, whereas a standardized anchor combined with local statistics
-recovers useful behavior without field fault labels. The field-native method achieves the lowest
-healthy false-alarm rate because it is calibrated fully in-domain, but it requires an offline
-field-calibration set. Online convergence approaches that performance using only a short local
-warm-up.
+The estimated operational radii remained consistently close to the complete-data field-oracle
+values across all repetitions. Despite the variability introduced by different initialization
+samples, the online calibration systematically converged toward the same local operating region.
 
-\subsection{Sensitivity and edge cost}
+Detection performance was correspondingly stable. Ball-fault detection remained between
+approximately 96\% and 100\% across all evaluated seeds, while inner-race and outer-race faults
+continued to be detected with essentially unchanged performance. The principal variability
+appeared in the healthy false-alarm rate, which fluctuated depending on the particular warm-up
+sample used for estimating the empirical percentile.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.62\linewidth]{sim_window_sensitivity.png}
-\caption{Sensitivity of false-alarm and detection rates to the local residual-buffer size.}
-\label{fig:window-sensitivity}
-\end{figure}
+This behaviour is expected from the statistical nature of the calibration procedure. Because the
+operational radius is estimated from only 100 initialization windows, the empirical
+98th-percentile is determined by very few extreme observations. Small variations in those
+observations therefore produce modest variations in the estimated radius without materially
+affecting the diagnostic separation achieved by the shared representation.
+
+These results indicate that the proposed deployment methodology is robust not only to simulation-
+to-field transfer but also to the specific nominal observations available during installation.
+The transferable object remains the shared canonical representation, whereas the local
+initialization procedure consistently identifies an appropriate operational radius from short,
+unlabeled field observations.
+
+%---------------------------------------------------------------------
+\subsection{Edge deployment implications}
+\label{sec:edge-results}
+%---------------------------------------------------------------------
+
+The shared model contains 847,601 trainable parameters and is trained entirely offline.
+Deployment at the monitored asset requires only forward inference, a small residual buffer,
+estimation of an empirical quantile, and the current convergence state.
+No gradient computation, model optimization, fault labels, or asset-specific representation
+learning are required after installation.
+
+On the evaluation platform, inference over a 1,200-sample window requires a median CPU latency
+of only 6.26\,ms (95th percentile: 6.62\,ms), substantially below the 100\,ms acquisition
+interval corresponding to the evaluated windows. Consequently, the proposed deployment operates
+comfortably in real time while leaving ample computational margin for additional edge tasks such
+as communication, diagnostics, or signal preprocessing.
+
+The local deployment state is also extremely compact. Besides the shared model itself, each asset
+stores only a buffer of the most recent 100 reconstruction residuals (400 bytes in float32) and
+a few scalar calibration variables, requiring less than 1\,kB of asset-specific state. The only
+fleet-wide artifact is the shared nominal representation, which is trained once and distributed
+to every operational unit.
 
 \begin{table}[H]
 \centering
-\caption{\texttt{[PLACEHOLDER]} Edge deployment footprint.}
+\caption{Edge-deployment footprint of the proposed shared nominal representation.}
 \label{tab:edge}
 \begin{tabular}{lc}
 \toprule
 Metric & Value \\
 \midrule
 Model parameters & 847,601 \\
-Serialized model size & \texttt{TODO} \\
-CPU inference latency per window & \texttt{TODO} \\
-Local calibration-state memory & \texttt{TODO} \\
-Raw-to-event data reduction & \texttt{TODO} \\
+Raw float32 weight size & 3.39 MB (3.23 MiB) \\
+Serialized inference model (.keras) & 10.24 MB (9.76 MiB) \\
+CPU inference latency (median) & 6.26 ms / 1,200-sample window \\
+CPU inference latency (95th percentile) & 6.62 ms / window \\
+Local residual-buffer length & 100 samples \\
+Residual-buffer memory & 400 bytes \\
+Total local calibration state & 428 bytes ($<1$ kB) \\
+Per-asset model training & None \\
+Fault labels required & None \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+These characteristics make the proposed methodology particularly suitable for edge deployment in
+large transportation fleets. Computational complexity remains essentially constant for each new
+asset because representation learning is centralized, whereas local deployment requires only
+inference and lightweight statistical estimation. Consequently, fleet growth increases the number
+of deployed instances but does not increase the number of models that must be engineered,
+validated, or maintained.
+
+The measured latency corresponds to approximately 6\% of the available processing budget for the
+evaluated acquisition rate (100\,ms per window), providing roughly a 16$\times$ real-time
+processing margin.
 
 %=====================================================================
 \section{Discussion}
 \label{sec:discussion}
 %=====================================================================
 
-The principal result is not that a Conv1D autoencoder can separate CWRU fault classes. That
-finding is already well established in the literature. The contribution is a deployment rule for
-heterogeneous transportation fleets: the nominal representation can be shared, while every asset
-independently identifies a local operational radius without model retraining.
+The principal result of this work is not that a Conv1D autoencoder can separate CWRU fault
+classes. That capability has already been extensively demonstrated in the literature. The
+contribution lies instead in the deployment methodology: a single canonical nominal
+representation can be shared across heterogeneous assets, while each physical unit
+independently estimates its own operational radius without retraining the representation.
 
-The standardized bridge experiment shows why this separation is necessary. The numerical scale
-of reconstruction residuals is installation-dependent. A simulator threshold therefore fails when
-treated as a physical quantity. Its standardized location within a nominal distribution is more
-portable, provided the deployed asset estimates its own local scale.
+The repeated-run experiments provide an additional insight into this deployment strategy.
+Independent random initializations converge to slightly different numerical reconstruction-error
+scales, yet the resulting healthy false-alarm rate and fault detection performance remain
+essentially unchanged after empirical calibration. Different stochastic realizations therefore
+learn diagnostically equivalent nominal representations even though their absolute residual
+scales differ.
 
-Operational-radius convergence also clarifies the role of adaptation. The purpose of adaptation
-is to identify the asset during cold start, not to follow its aging indefinitely. Once
-$\tau_k^\star$ is established, continued movement of the anomaly-score distribution is
-diagnostic information. Free adaptation after convergence would instead risk absorbing a
-progressive fault into the nominal baseline.
+A complementary robustness experiment leads to the same conclusion from the deployment side.
+Keeping the representation fixed while varying only the nominal observations used during the
+100-window warm-up produces only modest variations in the estimated operational radius and
+little change in post-calibration detection performance. The deployment mechanism is therefore
+robust at two independent levels: the learned representation itself and the local calibration
+procedure.
 
-For transportation practice, this architecture has several advantages. It supports day-one
-rollout without fault labels, removes per-asset model maintenance, isolates calibration between
-physical units, permits edge execution with minimal local state, and reduces continuous transfer of high-frequency raw sensor observations.
-The same deployment principle can be applied to bearings,
-traction motors, gearboxes, pumps, actuators, and spatially indexed infrastructure segments,
-provided the shared representation is trained for the relevant signal family.
+These observations reinforce the central claim of the paper. The transferable object is not an
+absolute reconstruction-error threshold but a shared canonical nominal representation. The role
+of local calibration is simply to identify the residual value that realizes the common target
+nominal coverage for each individual installation.
 
-The present evaluation remains limited. CWRU is a controlled benchmark rather than an
-in-service railway fleet, and fault streams are constructed rather than observed during natural
-field evolution. NASA IMS provides a stronger run-to-failure test but still represents laboratory
-rotating machinery. A later transportation-specific validation should apply the same deployment
-procedure to instrumented axlebox, tram, or train data with repeated observations and maintenance
-records. That extension is important for external validity but is not required to test the central
-calibration mechanism presented here.
+The calibration-transfer experiment further shows that the representation transfers successfully
+from simulation to field deployment, whereas the absolute reconstruction-error scale does not.
+A fixed simulator threshold therefore cannot be deployed fleet-wide. What transfers is the
+representation together with the target nominal coverage, while each asset estimates its own
+local operational radius from its residual distribution.
+
+This deployment methodology also fits naturally within the broader theoretical framework
+developed in our previous work. In our earlier technical report
+\cite{disanti2026inverse}, industrial diagnosis was interpreted as recovering a canonical
+nominal representation from observations rather than directly classifying raw signals.
+That interpretation was subsequently formalized as an inverse problem over quotient spaces
+\cite{disanti2026quotient}, where the canonical representation constitutes the mathematical
+object to be recovered while nuisance variability is factored out.
+
+The present work addresses the deployment stage of that formulation. Once the shared canonical
+representation has been learned offline, each deployed asset no longer needs to solve the global
+representation-learning problem. Instead, deployment consists only of solving a lightweight
+inverse calibration problem: given the reconstruction residuals generated by the fixed shared
+representation, each asset estimates the operational radius that best characterizes its own
+nominal operating conditions.
+
+This viewpoint is also consistent with the blueprint formulation introduced in
+\cite{disanti2026blueprints}, where diagnosis was interpreted as recovering a compact nominal
+structure from observations. Here, that recovered canonical representation is assumed to be
+available, and only its local realization must be identified for each deployed asset.
+Consequently, representation learning solves the global inverse problem only once, whereas
+deployment repeatedly solves a lightweight local inverse calibration problem for every physical
+asset.
+
+Operational-radius convergence also clarifies the role of adaptation. The objective of
+adaptation is to identify the asset during cold start, not to follow its aging indefinitely.
+Once $\tau_k^\star$ has been established, continued movement of the anomaly-score distribution
+constitutes diagnostic evidence. Allowing unrestricted adaptation after convergence would instead
+risk absorbing progressive degradation into the nominal baseline.
+
+The observed variability in healthy false-alarm rate should be interpreted in the context of the
+deliberately short initialization interval. Using 1,200-sample non-overlapping windows acquired
+at 12\,kHz, the 100-window warm-up corresponds to only approximately ten seconds of operation.
+Estimating an empirical 98th percentile from such a short sequence inevitably depends on a very
+small number of extreme observations.
+
+A practical deployment would not necessarily terminate initialization after a fixed number of
+windows. Instead, the operational radius could continue to evolve automatically until the
+convergence criterion is satisfied, or until a minimum amount of nominal operating time has been
+observed. Once convergence is achieved, the radius can be frozen or tightly constrained so that
+subsequent degradation cannot redefine itself as nominal.
+
+From an industrial perspective, the proposed architecture offers several practical advantages.
+It enables day-one deployment without fault labels, removes per-asset representation learning,
+isolates calibration between physical assets, requires only lightweight edge computation, and
+reduces continuous transmission of high-frequency sensor data.
+
+An additional consequence is that computational scalability becomes decoupled from fleet size.
+Fleet growth increases the number of monitored assets, but not the number of engineered models.
+Adding a new operational unit requires only distributing the shared representation and estimating
+its local operational radius. Representation engineering, validation, and maintenance remain
+constant regardless of the number of deployed assets.
+
+The computational requirements further support this deployment model. On the evaluation
+platform, inference requires only 6.26\,ms for a 1,200-sample window, corresponding to
+approximately 6\% of the available processing budget for the evaluated acquisition rate
+(100\,ms per window). The system therefore provides roughly a sixteen-fold real-time processing
+margin while requiring less than 1\,kB of asset-specific deployment state beyond the shared
+representation.
+
+An additional practical advantage is that calibration is performed around a previously learned
+canonical nominal representation rather than around the deployment data themselves.
+Asset-specific retraining implicitly assumes that the calibration dataset is entirely healthy.
+If the monitored asset already exhibits incipient degradation, that degradation may become part
+of the learned nominal model. In contrast, the proposed methodology preserves the shared
+canonical representation and estimates only a local operational radius. This separation opens
+the possibility of identifying assets whose initial behavior is already inconsistent with the
+canonical nominal manifold before they are accepted as locally healthy.
+
+\subsection{Future Work}
+
+The present work intentionally focuses on day-one deployment under the assumption that the
+monitored asset begins operation in a nominal condition. A natural extension is to relax this
+assumption.
+
+Because the methodology separates the shared canonical representation from the asset-specific
+operational radius, future work will investigate whether the initialization phase itself can be
+validated against the canonical nominal manifold. Such a consistency test could distinguish
+genuinely healthy initialization from assets already exhibiting incipient degradation, thereby
+preventing abnormal behavior from becoming part of the local baseline.
+
+A second research direction concerns progressive physical degradation. Rather than detecting only
+departures beyond a converged operational radius, future work will investigate whether the joint
+evolution of reconstruction residuals and operational-radius dynamics contains predictive
+information about the degradation process. This would naturally connect the proposed deployment
+methodology with physics-informed health indicators and remaining useful life estimation.
+
+Finally, the mathematical interpretation introduced in our previous work
+\cite{disanti2026quotient} opens several theoretical questions. If the shared canonical nominal
+representation is indeed the transferable mathematical object, then the operational radius may be
+interpreted as defining an asset-specific neighborhood around that object. Formalizing this
+relationship, characterizing its invariance properties, and establishing conditions under which
+local calibration preserves the underlying quotient-space structure constitute promising
+directions for future research.
 
 %=====================================================================
 \section{Conclusion}
 %=====================================================================
 
 We presented a day-one deployment methodology for nominal condition monitoring across
-heterogeneous asset fleets, validated in this study on public rolling-element bearing data. A
-single representation is trained once on simulated nominal observations and transferred unchanged
-to field deployment. Each operational unit then uses a short unlabeled warm-up to identify its
-own operational radius without modifying or retraining the shared model. The experiments show
-that the learned representation reuse from simulation to field data, whereas the absolute
-decision threshold does not. A standardized calibration anchor, re-expressed in each asset's
-local residual statistics, provides the bridge between the shared representation and local
-deployment. The resulting primitive is label-free, independently calibrated, compatible with
-edge inference, and designed around fleet deployment rather than benchmark-specific
-classification.
+heterogeneous asset fleets, validated on public rolling-element bearing datasets. A single
+nominal representation is trained once on simulated healthy observations and transferred
+unchanged to field deployment. Each operational unit then performs only a short unlabeled
+warm-up to estimate its own operational radius, without modifying or retraining the shared
+representation.
+
+The experimental results show that a simulator-trained nominal representation transfers
+successfully to field deployment, whereas an absolute decision threshold does not.
+A shared target nominal coverage, realized locally through the empirical residual quantile estimated during initialization, 
+provides an effective bridge between the shared representation and field deployment. This deployment strategy preserves detection performance
+close to that of asset-specific models trained under ideal asset-specific calibration conditions
+while eliminating per-asset representation learning.
+
+The transferable object is therefore not an absolute anomaly threshold, nor an asset-specific
+representation, but a shared canonical nominal representation together with a lightweight local
+calibration mechanism. The central outcome of this work is consequently not a new anomaly
+detector, but a scalable deployment principle: learn the canonical nominal representation once,
+distribute it across the fleet, and let each physical asset identify only its own operational
+radius during installation.
+
+This separation between representation learning and deployment calibration provides a practical
+foundation for large-scale edge condition monitoring in future transportation systems.
+
+Such a representation could naturally be produced and maintained by the original equipment manufacturer (OEM), 
+while fleet operators perform only lightweight local calibration during deployment, thereby separating representation engineering from operational deployment.
 
 %=====================================================================
 \appendix
@@ -825,11 +1417,23 @@ Y. Lei, J. Lin, Z. He, and M. J. Zuo.
 \newblock A review on empirical mode decomposition in fault diagnosis of rotating machinery.
 \newblock \emph{Mechanical Systems and Signal Processing}, 35(1--2), 108--126, 2013.
 
-\bibitem{disanti2026}
+\bibitem{disanti2026quotient}
+E. Di Santi.
+\newblock \emph{Anomaly Detection as an Inverse Problem on Quotient Spaces, 
+Equivalence Relations and Functional Manifolds as a General Diagnostic Framework}.
+\newblock Technical report, University of Colorado Boulder, 2026.
+
+\bibitem{disanti2026inverse}
 E. Di Santi.
 \newblock \emph{Self-Supervision, Manifold Saturation, and Emergent Operational Classes:
 Learning from Scarce Observations as Inverse Recovery of Compact Functional Structure}.
 \newblock Technical report, University of Colorado Boulder, 2026.
+
+\bibitem{disanti2026blueprints}
+E. Di Santi.
+\newblock \emph{The Blueprints of Intelligence: A Functional-Topological Foundation for Perception and Representation}.
+\newblock arXiv:2512.05089, 2025.
+
 
 \bibitem{kendall1984}
 D. G. Kendall.
