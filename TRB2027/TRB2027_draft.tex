@@ -16,6 +16,32 @@
 \usepackage{caption}
 \usepackage{hyperref}
 \usepackage{authblk}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit}
+
+\usepackage[
+    backend=biber,
+    style=authoryear,
+    sorting=nyt,
+    maxcitenames=2,
+    maxbibnames=99,
+    giveninits=false,
+    uniquename=false,
+    uniquelist=false,
+    doi=true,
+    url=true,
+    isbn=false,
+    eprint=true
+]{biblatex}
+
+\addbibresource{references.bib}
+\DeclareDelimFormat{nameyeardelim}{\addspace}
+\setlength{\bibhang}{1.5em}
+\DeclareFieldFormat[article,inproceedings,incollection]{title}{\mkbibquote{#1}}
+\DeclareFieldFormat[book,report,thesis,misc]{title}{\mkbibemph{#1}}
+\DefineBibliographyStrings{english}{
+  andothers = {et\addabbrvspace al\adddot}
+}
 
 \newtheorem{proposition}{Proposition}
 \newtheorem{corollary}{Corollary}
@@ -49,32 +75,53 @@ Independent Operational-Radius Convergence Across Heterogeneous Assets
 \maketitle
 
 %=====================================================================
+%=====================================================================
+% NOTA: TRB 2027 reemplaza el abstract tradicional por uno estructurado.
+% Va en página aparte, inmediatamente después de la portada, sin nada más
+% en esa página. Máx. 300 palabras. Revisá la plantilla LaTeX oficial de
+% TRB por si define un entorno/macro propio para esto en vez de \textbf.
+%=====================================================================
 \begin{abstract}
 
-Transportation operators increasingly face the challenge of deploying condition-monitoring
-systems across large fleets of heterogeneous assets without fault labels, asset-specific
-representation learning, or lengthy calibration campaigns. We propose a day-one deployment
-method that separates what is shared across the fleet from what must remain local to each
-physical asset. A single canonical nominal representation is trained once, offline, using
-simulated healthy observations and is subsequently transferred unchanged to field deployment.
-Each asset then estimates only its own operational radius from a short stream of unlabeled local
-observations, without modifying or retraining the shared representation.
+\textbf{Objectives:} Transportation operators deploying condition monitoring
+across large fleets of heterogeneous assets rarely have fault labels, time
+for per-asset representation learning, or long field calibration campaigns.
+This paper addresses how a single nominal representation can be deployed
+fleet-wide on day one, without retraining a model or tuning a threshold for
+every asset.
 
-The method is evaluated on four Case Western Reserve University bearing operating conditions and
-compared with an ideal but non-scalable setting in which a separate detector is trained and
-calibrated using the complete healthy dataset of each condition. Asset-specific autoencoders
-achieve 100\% detection across the evaluated fault families. The proposed shared
-simulator-trained model, using only a 100-window local warm-up, achieves an average healthy
-false-alarm rate of $3.09\%$, ball-fault detection of $99.69\%$, and 100\% detection of
-inner- and outer-race faults. The local operational radius converges after
-$51.0\pm12.6$ windows. In contrast, direct transfer of the absolute simulator threshold produces
-100\% false alarms, demonstrating that the transferable object is the canonical nominal
-representation rather than its absolute residual scale.
+\textbf{Methods:} A canonical nominal representation, a Conv1D autoencoder,
+is trained once offline on simulated healthy vibration signals and
+transferred unchanged to every asset. Each asset then estimates its
+operational radius, an empirical residual quantile, from a short stream of
+unlabeled local observations, without retraining the shared model. The
+method is evaluated on four Case Western Reserve University (CWRU) bearing
+conditions, spanning healthy, ball-fault, inner-race, and outer-race
+windows, against an oracle calibrated on each condition's complete healthy
+dataset. Three calibration strategies are compared: direct threshold
+transfer, a complete-data oracle radius, and the proposed online radius
+estimated from only the first 100 healthy windows.
 
-The resulting deployment primitive consists of one shared representation, independent local
-operational-radius convergence, and lightweight edge inference. Such a representation could be
-developed and maintained by an original equipment manufacturer and distributed fleet-wide,
-while operators perform only short, unsupervised local calibration during installation.
+\textbf{Findings:} Direct transfer of the absolute simulator threshold
+produced complete false alarms in the field, confirming that the
+representation, not its absolute score scale, transfers. Using only a
+100-window online calibration, the shared representation reached an
+average healthy false-alarm rate of 3.09\%, ball-fault detection of
+99.69\%, and 100\% detection of inner- and outer-race faults, with the
+radius converging after 51.0 $\pm$ 12.6 windows, approaching the
+asset-specific reference.
+
+\textbf{Novelty:} The contribution is a fleet-deployment methodology, not a
+new anomaly-detection architecture: it separates representation learning,
+performed once and shared fleet-wide, from decision-boundary calibration,
+performed independently by each asset.
+
+\textbf{Practical Applications:} A shared representation can be developed
+and maintained centrally, for example by an original equipment
+manufacturer, and distributed unchanged across an operator's fleet, while
+each installed asset requires only seconds of unsupervised local
+calibration and lightweight edge inference, removing the need for fault
+labels or per-asset model training during rollout.
 
 \end{abstract}
 
@@ -96,19 +143,19 @@ edge monitoring
 
 Modern transportation systems increasingly rely on condition-monitoring technologies to supervise
 large populations of operational assets, including rolling-element bearings, axleboxes, traction
-motors, gearboxes, pumps, actuators, vehicles, and spatially indexed infrastructure segments.
-Although machine-learning research has produced increasingly capable anomaly detectors, the
-deployment problem remains largely unresolved: a detector that performs well for one asset under
-one calibrated operating condition does not automatically scale to hundreds or thousands of
-independently installed units.
+motors, gearboxes, pumps, actuators, vehicles, and spatially indexed infrastructure segments
+\cite{jardine2006,zhao2019}. Although machine-learning research has produced increasingly capable
+anomaly detectors \cite{chandola2009,zhao2019}, the deployment problem remains largely unresolved:
+a detector that performs well for one asset under one calibrated operating condition does not
+automatically scale to hundreds or thousands of independently installed units.
 
 At fleet rollout, several constraints arise simultaneously. First, the target fleet contains few
 or no representative fault examples. Second, waiting months or years for failures to accumulate
 is operationally unacceptable. Third, installation-specific factors such as sensor coupling,
 mounting, operating point, and environmental noise alter the numerical scale of anomaly scores
-between assets. Fourth, training, calibrating, validating, and maintaining a separate
-representation model for every physical unit creates an operational and organizational burden
-that grows directly with fleet size.
+between assets \cite{randall2011}. Fourth, training, calibrating, validating, and maintaining a
+separate representation model for every physical unit creates an operational and organizational
+burden that grows directly with fleet size.
 
 The practical question is therefore not simply
 
@@ -130,6 +177,14 @@ observations and is distributed unchanged across the fleet. Each deployed asset 
 its own operational radius from a short stream of unlabeled local observations. The shared model
 is not retrained, fine-tuned, or adapted in the field.
 
+From a broader perspective, this separation can be interpreted as an inverse problem.
+Representation learning is performed once to recover a canonical nominal representation from
+observations, whereas deployment requires each asset to solve only a lightweight local inverse
+calibration problem by identifying its own operational radius around that fixed representation.
+This interpretation follows the inverse-problem and quotient-space formulations introduced in our
+previous work \cite{disanti2026inverse,disanti2026quotient}, while the present paper focuses on
+their engineering realization for scalable fleet deployment.
+
 For asset $k$, let $\tau_k(t)$ denote the progressively estimated operational radius. Under stable
 nominal operation, the proposed calibration procedure is expected to satisfy
 
@@ -150,30 +205,35 @@ threshold nor an asset-specific model. Instead, it transfers the canonical nomin
 and a fleet-wide target nominal coverage, while each asset estimates the empirical residual
 quantile that realizes that coverage locally.
 
+The transferable object is therefore not an anomaly threshold, but a canonical nominal
+representation. Deployment consists only of identifying the local operational radius around that
+shared representation.
+
 This formulation also changes the relevant experimental comparison. The ideal reference is not
 another globally shared detector, but an operationally unrealistic condition in which the
 complete healthy distribution of every asset is available in advance and a separate detector can
-be trained and calibrated for each one. The central question is then:
+be trained and calibrated for each one. The central question is therefore
 
 \begin{quote}
-\emph{How much detection performance is lost when many asset-specific models are replaced by
-one simulator-trained representation and a few seconds of local calibration?}
+\emph{How much detection performance is lost when many asset-specific models are replaced by one
+simulator-trained representation and a few seconds of local calibration?}
 \end{quote}
 
-We answer this question using four Case Western Reserve University bearing operating conditions.
-The asset-specific reference methods are trained and calibrated using the complete healthy dataset
-of each condition. In contrast, the proposed method uses no field observation for representation
-learning and estimates its local operational radius from only the first 100 healthy windows,
-corresponding to approximately ten seconds of signal at the evaluated window duration.
+We answer this question using four operating conditions from the Case Western Reserve University
+(CWRU) bearing benchmark \cite{smith2015}. The asset-specific reference methods are trained and
+calibrated using the complete healthy dataset of each condition. In contrast, the proposed method
+uses no field observation for representation learning and estimates its local operational radius
+from only the first 100 healthy windows, corresponding to approximately ten seconds of signal at
+the evaluated window duration.
 
 The experimental results show that the cost of scalable deployment is small. Asset-specific
-autoencoders reach 100\% detection across the evaluated ball, inner-race, and outer-race fault
+autoencoders reach 100\% detection across the evaluated ball-, inner-race-, and outer-race-fault
 families. The unchanged simulator-trained shared model, combined with online local-radius
-estimation, reaches an average ball-fault detection rate of $99.69\%$ and 100\% detection of
-inner- and outer-race faults. The operational radius converges after $51.0\pm12.6$ windows on
-average. Direct transfer of the absolute simulator threshold, however, produces 100\% healthy
-false alarms, confirming that the representation transfers while its absolute score scale does
-not.
+estimation, reaches an average ball-fault detection rate of 99.69\% and 100\% detection of
+inner- and outer-race faults. The operational radius converges after
+$51.0\pm12.6$ windows on average. Direct transfer of the absolute simulator threshold, however,
+produces 100\% healthy false alarms, confirming that the representation transfers while its
+absolute score scale does not.
 
 The contribution of this paper is therefore a deployment methodology rather than a new neural
 architecture. Although a Conv1D autoencoder is used as the experimental representation, the
@@ -200,8 +260,8 @@ deployment principle is representation-agnostic. The principal contributions are
     deployed unit performs only lightweight local calibration.
 \end{enumerate}
 
-The methodology is intentionally independent of asset type and sensing modality. It requires
-only a nominal representation producing a scalar anomaly score, repeated observations from each
+The methodology is intentionally independent of asset type and sensing modality. It requires only
+a nominal representation producing a scalar anomaly score, repeated observations from each
 operational unit, and a local procedure for estimating the acceptance boundary. Public
 rolling-element bearing data are used here as the first controlled validation domain rather than
 as a limitation of the proposed methodology.
@@ -212,7 +272,7 @@ Section~\ref{sec:method} defines the shared representation and local operational
 estimation. Section~\ref{sec:expdesign} presents the experimental protocol.
 Section~\ref{sec:results} reports the deployment-oriented results, and
 Section~\ref{sec:discussion} discusses industrial implications, limitations, and future work.
-A compact geometric rationale is provided in Appendix~\ref{sec:theory}.
+Section~\ref{sec:theory} summarizes the underlying mathematical interpretation.
 
 %=====================================================================
 \section{Related Work}
@@ -221,24 +281,29 @@ A compact geometric rationale is provided in Appendix~\ref{sec:theory}.
 
 Condition-based maintenance (CBM) has become a central component of modern transportation asset
 management, with condition monitoring providing the operational evidence required to supervise
-large fleets of heterogeneous assets \cite{jardine2006,zhao2019}. Although the sensing modality
-depends on the application---including vibration, acoustic emission, electrical current,
-temperature, strain, or other physical measurements---the computational objective is
-fundamentally the same: to characterize nominal operation and detect persistent departures that
-may indicate degradation.
+large fleets of heterogeneous assets
+\cite{jardine2006,chandola2009,zhao2019}. Although the sensing modality depends on the
+application---including vibration, acoustic emission, electrical current, temperature, strain,
+or other physical measurements---the computational objective is fundamentally the same: to
+characterize nominal operation and detect persistent departures that may indicate degradation.
 
 Most machine-learning approaches formulate this problem as supervised fault classification,
-assuming representative fault examples are available during training. While effective in
-benchmark datasets, supervised methods require fault labels and often assume that deployment
-conditions closely match those observed during model development.
+assuming representative fault examples are available during training. While effective on
+benchmark datasets, supervised methods require fault labels and generally assume that deployment
+conditions remain close to those observed during model development.
 
 One-class and novelty-detection methods, including one-class SVM
-\cite{scholkopf1999}, neural-network novelty detection \cite{bishop1994}, and autoencoder-based
-anomaly detection \cite{hinton2006,sakurada2014}, reduce the dependence on fault labels by
-learning only nominal behaviour. Existing work primarily studies how to learn anomaly detectors,
-whereas comparatively little attention has been paid to the deployment problem itself: how a
-single nominal model should be initialized, calibrated, and maintained across a heterogeneous
-fleet of independently operating assets.
+\cite{scholkopf1999}, neural-network novelty detection \cite{bishop1994}, and
+autoencoder-based anomaly detection \cite{hinton2006,sakurada2014}, reduce the dependence on
+fault labels by learning only nominal behaviour. More recently, representation-learning
+approaches have substantially improved anomaly detection by constructing latent spaces in which
+healthy operation occupies a compact region while degraded behaviour becomes more easily
+separable.
+
+However, the overwhelming majority of existing work focuses on learning better anomaly
+detectors. Comparatively little attention has been paid to the deployment problem itself:
+how a single nominal representation should be initialized, calibrated, and maintained across a
+heterogeneous fleet of independently operating assets.
 
 Adaptive thresholds are frequently employed in streaming anomaly detection to compensate for
 changes in operating conditions. However, unrestricted adaptation introduces an important
@@ -252,24 +317,42 @@ diagnostic evidence rather than input for further adaptation.
 The present work is also related to invariant representation learning
 \cite{bronstein2021} and anomaly detection under distribution shift
 \cite{li2023invariant}, which seek representations that are insensitive to operationally
-irrelevant variability. Our contribution lies at a different layer of the condition-monitoring pipeline.
- Rather than proposing a new
-representation-learning architecture, we address the operational deployment problem itself:
-how a shared nominal representation can be deployed across heterogeneous assets through
-shared nominal coverage, independent operational-radius convergence, and local empirical
-calibration, without fault labels or per-asset retraining.
+irrelevant variability. Our contribution, however, lies at a different level of the
+condition-monitoring pipeline. Rather than proposing a new representation-learning architecture,
+we address the deployment problem itself: how a shared nominal representation can be deployed
+across heterogeneous assets through shared nominal coverage, independent operational-radius
+convergence, and local empirical calibration, without fault labels or per-asset retraining.
 
-The methodology is intentionally independent of both sensing modality and asset type. The present manuscript validates the approach on the CWRU bearing benchmark because it provides
-controlled nominal observations, multiple fault modes, and several operating conditions.
-Bearings should therefore be interpreted as the first validation domain rather than as a
-limitation of the proposed deployment method.
+From a broader perspective, this deployment strategy follows the viewpoint that diagnosis should
+recover a canonical nominal representation from observations, while deployment should estimate
+only the local neighbourhood in which that representation remains valid for each individual
+asset. This interpretation is consistent with the inverse-problem and quotient-space
+formulations introduced in our previous work
+\cite{disanti2026inverse,disanti2026quotient}, although the present paper focuses exclusively on
+the engineering problem of scalable fleet deployment.
 
-Accordingly, this paper should be interpreted not as proposing another anomaly-detection architecture, but as introducing a deployment methodology in which a shared nominal representation is combined with independent operational-radius convergence for each monitored asset.
+The methodology is intentionally independent of both sensing modality and asset type. The
+present manuscript validates the approach on the CWRU bearing benchmark
+\cite{smith2015} because it provides controlled nominal observations, multiple fault modes,
+and several operating conditions. Bearings should therefore be interpreted as the first
+validation domain rather than as a limitation of the proposed deployment method.
+
+Accordingly, this paper should be interpreted not as proposing another anomaly-detection
+architecture, but as introducing a deployment methodology in which a shared canonical nominal
+representation is combined with independent operational-radius convergence for each monitored
+asset.
 
 %=====================================================================
 \section{Method}
 \label{sec:method}
 %=====================================================================
+
+The objective of the proposed methodology is not to learn a detector for each
+asset independently, but to separate two distinct problems: learning a single
+shared canonical nominal representation for the fleet and estimating an
+asset-specific operational radius during deployment.
+
+This section formalizes that deployment architecture.
 
 \subsection{Deployment architecture: shared representation, local radius}
 
@@ -340,8 +423,8 @@ r(x)=\|x-A_\phi(x)\|_2^2.
 \label{eq:residual}
 \end{equation}
 
-The autoencoder is an implementation choice, not the scientific contribution. Any nominal
-representation producing a stable scalar distance or anomaly score could replace
+The autoencoder is merely one possible instantiation of the shared representation. The scientific contribution is the deployment methodology rather than the particular representation-learning architecture.
+Any nominal representation producing a stable scalar distance or anomaly score could replace
 Equation~\ref{eq:residual}.
 
 \begin{figure}[H]
@@ -380,6 +463,59 @@ is retained only for comparison. Its absolute numerical value is
 not used by the proposed field-deployment procedure. What is shared across
 the fleet is the target nominal coverage, while each asset identifies the
 residual value that realizes that coverage locally.
+\begin{figure}[H]
+\centering
+
+\begin{tikzpicture}[
+    >=Latex,
+    node distance=1.8cm,
+    every node/.style={font=\small}
+]
+
+% Shared representation
+\node[draw,rounded corners,minimum width=3.5cm,minimum height=1.0cm] (ae)
+{Shared nominal representation};
+
+% Residuals
+\node[draw,rounded corners,below left=1.6cm and 2.2cm of ae,
+minimum width=3.2cm] (a)
+{Asset A residuals};
+
+\node[draw,rounded corners,below=1.6cm of ae,
+minimum width=3.2cm] (b)
+{Asset B residuals};
+
+\node[draw,rounded corners,below right=1.6cm and 2.2cm of ae,
+minimum width=3.2cm] (c)
+{Asset C residuals};
+
+% arrows
+\draw[->] (ae) -- (a);
+\draw[->] (ae) -- (b);
+\draw[->] (ae) -- (c);
+
+% local radius
+
+\node[below=0.8cm of a] {$\tau_A^\star$};
+
+\node[below=0.8cm of b] {$\tau_B^\star$};
+
+\node[below=0.8cm of c] {$\tau_C^\star$};
+
+\draw[->] (a) -- ++(0,-0.45);
+\draw[->] (b) -- ++(0,-0.45);
+\draw[->] (c) -- ++(0,-0.45);
+
+\end{tikzpicture}
+
+\caption{
+The same shared nominal representation produces reconstruction residuals for every deployed asset.
+Only the local empirical residual distribution changes across installations.
+Each asset independently estimates its own operational radius
+$\tau_k^\star$, while the representation remains unchanged.
+}
+\label{fig:shared_local}
+\end{figure}
 
 
 \subsection{Operational-radius convergence}
@@ -415,6 +551,9 @@ radius around a fixed shared representation.}
 
 After convergence, $\tau_k^\star$ is frozen or allowed only a tightly bounded robust correction.
 This prevents a slowly increasing anomaly score from being absorbed as a new nominal state.
+
+The convergence criterion therefore defines the transition from representation
+calibration to operational monitoring.
 
 \subsection{Guarded updates}
 
@@ -454,9 +593,6 @@ operational radius from the incoming residual stream;
 A practical alarm may require $q$ exceedances within the last $p$ observations to avoid reacting
 to isolated impulses.
 
-%=====================================================================
-
-
 %% ------------------------------------------------------------------
 %% Scope of the method (recommended addition)
 %% ------------------------------------------------------------------
@@ -476,17 +612,14 @@ The methodology requires only:
 The present manuscript validates the approach on the CWRU bearing benchmark because
 it provides controlled nominal observations, multiple fault modes, and several operating
 conditions. Bearings should therefore be interpreted as the first validation domain rather
-than as a limitation of the proposed deployment method. Bearings
-should therefore be interpreted as the first validation domain rather than as a
-limitation of the proposed deployment method.
-
+than as a limitation of the proposed deployment method.
 
 \section{Experimental Design}
 \label{sec:expdesign}
 %=====================================================================
 
-The experiments are designed around the deployment claim, not around the autoencoder
-architecture. Every stage therefore measures some subset of the following quantities:
+The experimental protocol is designed to validate the deployment hypothesis rather than the particular representation-learning architecture.
+Every stage, therefore measures some subset of the following quantities:
 
 \begin{itemize}[leftmargin=1.5em]
     \item false-alarm rate during cold start;
@@ -502,7 +635,9 @@ architecture. Every stage therefore measures some subset of the following quanti
 Four bearing streams are generated with a physics-motivated nominal simulator using
 1200-sample windows, a 30\,Hz shaft frequency, and bounded variation in amplitude, phase, speed,
 offset, and noise. The shared model is trained on 4,000 simulated nominal windows, with 1,000 additional nominal
-windows reserved for validation. A separate synthetic test set contains 750 windows per regime.
+windows reserved for validation. 
+No simulated fault observations are used during representation learning. Faults are introduced only during evaluation.
+A separate synthetic test set contains 750 windows per regime.
 The simulator and all field experiments use fixed-length 1,200-sample windows. Each simulated asset begins in nominal operation and independently calibrates its
 radius. Asset A remains nominal; Assets B--D transition after convergence to outer-race,
 inner-race, and ball-fault regimes.
@@ -591,6 +726,102 @@ deployment environments rather than as four physically distinct fleet assets. Th
 controlled test of score-scale heterogeneity and local calibration, but do not reproduce the full
 manufacturing, installation, and aging variability of an operational fleet.
 
+\begin{figure}[H]
+\centering
+
+\begin{tikzpicture}[
+    node distance=0.55cm,
+    stage/.style={
+        draw,
+        rounded corners=2pt,
+        align=center,
+        minimum height=2.35cm,
+        text width=2.45cm,
+        inner sep=5pt,
+        font=\small
+    },
+    flow/.style={
+        -{Latex[length=2.2mm]},
+        line width=0.7pt
+    },
+    label/.style={
+        font=\footnotesize\itshape,
+        align=center
+    }
+]
+
+%---------------------------------------------------------------------
+% Stages
+%---------------------------------------------------------------------
+
+\node[stage] (s1) {
+    \textbf{Stage 1}\\[0.15cm]
+    Controlled simulation\\[0.12cm]
+    \footnotesize
+    Train one shared nominal representation
+};
+
+\node[stage, right=of s1] (s2) {
+    \textbf{Stage 2}\\[0.15cm]
+    Simulation-to-field transfer\\[0.12cm]
+    \footnotesize
+    Deploy unchanged on CWRU
+};
+
+\node[stage, right=of s2] (s3) {
+    \textbf{Stage 3}\\[0.15cm]
+    Reference and ablation\\[0.12cm]
+    \footnotesize
+    Asset-specific oracle and calibration transfer
+};
+
+\node[stage, right=of s3] (s4) {
+    \textbf{Stage 4}\\[0.15cm]
+    Multi-unit degradation\\[0.12cm]
+    \footnotesize
+    Run-to-failure validation on NASA IMS
+};
+
+\node[stage, right=of s4] (s5) {
+    \textbf{Stage 5}\\[0.15cm]
+    Edge deployment cost\\[0.12cm]
+    \footnotesize
+    Latency, memory, model size, and communication
+};
+
+%---------------------------------------------------------------------
+% Main flow
+%---------------------------------------------------------------------
+
+\draw[flow] (s1) -- (s2);
+\draw[flow] (s2) -- (s3);
+\draw[flow] (s3) -- (s4);
+\draw[flow] (s4) -- (s5);
+
+%---------------------------------------------------------------------
+% Shared methodological principle
+%---------------------------------------------------------------------
+
+\node[
+    draw,
+    dashed,
+    rounded corners=2pt,
+    fit=(s1)(s2)(s3)(s4)(s5),
+    inner sep=8pt,
+    label={[label]below:
+    Fixed shared representation; independently estimated local operational radii}
+] {};
+
+\end{tikzpicture}
+
+\caption{Deployment-oriented experimental protocol. The experiments progress from controlled
+representation learning to direct field transfer, ideal-reference comparison, multi-unit
+run-to-failure validation, and measurement of the edge-deployment footprint. Across deployment
+stages, the nominal representation remains fixed while each monitored unit estimates its own
+local operational radius.}
+\label{fig:experimental-protocol}
+\end{figure}
+
 %=====================================================================
 \section{Results}
 \label{sec:results}
@@ -628,8 +859,7 @@ fault observations from the nominal observations, not whether its threshold can 
 \centering
 \caption{Ideal asset-specific detector performance on CWRU. Values are mean
 $\pm$ standard deviation across the four operating conditions. Each detector is trained and
-calibrated separately using the complete healthy dataset of the corresponding condition.
-The final two columns are reserved for repeated-run stability measurements.}
+calibrated separately using the complete healthy dataset of the corresponding condition.}
 \label{tab:asset-specific-summary}
 \resizebox{\linewidth}{!}{
 \begin{tabular}{lcccc}
@@ -1171,7 +1401,7 @@ representation, each asset estimates the operational radius that best characteri
 nominal operating conditions.
 
 This viewpoint is also consistent with the blueprint formulation introduced in
-\cite{disanti2026blueprints}, where diagnosis was interpreted as recovering a compact nominal
+\cite{disanti2025blueprints}, where diagnosis was interpreted as recovering a compact nominal
 structure from observations. Here, that recovered canonical representation is assumed to be
 available, and only its local realization must be identified for each deployed asset.
 Consequently, representation learning solves the global inverse problem only once, whereas
@@ -1281,175 +1511,75 @@ Such a representation could naturally be produced and maintained by the original
 while fleet operators perform only lightweight local calibration during deployment, thereby separating representation engineering from operational deployment.
 
 %=====================================================================
-\appendix
-\section{Geometric Rationale}
+\section{Compact Mathematical Perspective}
 \label{sec:theory}
 %=====================================================================
 
-This appendix provides a compact explanation for why a fixed nominal representation and local
-operational radii are compatible. It is not required for implementation.
+The deployment methodology presented in this paper is intentionally engineering-oriented.
+Its mathematical foundations are developed in our accompanying technical reports on inverse
+recovery and quotient-space formulations
+\cite{disanti2026inverse,disanti2026quotient}. The purpose of this section is not to reproduce
+those developments, but to summarize the key mathematical ideas that justify why a shared
+canonical nominal representation and independently estimated operational radii are compatible.
 
 \subsection{Observation model}
 
-Let $\X\subset\R^n$ be the space of fixed-length observation windows, $\theta\in\ThetaSpace$
-the latent physical state, and $\eta\in\EtaSpace$ the nuisance variables. The observation process
-is
+Let $\X\subset\mathbb{R}^{n}$ denote the space of fixed-length observation windows,
+$\theta\in\ThetaSpace$ the latent physical state, and
+$\eta\in\EtaSpace$ the nuisance variables. The observation process is
+
 \begin{equation}
-x=F(\theta,\eta).
+x = F(\theta,\eta).
 \end{equation}
 
 Let $\Gnuis$ denote a physically motivated family of nuisance transformations that preserve the
-underlying diagnostic state. Two observations are equivalent when they differ only through such
-a transformation.
+underlying diagnostic state. Two observations are therefore considered equivalent whenever they
+differ only through such nuisance transformations.
 
-\subsection{Compact nominal structure}
+\subsection{Existence of a compact nominal representation}
 
 \begin{proposition}[Relative compactness of the nominal orbit]
-If $\EtaSpace$ is compact and $\eta\mapsto F(\theta_{\mathrm N},\eta)$ is uniformly bounded and
-equicontinuous in the sup norm, then the nominal orbit
+If $\EtaSpace$ is compact and
+$\eta\mapsto F(\theta_{\mathrm N},\eta)$ is uniformly bounded and
+equicontinuous in the sup-norm topology, then the nominal orbit
+
 \[
-\mathcal{O}_{\mathrm N}=
+\mathcal{O}_{\mathrm N}
+=
 \{F(\theta_{\mathrm N},\eta):\eta\in\EtaSpace\}
 \]
+
 is relatively compact.
 \end{proposition}
 
 \begin{proof}
-The result follows directly from the Arzel\`a--Ascoli theorem. Therefore
-$\overline{\mathcal{O}_{\mathrm N}}$ is compact.
+The result follows directly from the Arzel\`a--Ascoli theorem. Consequently,
+its closure $\overline{\mathcal{O}_{\mathrm N}}$ is compact.
 \end{proof}
 
-A representation that collapses nuisance-equivalent observations can therefore map nominal
-operation into a bounded structure. The shared representation approximates this structure,
-whereas the local radius accounts for asset-specific score scale and dispersion. Estimating
-$\tau_k^\star$ does not deform the nominal representation; it only identifies the local
-acceptance boundary around it.
+A representation that collapses nuisance-equivalent observations may therefore map nominal
+operation into a compact canonical structure. The shared representation learned offline
+approximates this structure, whereas the operational radius accounts only for the
+asset-specific numerical scale and dispersion of the anomaly score. Estimating
+$\tau_k^\star$ therefore does not modify the representation itself; it identifies the local
+acceptance neighborhood around the same canonical nominal object.
 
-\begin{proposition}[Factorization of diagnostic maps]
-If a diagnostic map is invariant under $\Gnuis$, then it is constant on nuisance orbits and
-factors through the quotient projection.
+\begin{proposition}[Factorization of invariant diagnostic maps]
+If a diagnostic map is invariant under the action of $\Gnuis$, then it is constant on
+nuisance-equivalence classes and factors through the quotient projection.
 \end{proposition}
 
-This proposition motivates treating anomaly detection as membership testing in a nominal
-representation. It does not prescribe the autoencoder, the residual, or the calibration rule used
-in the main paper.
+This proposition provides the geometric justification for treating diagnosis as membership
+testing around a canonical nominal representation rather than directly on raw observations.
+Within this interpretation, representation learning solves the global inverse problem only
+once, whereas deployment solves a lightweight local inverse calibration problem by estimating
+the operational radius associated with each physical asset.
 
-%=====================================================================
-\begin{thebibliography}{99}
-%=====================================================================
+The present paper validates experimentally this deployment principle. A complete mathematical
+treatment of the inverse-problem formulation, quotient-space construction, and their relation
+to canonical nominal representations is provided in
+\cite{disanti2026inverse,disanti2026quotient}.
 
-\bibitem{hadamard}
-J. Hadamard.
-\newblock \emph{Lectures on Cauchy's Problem in Linear Partial Differential Equations}.
-\newblock Yale University Press, 1923.
-
-\bibitem{tikhonov}
-A. N. Tikhonov and V. Y. Arsenin.
-\newblock \emph{Solutions of Ill-Posed Problems}.
-\newblock Winston, 1977.
-
-\bibitem{chandola2009}
-V. Chandola, A. Banerjee, and V. Kumar.
-\newblock Anomaly detection: A survey.
-\newblock \emph{ACM Computing Surveys}, 41(3), Article 15, 2009.
-
-\bibitem{scholkopf1999}
-B. Sch\"olkopf, R. C. Williamson, A. J. Smola, J. Shawe-Taylor, and J. C. Platt.
-\newblock Support vector method for novelty detection.
-\newblock In \emph{Advances in Neural Information Processing Systems}, 1999.
-
-\bibitem{bishop1994}
-C. M. Bishop.
-\newblock Novelty detection and neural network validation.
-\newblock \emph{IEE Proceedings --- Vision, Image and Signal Processing}, 141(4), 1994.
-
-\bibitem{kohonen}
-T. Kohonen.
-\newblock Self-organized formation of topologically correct feature maps.
-\newblock \emph{Biological Cybernetics}, 43, 59--69, 1982.
-
-\bibitem{hinton2006}
-G. E. Hinton and R. R. Salakhutdinov.
-\newblock Reducing the dimensionality of data with neural networks.
-\newblock \emph{Science}, 313(5786), 504--507, 2006.
-
-\bibitem{sakurada2014}
-M. Sakurada and T. Yairi.
-\newblock Anomaly detection using autoencoders with nonlinear dimensionality reduction.
-\newblock In \emph{Proceedings of the 2nd Workshop on Machine Learning for Sensory Data
-Analysis}, 2014.
-
-\bibitem{bronstein2021}
-M. M. Bronstein, J. Bruna, T. Cohen, and P. Veli\v{c}kovi\'c.
-\newblock Geometric deep learning: Grids, groups, graphs, geodesics, and gauges.
-\newblock \emph{arXiv:2104.13478}, 2021.
-
-\bibitem{jardine2006}
-A. K. S. Jardine, D. Lin, and D. Banjevic.
-\newblock A review on machinery diagnostics and prognostics implementing condition-based
-maintenance.
-\newblock \emph{Mechanical Systems and Signal Processing}, 20(7), 1483--1510, 2006.
-
-\bibitem{randall2011}
-R. B. Randall and J. Antoni.
-\newblock Rolling element bearing diagnostics---A tutorial.
-\newblock \emph{Mechanical Systems and Signal Processing}, 25(2), 485--520, 2011.
-
-\bibitem{cwru_benchmark}
-W. A. Smith and R. B. Randall.
-\newblock Rolling element bearing diagnostics using the Case Western Reserve University data:
-A benchmark study.
-\newblock \emph{Mechanical Systems and Signal Processing}, 64--65, 100--131, 2015.
-
-\bibitem{nasa_ims_bearings}
-J. Lee, H. Qiu, G. Yu, J. Lin, and Rexnord Technical Services.
-\newblock IMS, University of Cincinnati. ``Bearing Data Set'', NASA Ames Prognostics Data
-Repository.
-\newblock \emph{NASA Ames Research Center}, Moffett Field, CA, 2007.
-
-\bibitem{zhao2019}
-R. Zhao, R. Yan, Z. Chen, K. Mao, P. Wang, and R. X. Gao.
-\newblock Deep learning and its applications to machine health monitoring: A survey.
-\newblock \emph{Mechanical Systems and Signal Processing}, 115, 213--237, 2019.
-
-\bibitem{lei2013}
-Y. Lei, J. Lin, Z. He, and M. J. Zuo.
-\newblock A review on empirical mode decomposition in fault diagnosis of rotating machinery.
-\newblock \emph{Mechanical Systems and Signal Processing}, 35(1--2), 108--126, 2013.
-
-\bibitem{disanti2026quotient}
-E. Di Santi.
-\newblock \emph{Anomaly Detection as an Inverse Problem on Quotient Spaces, 
-Equivalence Relations and Functional Manifolds as a General Diagnostic Framework}.
-\newblock Technical report, University of Colorado Boulder, 2026.
-
-\bibitem{disanti2026inverse}
-E. Di Santi.
-\newblock \emph{Self-Supervision, Manifold Saturation, and Emergent Operational Classes:
-Learning from Scarce Observations as Inverse Recovery of Compact Functional Structure}.
-\newblock Technical report, University of Colorado Boulder, 2026.
-
-\bibitem{disanti2026blueprints}
-E. Di Santi.
-\newblock \emph{The Blueprints of Intelligence: A Functional-Topological Foundation for Perception and Representation}.
-\newblock arXiv:2512.05089, 2025.
-
-
-\bibitem{kendall1984}
-D. G. Kendall.
-\newblock Shape manifolds, Procrustean metrics, and complex projective spaces.
-\newblock \emph{Bulletin of the London Mathematical Society}, 16(2), 81--121, 1984.
-
-\bibitem{palais1961}
-R. S. Palais.
-\newblock On the existence of slices for actions of non-compact Lie groups.
-\newblock \emph{Annals of Mathematics}, 73(2), 295--323, 1961.
-
-\bibitem{li2023invariant}
-L. Li, Y. Kuang, and J. Han.
-\newblock Invariant anomaly detection under distribution shifts.
-\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2023.
-
-\end{thebibliography}
+\printbibliography
 
 \end{document}
