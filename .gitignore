@@ -228,3 +228,6 @@ quotient_space_tech_note/quotient_space_bearing_inverse_problem_technical_note.f
 quotient_space_tech_note/quotient_space_bearing_inverse_problem_technical_note.fdb_latexmk
 .gitignore
 quotient_space_tech_note/quotient_space_bearing_inverse_problem_technical_note.aux
+
+2nd_test/*
+NASA_bearing/IMS/2nd_test/*

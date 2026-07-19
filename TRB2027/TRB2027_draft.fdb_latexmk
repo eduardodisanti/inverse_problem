@@ -1,13 +1,13 @@
 # Fdb version 4
-["biber TRB2027_draft"] 1784292026 "TRB2027_draft.bcf" "TRB2027_draft.bbl" "TRB2027_draft" 1784292800 0
+["biber TRB2027_draft"] 1784295471 "TRB2027_draft.bcf" "TRB2027_draft.bbl" "TRB2027_draft" 1784295481 0
   "./references.bib" 1784290866 6451 570221b6c086d8f7988a9ee6aa7e3306 ""
-  "TRB2027_draft.bcf" 1784292800 109713 6dd3c002a52f007dea1d56fd581db52a "pdflatex"
+  "TRB2027_draft.bcf" 1784295481 109713 6dd3c002a52f007dea1d56fd581db52a "pdflatex"
   (generated)
   "TRB2027_draft.bbl"
   "TRB2027_draft.blg"
   (rewritten before read)
-["pdflatex"] 1784292798 "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" "TRB2027_draft.pdf" "TRB2027_draft" 1784292800 0
-  "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" 1784292793 73794 a79557dec3b7f171aa85c5905f1e3de1 ""
+["pdflatex"] 1784295480 "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" "TRB2027_draft.pdf" "TRB2027_draft" 1784295481 0
+  "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" 1784295480 73810 a0f3595b368e797ce82a47f1a0eb8681 ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc" 1254269338 2375 baa924870cfb487815765f9094cf3728 ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc" 1202520719 3486 c7eadf5dcc57b3b2d11736679f6636ba ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc" 1202520719 2405 5dcf2c1b967ee25cc46c58cd52244aed ""
@@ -236,11 +236,11 @@
   "/usr/local/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1699445358 4623355 b8cad38412faebe1ce5b780a45db67bd ""
   "/usr/local/texlive/2023/texmf-var/web2c/pdftex/pdflatex.fmt" 1699445304 7883459 18e43aa00442b33783c454a42303b016 ""
   "/usr/local/texlive/2023/texmf.cnf" 1678822455 577 1b2b1af17af2508fb20dd85783af4050 ""
-  "TRB2027_draft.aux" 1784292800 17656 9865566f8a6459b92f35ee24b348e080 "pdflatex"
-  "TRB2027_draft.bbl" 1784292029 21264 42db3765d5af897a0a1e7e7c08fdd9ad "biber TRB2027_draft"
-  "TRB2027_draft.out" 1784292800 4680 d292ced2cb4fcde4d922767248279e34 "pdflatex"
-  "TRB2027_draft.run.xml" 1784292800 2374 e1fdc0aeebaa910d9cac988e920b82a7 "pdflatex"
-  "TRB2027_draft.tex" 1784292793 73794 a79557dec3b7f171aa85c5905f1e3de1 ""
+  "TRB2027_draft.aux" 1784295481 17656 ac989d4a027b7ce16a8a61f39c6a8a02 "pdflatex"
+  "TRB2027_draft.bbl" 1784295474 21264 42db3765d5af897a0a1e7e7c08fdd9ad "biber TRB2027_draft"
+  "TRB2027_draft.out" 1784295481 4680 d292ced2cb4fcde4d922767248279e34 "pdflatex"
+  "TRB2027_draft.run.xml" 1784295481 2374 e1fdc0aeebaa910d9cac988e920b82a7 "pdflatex"
+  "TRB2027_draft.tex" 1784295480 73810 a0f3595b368e797ce82a47f1a0eb8681 ""
   "training.png" 1784041811 28609 2051734ea386a381376bb048f890014c ""
   (generated)
   "TRB2027_draft.aux"
