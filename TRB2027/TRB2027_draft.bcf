@@ -2383,13 +2383,13 @@
     <bcf:citekey order="12" intorder="2">disanti2026quotient</bcf:citekey>
     <bcf:citekey order="13" intorder="1">smith2015</bcf:citekey>
     <bcf:citekey order="14" intorder="1">disanti2026inverse</bcf:citekey>
-    <bcf:citekey order="15" intorder="1">disanti2026quotient</bcf:citekey>
-    <bcf:citekey order="16" intorder="1">disanti2025blueprints</bcf:citekey>
+    <bcf:citekey order="14" intorder="2">disanti2026quotient</bcf:citekey>
+    <bcf:citekey order="15" intorder="1">disanti2026inverse</bcf:citekey>
+    <bcf:citekey order="15" intorder="2">disanti2026quotient</bcf:citekey>
+    <bcf:citekey order="16" intorder="1">disanti2026inverse</bcf:citekey>
     <bcf:citekey order="17" intorder="1">disanti2026quotient</bcf:citekey>
-    <bcf:citekey order="18" intorder="1">disanti2026inverse</bcf:citekey>
-    <bcf:citekey order="18" intorder="2">disanti2026quotient</bcf:citekey>
-    <bcf:citekey order="19" intorder="1">disanti2026inverse</bcf:citekey>
-    <bcf:citekey order="19" intorder="2">disanti2026quotient</bcf:citekey>
+    <bcf:citekey order="18" intorder="1">disanti2025blueprints</bcf:citekey>
+    <bcf:citekey order="19" intorder="1">disanti2026quotient</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">

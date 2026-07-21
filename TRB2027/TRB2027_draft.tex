@@ -68,8 +68,7 @@ Enabling OEM-Centralized, Fleet-Deployed CBM
 }
 
 \author[1]{Eduardo Di Santi}
-\affil[1]{Department of Applied Mathematics
-%, University of Colorado Boulder%
+\affil[1]{Department of Applied Mathematics, University of Colorado Boulder
 }
 \date{}
 
@@ -77,11 +76,7 @@ Enabling OEM-Centralized, Fleet-Deployed CBM
 \maketitle
 
 %=====================================================================
-%=====================================================================
-% NOTA: TRB 2027 reemplaza el abstract tradicional por uno estructurado.
-% Va en página aparte, inmediatamente después de la portada, sin nada más
-% en esa página. Máx. 300 palabras. Revisá la plantilla LaTeX oficial de
-% TRB por si define un entorno/macro propio para esto en vez de \textbf.
+% Abstract
 %=====================================================================
 \begin{abstract}
 
@@ -93,7 +88,7 @@ fleet-wide on day one, without retraining a model or tuning a threshold for
 every asset.
 
 \textbf{Methods:} A canonical nominal representation, a Conv1D autoencoder,
-is trained once offline on simulated healthy vibration signals and
+is trained once offline on simulated healthy signals and
 transferred unchanged to every asset. Each asset then estimates its
 operational radius, an empirical residual quantile, from a short stream of
 unlabeled local observations, without retraining the shared model. The
@@ -103,6 +98,10 @@ windows, against an oracle calibrated on each condition's complete healthy
 dataset. Three calibration strategies are compared: direct threshold
 transfer, a complete-data oracle radius, and the proposed online radius
 estimated from only the first 100 healthy windows.
+The deployment principle is further validated on four independently
+monitored bearings from the NASA IMS run-to-failure dataset and compared
+with autoencoders trained separately on each bearing's early-life data.
+
 
 \textbf{Findings:} Direct transfer of the absolute simulator threshold
 produced complete false alarms in the field, confirming that the
@@ -112,6 +111,10 @@ average healthy false-alarm rate of 3.09\%, ball-fault detection of
 99.69\%, and 100\% detection of inner- and outer-race faults, with the
 radius converging after 51.0 $\pm$ 12.6 windows, approaching the
 asset-specific reference.
+On NASA IMS, the shared representation detected persistent departure in
+all four bearings, on average 83.25 hours before the documented end of the
+experiment, compared with 47.89 hours for the per-asset early-life
+autoencoders, while eliminating per-asset representation training.
 
 \textbf{Novelty:} The contribution is a fleet-deployment methodology, not a
 new anomaly-detection architecture: it separates representation learning,
@@ -129,14 +132,12 @@ labels or per-asset model training during rollout.
 
 \vspace{0.3cm}
 \noindent\textbf{Keywords:}
-condition monitoring,
-condition-based maintenance,
-transportation asset management,
-fleet deployment,
-anomaly detection,
-cold start,
-local calibration,
-edge monitoring
+fleet-wide condition monitoring,
+shared nominal representation,
+simulation-to-field model transfer,
+local threshold calibration,
+run-to-failure monitoring,
+condition-based maintenance
 
 %=====================================================================
 \section{Introduction}
@@ -221,9 +222,12 @@ be trained and calibrated for each one. The central question is therefore
 simulator-trained representation and a few seconds of local calibration?}
 \end{quote}
 
-We answer this question using four operating conditions from the Case Western Reserve University
-(CWRU) bearing benchmark \cite{smith2015}. The asset-specific reference methods are trained and
-calibrated using the complete healthy dataset of each condition. In contrast, the proposed method
+We first answer this question under controlled operating-condition
+heterogeneity using four CWRU \cite{smith2015} conditions, and then evaluate its extension
+to independently monitored physical units and naturally evolving
+degradation using the NASA IMS run-to-failure dataset.
+
+The asset-specific reference methods are trained and calibrated using the complete healthy dataset of each condition. In contrast, the proposed method
 uses no field observation for representation learning and estimates its local operational radius
 from only the first 100 healthy windows, corresponding to approximately ten seconds of signal at
 the evaluated window duration.
@@ -829,17 +833,24 @@ local operational radius.}
 \label{sec:results}
 %=====================================================================
 
-The experiments address two distinct questions. First, we establish the performance attainable
-under an ideal but operationally non-scalable condition in which a separate detector is trained
-and calibrated using the complete healthy dataset available for each CWRU operating condition.
-Second, we evaluate whether the proposed simulator-trained shared representation, combined only
-with a short online calibration stream, can approach that ideal performance without any
-field-model retraining.
+The experiments address three complementary deployment questions. First, the
+CWRU experiments establish the performance attainable under an ideal but
+operationally non-scalable condition in which separate detectors are trained
+and calibrated for each operating condition. Second, they evaluate whether a
+simulator-trained shared representation, combined only with short local
+calibration, can approach that ideal performance without field-model
+retraining. Third, the NASA IMS run-to-failure experiment evaluates whether
+the same deployment principle extends to independently monitored physical
+units undergoing naturally evolving degradation.
 
-The CWRU evaluation includes four operating conditions corresponding to 1730, 1750, 1772, and
-1797\,RPM. Across these conditions, the experiments contain 1,414 healthy windows, 1,621
-ball-fault windows, 1,621 inner-race-fault windows, and 2,846 outer-race-fault windows. All
-windows contain 1,200 samples and are processed identically across detectors.
+The CWRU evaluation includes four operating conditions corresponding to
+1730, 1750, 1772, and 1797\,RPM. Across these conditions, the experiments
+contain 1,414 healthy windows, 1,621 ball-fault windows, 1,621
+inner-race-fault windows, and 2,846 outer-race-fault windows. All windows
+contain 1,200 samples and are processed identically across detectors. The
+NASA IMS evaluation subsequently considers four independently monitored
+bearings from Experiment~2, each represented by 984 chronologically ordered
+recordings, of which the first 100 are reserved for early-life calibration.
 
 %---------------------------------------------------------------------
 \subsection{Ideal asset-specific reference}
@@ -1171,37 +1182,74 @@ retrains the shared representation.
 \label{sec:radius-convergence-results}
 %---------------------------------------------------------------------
 
-Figure~\ref{fig:tau-convergence} shows the sequential estimate of the local p98 operational
-radius during the 100-window warm-up. Each condition converges to a distinct radius despite using
-the same fixed representation. The final online estimates are close to their complete-data
-field-oracle counterparts: 0.1984 versus 0.2005 at 1730\,RPM, 0.1759 versus 0.1786 at
-1750\,RPM, 0.2072 versus 0.1997 at 1772\,RPM, and 0.2364 versus 0.2474 at 1797\,RPM.
+Figure~\ref{fig:tau-convergence} shows the sequential estimation of the
+local operational radius under the fixed shared representation. For each
+CWRU operating condition, the radius is computed from the residual mean and
+standard deviation available up to observation $t$,
+
+\begin{equation}
+\tau_k(t)=\mu_k(t)+z_{\mathrm{MC}}\sigma_k(t),
+\end{equation}
+
+where $z_{\mathrm{MC}}$ is transferred from the simulated nominal residual
+distribution. The representation and the transferred standardized coverage
+remain fixed; only the local residual statistics are estimated from the
+incoming healthy observations.
+
+The first 100 windows constitute the prescribed cold-start calibration
+interval used in the deployment experiment. Across the four operating
+conditions, the convergence criterion is satisfied between windows 38 and
+65, before the complete calibration budget is exhausted. The operational
+radii available at window 100 are 0.2393, 0.2188, 0.2540, and 0.2777 for
+1730, 1750, 1772, and 1797\,RPM, respectively.
 
 \begin{figure}[H]
 \centering
-\fbox{
-\begin{minipage}{0.84\linewidth}
-\centering
-\texttt{[PLACEHOLDER: operational-radius trajectories for 1730, 1750, 1772, and
-1797\,RPM, including the complete-data field-oracle radius and detected convergence index.]}
-\end{minipage}}
-\caption{Online operational-radius convergence from the first 100 unlabeled healthy windows.
-The shared representation remains unchanged; only the local empirical p98 radius is estimated.
-Observed convergence occurs between 38 and 65 windows.}
+\includegraphics[width=\linewidth]{cwru_tau_convergence.pdf}
+\caption{Cold-start convergence and retrospective evolution of the local
+operational radius across the four CWRU operating conditions. The blue
+segment shows the sequential radius estimate during the 100-window
+calibration interval used by the deployed detector. The red dotted line
+marks the detected convergence index, and the blue dash-dotted line marks
+the end of the prescribed cold-start interval. The gray segment is a
+retrospective cumulative estimate obtained by continuing to incorporate the
+remaining known-healthy observations; it is shown only to characterize the
+subsequent evolution of the estimator and is not used to update the deployed
+decision boundary. Horizontal lines indicate the transferred standardized
+radius $\tau_{\mathrm{bridge}}$ and the complete-data field p98 reference.}
 \label{fig:tau-convergence}
 \end{figure}
 
-The convergence result is operationally relevant because the complete healthy distribution is not
-available at the start of a real deployment. The asset-specific and field-oracle references assume
-that all healthy data have already been collected. The proposed procedure instead constructs the
-local acceptance boundary incrementally and approaches the complete-data radius within a small
-fraction of the available nominal sequence.
+The post-calibration variation visible in the retrospective trajectories
+does not represent continued adaptation of the deployed detector. After
+cold-start calibration, the operational radius used for monitoring is
+frozen. The gray trajectories instead answer a retrospective question:
+how would the estimated radius have evolved if additional observations,
+known in the benchmark to be healthy, had continued to update the local
+statistics?
 
-The present experiment assumes that the initial warm-up observations are representative of
-nominal operation. Detecting an asset that is already degraded at installation, or determining
-that no stable nominal radius can be established, is outside the current scope. The convergence
-dynamics themselves may provide evidence of an invalid initialization state and are identified as
-a subject for future work.
+Such evolution is expected because the nominal residual distribution is not
+perfectly stationary. Later healthy observations may change the estimated
+residual mean, its dispersion, or both. Consequently, the retrospective
+radius may increase or decrease even in the absence of a fault. This
+behaviour reflects nominal within-condition variability rather than
+degradation and motivates separating finite calibration from subsequent
+monitoring.
+
+The convergence result is operationally relevant because the complete
+healthy distribution is not available at the start of a real deployment.
+The complete-data p98 reference assumes that all nominal observations have
+already been collected. The proposed procedure instead obtains an
+operationally usable local radius during a short initialization interval,
+with the convergence criterion satisfied before the end of the 100-window
+calibration budget in every evaluated condition.
+
+The present experiment assumes that the initial warm-up observations are
+representative of nominal operation. Detecting an asset that is already
+degraded at installation, or determining that no stable nominal radius can
+be established, is outside the current scope. The convergence dynamics
+themselves may provide evidence of an invalid initialization state and are
+identified as a subject for future work.
 
 %---------------------------------------------------------------------
 \subsection{Robustness to local initialization}
@@ -1296,6 +1344,246 @@ initialization procedure consistently identifies an appropriate operational radi
 unlabeled field observations.
 
 %---------------------------------------------------------------------
+\subsection{Multi-unit run-to-failure validation on NASA IMS}
+\label{sec:nasa-results}
+%---------------------------------------------------------------------
+
+The CWRU experiments demonstrate simulation-to-field transfer under
+controlled operating conditions. To evaluate whether the proposed
+deployment principle extends to independent physical units and naturally
+evolving degradation trajectories, the shared nominal representation was
+further evaluated on the NASA IMS run-to-failure bearing dataset.
+
+Unlike the CWRU experiments, where each operating condition represents a
+controlled deployment environment, each NASA IMS bearing is treated as an
+independent monitored asset. The simulator-trained autoencoder remains
+unchanged, and no NASA observation is used for representation learning,
+model adaptation, or parameter tuning. Only a short early-life nominal
+segment is used to estimate the local operational radius.
+
+Table~\ref{tab:nasa-main-results} summarizes the recording-level
+run-to-failure results. The calibration exceedance rate is 2\% by
+construction because the operational radius is defined as the empirical
+98th percentile of the early-life recording scores. After calibration, a
+persistent departure is detected for all four bearings. The mean fraction
+of monitoring recordings above the local radius is 28.51\%, and the first
+persistent departure occurs, on average, 83.25 hours before the documented
+end of the experiment.
+
+\begin{table}[H]
+\centering
+\caption{Recording-level run-to-failure validation on NASA IMS using the
+shared nominal representation and local operational-radius calibration.
+Lead time is measured relative to the documented end of the experiment.}
+\label{tab:nasa-main-results}
+
+\small
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{lcccc}
+\toprule
+Bearing &
+\shortstack{Calibration\\exceedance (\%)} &
+\shortstack{Persistent\\departure} &
+\shortstack{Monitoring\\exceedance (\%)} &
+\shortstack{Lead time\\(h)} \\
+\midrule
+1 & 2.00 & Yes & 51.47 & 137.83 \\
+2 & 2.00 & Yes & 16.86 & 46.83  \\
+3 & 2.00 & Yes & 10.29 & 15.50  \\
+4 & 2.00 & Yes & 35.41 & 132.83 \\
+\midrule
+Mean & 2.00 & 4/4 & 28.51 & 83.25 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+The results demonstrate that the shared representation is not limited to
+controlled operating-condition transfer. Once the local operational radius
+has been identified, the same nominal representation can be applied to
+multiple independent physical units without retraining a model for each
+asset.
+
+
+\subsubsection{Stability of local operational-radius estimation}
+
+A key deployment requirement is that the local calibration procedure should
+not depend critically on the particular nominal observations collected
+during installation. Therefore, the shared representation was kept fixed
+while multiple random initialization samples were used to estimate the
+local operational radius.
+
+For each NASA bearing, five independent 100-window samples were drawn from
+the early-life calibration recordings. The shared representation and its
+preprocessing remained fixed; only the residual observations used to
+estimate the local operational radius were varied.
+Table~\ref{tab:nasa-stability} reports the resulting variability. The
+estimated radius remained stable across initialization samples, with low
+relative error and convergence within a limited number of calibration
+windows.
+
+\begin{table}[H]
+\centering
+\caption{Stability of local operational-radius estimation for the shared
+NASA representation under different warm-up initializations.}
+\label{tab:nasa-stability}
+
+\begin{tabular}{lcccc}
+\toprule
+Bearing &
+$\tau$ mean &
+$\tau$ std &
+Relative error (\%) &
+Convergence (windows)
+\\
+\midrule
+
+1 & 0.0120 & 0.00013 & 0.92 & 48.4\\
+2 & 0.0165 & 0.00010 & 2.07 & 39.0\\
+3 & 0.0204 & 0.00050 & 2.08 & 62.2\\
+4 & 0.0074 & 0.00009 & 1.82 & 45.6\\
+
+\midrule
+Mean &
+0.0141 &
+--
+&
+1.72 &
+48.8
+\\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+The stability experiment supports the central deployment hypothesis:
+the transferable object is the nominal representation, while each physical
+asset independently identifies its own local acceptance region. Variability
+between assets is therefore handled by calibration of the operational
+radius rather than by training separate representations.
+
+\subsubsection{Comparison with per-asset early-life training}
+
+To quantify the cost of eliminating per-asset representation learning, the
+shared deployment was compared with an intentionally favorable reference.
+For each NASA bearing, an independent autoencoder and preprocessing
+transformation were trained using the first 100 recordings of that same
+bearing. Training was repeated with five random initializations. The shared
+approach instead used one frozen simulator-trained representation for all
+four bearings and estimated only a local operational radius.
+
+Table~\ref{tab:nasa-shared-vs-specific} reports the recording-level
+comparison. Both approaches detect a persistent departure for every bearing
+and reproduce the prescribed 2\% calibration exceedance. Their monitoring
+exceedance rates are also similar. The shared representation detects the
+departure earlier under the present protocol for Bearings~1, 2, and~4,
+while both approaches produce nearly identical timing for Bearing~3.
+
+\begin{table}[H]
+\centering
+\caption{NASA IMS comparison between the proposed shared representation and
+autoencoders trained separately on the early-life data of each bearing.
+Asset-specific results are mean $\pm$ standard deviation over five training
+initializations. Shared-model values correspond to one fixed representation
+applied unchanged to every bearing. Lead time is measured relative to the
+documented end of the experiment.}
+\label{tab:nasa-shared-vs-specific}
+
+\resizebox{\linewidth}{!}{
+\begin{tabular}{llccc}
+\toprule
+Bearing &
+Deployment strategy &
+Departure detected (\%) &
+Monitoring exceedance (\%) &
+Lead time (h)\\
+\midrule
+
+1 &
+Asset-specific early-life AE &
+$100.00 \pm 0.00$ &
+$53.08 \pm 1.08$ &
+$79.90 \pm 6.95$\\
+1 &
+Shared AE with local radius &
+100.00 &
+51.47 &
+137.83\\
+
+\addlinespace
+
+2 &
+Asset-specific early-life AE &
+$100.00 \pm 0.00$ &
+$17.69 \pm 2.56$ &
+$33.03 \pm 10.80$\\
+2 &
+Shared AE with local radius &
+100.00 &
+16.86 &
+46.83\\
+
+\addlinespace
+
+3 &
+Asset-specific early-life AE &
+$100.00 \pm 0.00$ &
+$10.63 \pm 0.00$ &
+$15.00 \pm 0.00$\\
+3 &
+Shared AE with local radius &
+100.00 &
+10.29 &
+15.50\\
+
+\addlinespace
+
+4 &
+Asset-specific early-life AE &
+$100.00 \pm 0.00$ &
+$39.37 \pm 1.26$ &
+$63.63 \pm 5.89$\\
+4 &
+Shared AE with local radius &
+100.00 &
+35.41 &
+132.83\\
+
+\midrule
+
+Mean &
+Asset-specific early-life AE &
+100.00 &
+30.19 &
+47.89\\
+Mean &
+Shared AE with local radius &
+100.00 &
+28.51 &
+83.25\\
+
+\bottomrule
+\end{tabular}}
+\end{table}
+
+The comparison does not establish that the shared representation is
+universally superior as a prognostic detector. Alarm timing depends on the
+representation, percentile aggregation, persistence criterion, and the
+particular degradation trajectory. It does show, however, that eliminating
+per-asset representation training produced no observed loss of departure
+detection in this experiment. A single simulator-trained representation,
+combined only with local radius calibration, matched the monitoring
+separation of twenty independently trained asset-specific models and
+produced comparable or earlier persistent-departure timing.
+
+This result directly supports the fleet-deployment claim. The
+asset-specific reference requires fitting and maintaining a separate scaler
+and neural representation for every bearing. The proposed approach requires
+one centrally maintained representation and only lightweight empirical
+calibration at each installed unit.
+
+%---------------------------------------------------------------------
 \subsection{Edge deployment implications}
 \label{sec:edge-results}
 %---------------------------------------------------------------------
@@ -1350,6 +1638,76 @@ validated, or maintained.
 The measured latency corresponds to approximately 6\% of the available processing budget for the
 evaluated acquisition rate (100\,ms per window), providing roughly a 16$\times$ real-time
 processing margin.
+
+%=====================================================================
+\section{Compact Mathematical Perspective}
+\label{sec:theory}
+%=====================================================================
+
+The deployment methodology presented in this paper is intentionally engineering-oriented.
+Its mathematical foundations are developed in our accompanying technical reports on inverse
+recovery and quotient-space formulations
+\cite{disanti2026inverse,disanti2026quotient}. The purpose of this section is not to reproduce
+those developments, but to summarize the key mathematical ideas that justify why a shared
+canonical nominal representation and independently estimated operational radii are compatible.
+
+\subsection{Observation model}
+
+Let $\X\subset\mathbb{R}^{n}$ denote the space of fixed-length observation windows,
+$\theta\in\ThetaSpace$ the latent physical state, and
+$\eta\in\EtaSpace$ the nuisance variables. The observation process is
+
+\begin{equation}
+x = F(\theta,\eta).
+\end{equation}
+
+Let $\Gnuis$ denote a physically motivated family of nuisance transformations that preserve the
+underlying diagnostic state. Two observations are therefore considered equivalent whenever they
+differ only through such nuisance transformations.
+
+\subsection{Existence of a compact nominal representation}
+
+\begin{proposition}[Relative compactness of the nominal orbit]
+If $\EtaSpace$ is compact and
+$\eta\mapsto F(\theta_{\mathrm N},\eta)$ is uniformly bounded and
+equicontinuous in the sup-norm topology, then the nominal orbit
+
+\[
+\mathcal{O}_{\mathrm N}
+=
+\{F(\theta_{\mathrm N},\eta):\eta\in\EtaSpace\}
+\]
+
+is relatively compact.
+\end{proposition}
+
+\begin{proof}
+The result follows directly from the Arzel\`a--Ascoli theorem. Consequently,
+its closure $\overline{\mathcal{O}_{\mathrm N}}$ is compact.
+\end{proof}
+
+A representation that collapses nuisance-equivalent observations may therefore map nominal
+operation into a compact canonical structure. The shared representation learned offline
+approximates this structure, whereas the operational radius accounts only for the
+asset-specific numerical scale and dispersion of the anomaly score. Estimating
+$\tau_k^\star$ therefore does not modify the representation itself; it identifies the local
+acceptance neighborhood around the same canonical nominal object.
+
+\begin{proposition}[Factorization of invariant diagnostic maps]
+If a diagnostic map is invariant under the action of $\Gnuis$, then it is constant on
+nuisance-equivalence classes and factors through the quotient projection.
+\end{proposition}
+
+This proposition provides the geometric justification for treating diagnosis as membership
+testing around a canonical nominal representation rather than directly on raw observations.
+Within this interpretation, representation learning solves the global inverse problem only
+once, whereas deployment solves a lightweight local inverse calibration problem by estimating
+the operational radius associated with each physical asset.
+
+The present paper validates experimentally this deployment principle. A complete mathematical
+treatment of the inverse-problem formulation, quotient-space construction, and their relation
+to canonical nominal representations is provided in
+\cite{disanti2026inverse,disanti2026quotient}.
 
 %=====================================================================
 \section{Discussion}
@@ -1511,76 +1869,6 @@ foundation for large-scale edge condition monitoring in future transportation sy
 
 Such a representation could naturally be produced and maintained by the original equipment manufacturer (OEM), 
 while fleet operators perform only lightweight local calibration during deployment, thereby separating representation engineering from operational deployment.
-
-%=====================================================================
-\section{Compact Mathematical Perspective}
-\label{sec:theory}
-%=====================================================================
-
-The deployment methodology presented in this paper is intentionally engineering-oriented.
-Its mathematical foundations are developed in our accompanying technical reports on inverse
-recovery and quotient-space formulations
-\cite{disanti2026inverse,disanti2026quotient}. The purpose of this section is not to reproduce
-those developments, but to summarize the key mathematical ideas that justify why a shared
-canonical nominal representation and independently estimated operational radii are compatible.
-
-\subsection{Observation model}
-
-Let $\X\subset\mathbb{R}^{n}$ denote the space of fixed-length observation windows,
-$\theta\in\ThetaSpace$ the latent physical state, and
-$\eta\in\EtaSpace$ the nuisance variables. The observation process is
-
-\begin{equation}
-x = F(\theta,\eta).
-\end{equation}
-
-Let $\Gnuis$ denote a physically motivated family of nuisance transformations that preserve the
-underlying diagnostic state. Two observations are therefore considered equivalent whenever they
-differ only through such nuisance transformations.
-
-\subsection{Existence of a compact nominal representation}
-
-\begin{proposition}[Relative compactness of the nominal orbit]
-If $\EtaSpace$ is compact and
-$\eta\mapsto F(\theta_{\mathrm N},\eta)$ is uniformly bounded and
-equicontinuous in the sup-norm topology, then the nominal orbit
-
-\[
-\mathcal{O}_{\mathrm N}
-=
-\{F(\theta_{\mathrm N},\eta):\eta\in\EtaSpace\}
-\]
-
-is relatively compact.
-\end{proposition}
-
-\begin{proof}
-The result follows directly from the Arzel\`a--Ascoli theorem. Consequently,
-its closure $\overline{\mathcal{O}_{\mathrm N}}$ is compact.
-\end{proof}
-
-A representation that collapses nuisance-equivalent observations may therefore map nominal
-operation into a compact canonical structure. The shared representation learned offline
-approximates this structure, whereas the operational radius accounts only for the
-asset-specific numerical scale and dispersion of the anomaly score. Estimating
-$\tau_k^\star$ therefore does not modify the representation itself; it identifies the local
-acceptance neighborhood around the same canonical nominal object.
-
-\begin{proposition}[Factorization of invariant diagnostic maps]
-If a diagnostic map is invariant under the action of $\Gnuis$, then it is constant on
-nuisance-equivalence classes and factors through the quotient projection.
-\end{proposition}
-
-This proposition provides the geometric justification for treating diagnosis as membership
-testing around a canonical nominal representation rather than directly on raw observations.
-Within this interpretation, representation learning solves the global inverse problem only
-once, whereas deployment solves a lightweight local inverse calibration problem by estimating
-the operational radius associated with each physical asset.
-
-The present paper validates experimentally this deployment principle. A complete mathematical
-treatment of the inverse-problem formulation, quotient-space construction, and their relation
-to canonical nominal representations is provided in
-\cite{disanti2026inverse,disanti2026quotient}.
 
 \printbibliography
 

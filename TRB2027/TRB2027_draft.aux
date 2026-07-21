@@ -24,28 +24,28 @@
 \abx@aux@segm{0}{0}{zhao2019}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
 \newlabel{sec:introduction}{{1}{1}{Introduction}{section.1}{}}
-\abx@aux@page{1}{1}
-\abx@aux@page{2}{1}
-\abx@aux@page{3}{1}
-\abx@aux@page{4}{1}
 \abx@aux@cite{0}{randall2011}
 \abx@aux@segm{0}{0}{randall2011}
 \abx@aux@cite{0}{disanti2026inverse}
 \abx@aux@segm{0}{0}{disanti2026inverse}
 \abx@aux@cite{0}{disanti2026quotient}
 \abx@aux@segm{0}{0}{disanti2026quotient}
+\abx@aux@page{1}{2}
+\abx@aux@page{2}{2}
+\abx@aux@page{3}{2}
+\abx@aux@page{4}{2}
 \abx@aux@page{5}{2}
 \abx@aux@page{6}{2}
 \abx@aux@page{7}{2}
 \abx@aux@cite{0}{smith2015}
 \abx@aux@segm{0}{0}{smith2015}
+\abx@aux@page{8}{3}
 \abx@aux@cite{0}{jardine2006}
 \abx@aux@segm{0}{0}{jardine2006}
 \abx@aux@cite{0}{chandola2009}
 \abx@aux@segm{0}{0}{chandola2009}
 \abx@aux@cite{0}{zhao2019}
 \abx@aux@segm{0}{0}{zhao2019}
-\abx@aux@page{8}{3}
 \abx@aux@cite{0}{scholkopf1999}
 \abx@aux@segm{0}{0}{scholkopf1999}
 \abx@aux@cite{0}{bishop1994}
@@ -85,7 +85,7 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Fleet deployment architecture. One representation is distributed fleet-wide, while each physical asset converges independently to its own operational radius.\relax }}{5}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:deployment-architecture}{{1}{5}{Fleet deployment architecture. One representation is distributed fleet-wide, while each physical asset converges independently to its own operational radius.\relax }{figure.caption.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Representation instantiation}{5}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Representation instantiation}{6}{subsection.3.2}\protected@file@percent }
 \newlabel{eq:residual}{{3}{6}{Representation instantiation}{equation.3.3}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Training and validation loss of the healthy-only Conv1D autoencoder used as the shared nominal representation.\relax }}{6}{figure.caption.2}\protected@file@percent }
 \newlabel{fig:ae-training}{{2}{6}{Training and validation loss of the healthy-only Conv1D autoencoder used as the shared nominal representation.\relax }{figure.caption.2}{}}
@@ -130,61 +130,71 @@
 \newlabel{tab:oracle-vs-proposed}{{4}{13}{Ideal but non-scalable asset-specific deployment versus the proposed fleet-scalable deployment. Values are mean $\pm $ standard deviation across the four CWRU operating conditions.\relax }{table.caption.14}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Operational-radius convergence}{13}{subsection.5.5}\protected@file@percent }
 \newlabel{sec:radius-convergence-results}{{5.5}{13}{Operational-radius convergence}{subsection.5.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Online operational-radius convergence from the first 100 unlabeled healthy windows. The shared representation remains unchanged; only the local empirical p98 radius is estimated. Observed convergence occurs between 38 and 65 windows.\relax }}{14}{figure.caption.15}\protected@file@percent }
-\newlabel{fig:tau-convergence}{{5}{14}{Online operational-radius convergence from the first 100 unlabeled healthy windows. The shared representation remains unchanged; only the local empirical p98 radius is estimated. Observed convergence occurs between 38 and 65 windows.\relax }{figure.caption.15}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Robustness to local initialization}{14}{subsection.5.6}\protected@file@percent }
-\newlabel{sec:initialization-robustness}{{5.6}{14}{Robustness to local initialization}{subsection.5.6}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Robustness of online operational-radius estimation under different random warm-up samples. The shared simulator-trained representation remained fixed throughout the experiment. Only the 100 healthy initialization windows used for local calibration were randomly changed. Values are mean $\pm $ standard deviation over five random seeds.\relax }}{14}{table.caption.16}\protected@file@percent }
-\newlabel{tab:initialization-robustness}{{5}{14}{Robustness of online operational-radius estimation under different random warm-up samples. The shared simulator-trained representation remained fixed throughout the experiment. Only the 100 healthy initialization windows used for local calibration were randomly changed. Values are mean $\pm $ standard deviation over five random seeds.\relax }{table.caption.16}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Edge deployment implications}{15}{subsection.5.7}\protected@file@percent }
-\newlabel{sec:edge-results}{{5.7}{15}{Edge deployment implications}{subsection.5.7}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Edge-deployment footprint of the proposed shared nominal representation.\relax }}{15}{table.caption.17}\protected@file@percent }
-\newlabel{tab:edge}{{6}{15}{Edge-deployment footprint of the proposed shared nominal representation.\relax }{table.caption.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Cold-start convergence and retrospective evolution of the local operational radius across the four CWRU operating conditions. The blue segment shows the sequential radius estimate during the 100-window calibration interval used by the deployed detector. The red dotted line marks the detected convergence index, and the blue dash-dotted line marks the end of the prescribed cold-start interval. The gray segment is a retrospective cumulative estimate obtained by continuing to incorporate the remaining known-healthy observations; it is shown only to characterize the subsequent evolution of the estimator and is not used to update the deployed decision boundary. Horizontal lines indicate the transferred standardized radius $\tau _{\mathrm  {bridge}}$ and the complete-data field p98 reference.\relax }}{14}{figure.caption.15}\protected@file@percent }
+\newlabel{fig:tau-convergence}{{5}{14}{Cold-start convergence and retrospective evolution of the local operational radius across the four CWRU operating conditions. The blue segment shows the sequential radius estimate during the 100-window calibration interval used by the deployed detector. The red dotted line marks the detected convergence index, and the blue dash-dotted line marks the end of the prescribed cold-start interval. The gray segment is a retrospective cumulative estimate obtained by continuing to incorporate the remaining known-healthy observations; it is shown only to characterize the subsequent evolution of the estimator and is not used to update the deployed decision boundary. Horizontal lines indicate the transferred standardized radius $\tau _{\mathrm {bridge}}$ and the complete-data field p98 reference.\relax }{figure.caption.15}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Robustness to local initialization}{15}{subsection.5.6}\protected@file@percent }
+\newlabel{sec:initialization-robustness}{{5.6}{15}{Robustness to local initialization}{subsection.5.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Robustness of online operational-radius estimation under different random warm-up samples. The shared simulator-trained representation remained fixed throughout the experiment. Only the 100 healthy initialization windows used for local calibration were randomly changed. Values are mean $\pm $ standard deviation over five random seeds.\relax }}{15}{table.caption.16}\protected@file@percent }
+\newlabel{tab:initialization-robustness}{{5}{15}{Robustness of online operational-radius estimation under different random warm-up samples. The shared simulator-trained representation remained fixed throughout the experiment. Only the 100 healthy initialization windows used for local calibration were randomly changed. Values are mean $\pm $ standard deviation over five random seeds.\relax }{table.caption.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Multi-unit run-to-failure validation on NASA IMS}{16}{subsection.5.7}\protected@file@percent }
+\newlabel{sec:nasa-results}{{5.7}{16}{Multi-unit run-to-failure validation on NASA IMS}{subsection.5.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Recording-level run-to-failure validation on NASA IMS using the shared nominal representation and local operational-radius calibration. Lead time is measured relative to the documented end of the experiment.\relax }}{16}{table.caption.17}\protected@file@percent }
+\newlabel{tab:nasa-main-results}{{6}{16}{Recording-level run-to-failure validation on NASA IMS using the shared nominal representation and local operational-radius calibration. Lead time is measured relative to the documented end of the experiment.\relax }{table.caption.17}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.7.1}Stability of local operational-radius estimation}{16}{subsubsection.5.7.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Stability of local operational-radius estimation for the shared NASA representation under different warm-up initializations.\relax }}{17}{table.caption.18}\protected@file@percent }
+\newlabel{tab:nasa-stability}{{7}{17}{Stability of local operational-radius estimation for the shared NASA representation under different warm-up initializations.\relax }{table.caption.18}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.7.2}Comparison with per-asset early-life training}{17}{subsubsection.5.7.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces NASA IMS comparison between the proposed shared representation and autoencoders trained separately on the early-life data of each bearing. Asset-specific results are mean $\pm $ standard deviation over five training initializations. Shared-model values correspond to one fixed representation applied unchanged to every bearing. Lead time is measured relative to the documented end of the experiment.\relax }}{17}{table.caption.19}\protected@file@percent }
+\newlabel{tab:nasa-shared-vs-specific}{{8}{17}{NASA IMS comparison between the proposed shared representation and autoencoders trained separately on the early-life data of each bearing. Asset-specific results are mean $\pm $ standard deviation over five training initializations. Shared-model values correspond to one fixed representation applied unchanged to every bearing. Lead time is measured relative to the documented end of the experiment.\relax }{table.caption.19}{}}
+\abx@aux@cite{0}{disanti2026inverse}
+\abx@aux@segm{0}{0}{disanti2026inverse}
+\abx@aux@cite{0}{disanti2026quotient}
+\abx@aux@segm{0}{0}{disanti2026quotient}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Edge deployment implications}{18}{subsection.5.8}\protected@file@percent }
+\newlabel{sec:edge-results}{{5.8}{18}{Edge deployment implications}{subsection.5.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Edge-deployment footprint of the proposed shared nominal representation.\relax }}{18}{table.caption.20}\protected@file@percent }
+\newlabel{tab:edge}{{9}{18}{Edge-deployment footprint of the proposed shared nominal representation.\relax }{table.caption.20}{}}
+\abx@aux@cite{0}{disanti2026inverse}
+\abx@aux@segm{0}{0}{disanti2026inverse}
+\abx@aux@cite{0}{disanti2026quotient}
+\abx@aux@segm{0}{0}{disanti2026quotient}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Compact Mathematical Perspective}{19}{section.6}\protected@file@percent }
+\newlabel{sec:theory}{{6}{19}{Compact Mathematical Perspective}{section.6}{}}
+\abx@aux@page{20}{19}
+\abx@aux@page{21}{19}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Observation model}{19}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Existence of a compact nominal representation}{19}{subsection.6.2}\protected@file@percent }
+\abx@aux@page{22}{19}
+\abx@aux@page{23}{19}
 \abx@aux@cite{0}{disanti2026inverse}
 \abx@aux@segm{0}{0}{disanti2026inverse}
 \abx@aux@cite{0}{disanti2026quotient}
 \abx@aux@segm{0}{0}{disanti2026quotient}
 \abx@aux@cite{0}{disanti2025blueprints}
 \abx@aux@segm{0}{0}{disanti2025blueprints}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{16}{section.6}\protected@file@percent }
-\newlabel{sec:discussion}{{6}{16}{Discussion}{section.6}{}}
-\abx@aux@page{20}{16}
-\abx@aux@page{21}{16}
-\abx@aux@page{22}{16}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Discussion}{20}{section.7}\protected@file@percent }
+\newlabel{sec:discussion}{{7}{20}{Discussion}{section.7}{}}
+\abx@aux@page{24}{20}
+\abx@aux@page{25}{20}
+\abx@aux@page{26}{20}
 \abx@aux@cite{0}{disanti2026quotient}
 \abx@aux@segm{0}{0}{disanti2026quotient}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Future Work}{17}{subsection.6.1}\protected@file@percent }
-\abx@aux@page{23}{17}
-\abx@aux@cite{0}{disanti2026inverse}
-\abx@aux@segm{0}{0}{disanti2026inverse}
-\abx@aux@cite{0}{disanti2026quotient}
-\abx@aux@segm{0}{0}{disanti2026quotient}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{18}{section.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {8}Compact Mathematical Perspective}{18}{section.8}\protected@file@percent }
-\newlabel{sec:theory}{{8}{18}{Compact Mathematical Perspective}{section.8}{}}
-\abx@aux@page{24}{18}
-\abx@aux@page{25}{18}
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Observation model}{18}{subsection.8.1}\protected@file@percent }
-\abx@aux@cite{0}{disanti2026inverse}
-\abx@aux@segm{0}{0}{disanti2026inverse}
-\abx@aux@cite{0}{disanti2026quotient}
-\abx@aux@segm{0}{0}{disanti2026quotient}
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Existence of a compact nominal representation}{19}{subsection.8.2}\protected@file@percent }
-\abx@aux@page{26}{19}
-\abx@aux@page{27}{19}
-\abx@aux@page{28}{19}
-\abx@aux@page{29}{19}
-\abx@aux@page{30}{19}
-\abx@aux@page{31}{19}
-\abx@aux@page{32}{19}
-\abx@aux@page{33}{19}
-\abx@aux@page{34}{19}
-\abx@aux@page{35}{20}
-\abx@aux@page{36}{20}
-\abx@aux@page{37}{20}
-\abx@aux@page{38}{20}
-\abx@aux@page{39}{20}
-\abx@aux@page{40}{20}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Future Work}{21}{subsection.7.1}\protected@file@percent }
+\abx@aux@page{27}{21}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{22}{section.8}\protected@file@percent }
+\abx@aux@page{28}{22}
+\abx@aux@page{29}{22}
+\abx@aux@page{30}{22}
+\abx@aux@page{31}{22}
+\abx@aux@page{32}{22}
+\abx@aux@page{33}{22}
+\abx@aux@page{34}{22}
+\abx@aux@page{35}{23}
+\abx@aux@page{36}{23}
+\abx@aux@page{37}{23}
+\abx@aux@page{38}{23}
+\abx@aux@page{39}{23}
+\abx@aux@page{40}{23}
 \abx@aux@read@bbl@mdfivesum{42DB3765D5AF897A0A1E7E7C08FDD9AD}
 \abx@aux@defaultrefcontext{0}{bishop1994}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{bronstein2021}{nyt/global//global/global}
@@ -199,4 +209,4 @@
 \abx@aux@defaultrefcontext{0}{scholkopf1999}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{smith2015}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{zhao2019}{nyt/global//global/global}
-\gdef \@abspage@last{20}
+\gdef \@abspage@last{23}
