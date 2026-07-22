@@ -353,33 +353,6 @@
       \verb 10.1016/j.ymssp.2010.07.017
       \endverb
     \endentry
-    \entry{rudin1976}{book}{}
-      \name{author}{1}{}{%
-        {{hash=33be2fc2739d3493c6d6cc5d56a4c41e}{%
-           family={Rudin},
-           familyi={R\bibinitperiod},
-           given={Walter},
-           giveni={W\bibinitperiod}}}%
-      }
-      \list{publisher}{1}{%
-        {McGraw-Hill}%
-      }
-      \strng{namehash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \strng{fullhash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \strng{bibnamehash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \strng{authorbibnamehash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \strng{authornamehash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \strng{authorfullhash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \field{sortinit}{R}
-      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{edition}{3rd}
-      \field{title}{Principles of Mathematical Analysis}
-      \field{year}{1976}
-    \endentry
     \entry{sakurada2014}{inproceedings}{}
       \name{author}{2}{}{%
         {{hash=a1b0918bcbaee18ebd732374d128f0e5}{%

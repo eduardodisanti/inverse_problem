@@ -1,0 +1,5 @@
+[0] Config.pm:307> INFO - This is Biber 2.19
+[0] Config.pm:310> INFO - Logfile is 'TRB2027_draft_JUL_21.tex.blg'
+[33] biber-darwin:340> INFO - === Wed Jul 22, 2026, 17:55:32
+[136] Utils.pm:410> ERROR - Cannot find 'TRB2027_draft_JUL_21.tex.bcf'!
+[136] Biber.pm:136> INFO - ERRORS: 1
