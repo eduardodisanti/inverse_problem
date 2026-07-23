@@ -1,17 +1,15 @@
 [0] Config.pm:307> INFO - This is Biber 2.19
 [0] Config.pm:310> INFO - Logfile is 'TRB2027_draft.blg'
-[33] biber-darwin:340> INFO - === Wed Jul 22, 2026, 19:17:17
-[42] Biber.pm:419> INFO - Reading 'TRB2027_draft.bcf'
-[80] Biber.pm:979> INFO - Found 15 citekeys in bib section 0
-[88] Biber.pm:4419> INFO - Processing section 0
-[93] Biber.pm:4610> INFO - Looking for bibtex file 'references.bib' for section 0
-[94] bibtex.pm:1713> INFO - LaTeX decoding ...
-[103] bibtex.pm:1519> INFO - Found BibTeX data source 'references.bib'
-[157] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[157] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[158] Biber.pm:4239> INFO - Sorting list 'nyt/global//global/global' of type 'entry' with template 'nyt' and locale 'en-US'
-[158] Biber.pm:4245> INFO - No sort tailoring available for locale 'en-US'
-[169] bbl.pm:660> INFO - Writing 'TRB2027_draft.bbl' with encoding 'UTF-8'
-[173] bbl.pm:763> INFO - Output to TRB2027_draft.bbl
-[173] Biber.pm:131> WARN - I didn't find a database entry for 'li2023invariant' (section 0)
-[173] Biber.pm:133> INFO - WARNINGS: 1
+[58] biber-darwin:340> INFO - === Thu Jul 23, 2026, 22:10:55
+[80] Biber.pm:419> INFO - Reading 'TRB2027_draft.bcf'
+[142] Biber.pm:979> INFO - Found 19 citekeys in bib section 0
+[154] Biber.pm:4419> INFO - Processing section 0
+[168] Biber.pm:4610> INFO - Looking for bibtex file 'references.bib' for section 0
+[171] bibtex.pm:1713> INFO - LaTeX decoding ...
+[195] bibtex.pm:1519> INFO - Found BibTeX data source 'references.bib'
+[318] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[318] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[318] Biber.pm:4239> INFO - Sorting list 'nyt/global//global/global' of type 'entry' with template 'nyt' and locale 'en-US'
+[319] Biber.pm:4245> INFO - No sort tailoring available for locale 'en-US'
+[347] bbl.pm:660> INFO - Writing 'TRB2027_draft.bbl' with encoding 'UTF-8'
+[355] bbl.pm:763> INFO - Output to TRB2027_draft.bbl
