@@ -1,13 +1,13 @@
 # Fdb version 4
-["biber TRB2027_draft"] 1784837452 "TRB2027_draft.bcf" "TRB2027_draft.bbl" "TRB2027_draft" 1784837463 0
+["biber TRB2027_draft"] 1784837452 "TRB2027_draft.bcf" "TRB2027_draft.bbl" "TRB2027_draft" 1784890249 0
   "./references.bib" 1784837452 8264 e1da7898398f286d9f6395034ac46224 ""
-  "TRB2027_draft.bcf" 1784837463 110068 7246378953ecca2a13d842746592a3e7 "pdflatex"
+  "TRB2027_draft.bcf" 1784890249 110068 7246378953ecca2a13d842746592a3e7 "pdflatex"
   (generated)
   "TRB2027_draft.bbl"
   "TRB2027_draft.blg"
   (rewritten before read)
-["pdflatex"] 1784837459 "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" "TRB2027_draft.pdf" "TRB2027_draft" 1784837463 0
-  "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" 1784836959 78441 62487e3cfe7b212bf5f9ec52d4b3a9e3 ""
+["pdflatex"] 1784890247 "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" "TRB2027_draft.pdf" "TRB2027_draft" 1784890249 0
+  "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" 1784890241 81961 bd370e80244205754ae4df4b3a31dafd ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc" 1254269338 2375 baa924870cfb487815765f9094cf3728 ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc" 1202520719 3486 c7eadf5dcc57b3b2d11736679f6636ba ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc" 1202520719 2405 5dcf2c1b967ee25cc46c58cd52244aed ""
@@ -170,6 +170,7 @@
   "/usr/local/texlive/2023/texmf-dist/tex/latex/base/ifthen.sty" 1654720880 5319 48d7f3cfa322abd2788e3c09d624b922 ""
   "/usr/local/texlive/2023/texmf-dist/tex/latex/base/inputenc.sty" 1654720880 5048 84b05796b49b69e2d4257d537721c960 ""
   "/usr/local/texlive/2023/texmf-dist/tex/latex/base/size11.clo" 1667332637 8464 63bf71cc1214ffdd38288da73a7ca182 ""
+  "/usr/local/texlive/2023/texmf-dist/tex/latex/biblatex/bbx/authoryear-comp.bbx" 1342308459 98 5a32a8d4527f977d0515687ae7125568 ""
   "/usr/local/texlive/2023/texmf-dist/tex/latex/biblatex/bbx/authoryear.bbx" 1566680006 8024 f170876981d3e1db9ed0abd5abc62dbe ""
   "/usr/local/texlive/2023/texmf-dist/tex/latex/biblatex/bbx/standard.bbx" 1609451401 25680 409c3f3d570418bc545e8065bebd0688 ""
   "/usr/local/texlive/2023/texmf-dist/tex/latex/biblatex/biblatex.cfg" 1342308459 69 249fa6df04d948e51b6d5c67bea30c42 ""
@@ -178,7 +179,7 @@
   "/usr/local/texlive/2023/texmf-dist/tex/latex/biblatex/blx-case-expl3.sty" 1609451401 8433 72f8188742e7214b7068f345cd0287ac ""
   "/usr/local/texlive/2023/texmf-dist/tex/latex/biblatex/blx-compat.def" 1643926307 13919 5426dbe90e723f089052b4e908b56ef9 ""
   "/usr/local/texlive/2023/texmf-dist/tex/latex/biblatex/blx-dm.def" 1643926307 32455 8d3e554836db11aab80a8e11be62e1b1 ""
-  "/usr/local/texlive/2023/texmf-dist/tex/latex/biblatex/cbx/authoryear.cbx" 1566680006 3976 2d46354b304f9bc8fda915fe9215de04 ""
+  "/usr/local/texlive/2023/texmf-dist/tex/latex/biblatex/cbx/authoryear-comp.cbx" 1678141846 8788 a09fed58fd931626c2515d9d7357647f ""
   "/usr/local/texlive/2023/texmf-dist/tex/latex/biblatex/lbx/english.lbx" 1643926307 39965 48ce9ce3350aba9457f1020b1deba5cf ""
   "/usr/local/texlive/2023/texmf-dist/tex/latex/booktabs/booktabs.sty" 1579038678 6078 f1cb470c9199e7110a27851508ed7a5c ""
   "/usr/local/texlive/2023/texmf-dist/tex/latex/caption/caption.sty" 1678653221 55778 14d5c99aa26410e440820bb9ea5b8b3a ""
@@ -249,11 +250,11 @@
   "/usr/local/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1699445358 4623355 b8cad38412faebe1ce5b780a45db67bd ""
   "/usr/local/texlive/2023/texmf-var/web2c/pdftex/pdflatex.fmt" 1699445304 7883459 18e43aa00442b33783c454a42303b016 ""
   "/usr/local/texlive/2023/texmf.cnf" 1678822455 577 1b2b1af17af2508fb20dd85783af4050 ""
-  "TRB2027_draft.aux" 1784837463 21758 bb80aeb11c459796e4f7be70a1d11954 "pdflatex"
+  "TRB2027_draft.aux" 1784890249 23482 8137bdfe55f7557ab46226e216cee165 "pdflatex"
   "TRB2027_draft.bbl" 1784837456 30037 0a6ae5b21df005dcc8d585f725dfaa7a "biber TRB2027_draft"
-  "TRB2027_draft.out" 1784837463 5355 ec944b70afb83728d1dfb759bfd40301 "pdflatex"
-  "TRB2027_draft.run.xml" 1784837463 2374 e1fdc0aeebaa910d9cac988e920b82a7 "pdflatex"
-  "TRB2027_draft.tex" 1784836959 78441 62487e3cfe7b212bf5f9ec52d4b3a9e3 ""
+  "TRB2027_draft.out" 1784890249 5708 1b29671c04c16eaa678dcb459198362b "pdflatex"
+  "TRB2027_draft.run.xml" 1784890249 2418 31ba22616e5b21302f230859769a2ee4 "pdflatex"
+  "TRB2027_draft.tex" 1784890241 81961 bd370e80244205754ae4df4b3a31dafd ""
   "cwru_tau_convergence.pdf" 1784669702 37153 26c10af7d0d43d2c43a2c907f02f24d5 ""
   (generated)
   "TRB2027_draft.aux"

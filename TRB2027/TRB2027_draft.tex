@@ -23,7 +23,7 @@
 
 \usepackage[
     backend=biber,
-    style=authoryear,
+    style=authoryear-comp,
     sorting=nyt,
     maxcitenames=2,
     maxbibnames=99,
@@ -707,6 +707,12 @@ r_{k,t}>\tau_k(t)
 This rule requires only a residual buffer (or running robust statistics), the
 current operational radius, and the convergence state.
 
+The guarded-update mechanism is included as an optional extension for
+deployments requiring limited post-calibration adaptation. It is not
+exercised or evaluated in the experiments reported in this paper; all
+reported CWRU and NASA IMS results use a radius frozen after cold-start
+calibration.
+
 \subsection{Deployment states}
 
 Each asset progresses through three deployment states:
@@ -813,8 +819,8 @@ Using the unchanged simulator-trained autoencoder, we compare three deployment s
     \item \textbf{Field oracle:} estimate the p98 operational radius using the complete healthy
     field dataset of each condition, without retraining the shared representation; and
 
-    \item \textbf{Online local convergence:} estimate the p98 operational radius progressively
-    from only the first 100 unlabeled healthy windows.
+    \item \textbf{Online local convergence:} estimate the operational radius progressively from the first 100 
+    unlabeled healthy windows using $\tau_{\mathrm{bridge},k}(t)=\mu_k(t)+z_{\mathrm{MC}}\sigma_k(t)$.
 \end{enumerate}
 
 This ablation separates representation transfer from decision-boundary transfer. The
@@ -1024,8 +1030,37 @@ consistently separates healthy and faulty operation. The asset-specific autoenco
 used as the oracle reference for evaluating the cost of shared-model deployment.
 
 
-%-------------------\subsection{Repeated-run stability of the asset-specific autoencoder}
+\subsection{Repeated-run stability of the asset-specific autoencoder}
 \label{sec:ae-stability}
+
+To assess sensitivity to stochastic optimization, the complete
+asset-specific autoencoder training and evaluation procedure was repeated
+five times using independent random initializations. The architecture,
+preprocessing, datasets, training protocol, and empirical p98 calibration
+remained unchanged. Across all operating conditions, no variation was
+observed in healthy false-alarm rate or in the detection rates for ball-,
+inner-race-, and outer-race faults. Only the numerical reconstruction-error
+threshold varied between runs, as summarized in
+Table~\ref{tab:ae-threshold-stability}. Thus, stochastic training altered the
+absolute residual scale without changing calibrated diagnostic performance.
+\begin{table}[H]
+\centering
+\caption{Repeated-run variability of the asset-specific autoencoder threshold
+over five independent random initializations. Healthy false-alarm and fault
+detection rates remained unchanged across runs.}
+\label{tab:ae-threshold-stability}
+
+\begin{tabular}{lc}
+\toprule
+RPM & Reconstruction threshold \\
+\midrule
+1730 & $0.649 \pm 0.021$ \\
+1750 & $0.759 \pm 0.227$ \\
+1772 & $0.725 \pm 0.148$ \\
+1797 & $0.459 \pm 0.026$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 Repeating the complete training and evaluation procedure five times under
 independent random initializations produced identical healthy false-alarm
@@ -1224,61 +1259,109 @@ deployment complexity.
 \label{sec:radius-convergence-results}
 %---------------------------------------------------------------------
 
-Figure~\ref{fig:tau-convergence} shows the sequential estimation of the
-local operational radius under the fixed shared representation. For each
-CWRU operating condition,
+Figure~\ref{fig:tau-convergence} illustrates the sequential estimation of
+the local operational radius under the fixed shared representation. In the
+CWRU deployment experiment, the simulator contributes no absolute
+reconstruction-error threshold. Instead, it provides the standardized
+nominal radius
 
 \begin{equation}
-\tau_k(t)=\mu_k(t)+z_{\mathrm{MC}}\sigma_k(t),
+z_{\mathrm{MC}}
+=
+\frac{\tau_{\mathrm{MC}}-\mu_{\mathrm{MC}}}
+{\sigma_{\mathrm{MC}}},
+\label{eq:z-mc}
 \end{equation}
 
-where $z_{\mathrm{MC}}$ is transferred from the simulated nominal residual
-distribution. The representation and standardized coverage remain fixed;
-only the local residual statistics are estimated from incoming healthy
-observations.
+where $\mu_{\mathrm{MC}}$, $\sigma_{\mathrm{MC}}$, and
+$\tau_{\mathrm{MC}}$ are computed from the simulated nominal residual
+distribution.
 
-The first 100 windows constitute the prescribed cold-start calibration
-interval. Across all four operating conditions, the convergence criterion
-is satisfied between windows 38 and 65, before the calibration budget is
-exhausted. The operational radii at window 100 are 0.2393, 0.2188, 0.2540,
-and 0.2777 for 1730, 1750, 1772, and 1797\,RPM, respectively.
+For operating condition $k$, the sequential bridge radius is then estimated
+from the local residual statistics available up to calibration instant $t$,
+
+\begin{equation}
+\tau_{\mathrm{bridge},k}(t)
+=
+\mu_k(t)+z_{\mathrm{MC}}\sigma_k(t),
+\label{eq:tau-bridge-online}
+\end{equation}
+
+where $\mu_k(t)$ and $\sigma_k(t)$ denote the cumulative mean and standard
+deviation of the nominal field residuals observed up to time $t$. Thus, the
+absolute simulator threshold is not transferred. Only its standardized
+location relative to the simulated nominal distribution is retained, while
+the corresponding reconstruction-error scale is estimated independently
+from each deployment environment.
+
+For comparison, the complete-data field-oracle radius is defined as
+
+\begin{equation}
+\tau_{\mathrm{p98},k}^{\mathrm{oracle}}
+=
+\widehat{Q}_{k}(0.98),
+\label{eq:tau-field-p98}
+\end{equation}
+
+using all available healthy field residuals for operating condition $k$.
+This empirical p98 value is not available during cold start and is shown
+only as a retrospective oracle reference.
+
+The first 100 healthy windows constitute the prescribed cold-start
+calibration interval. Across the four operating conditions, the convergence
+criterion is satisfied after 38--65 windows, before the calibration budget
+is exhausted. The subsequent gray segment is retrospective only: it shows
+how the bridge estimator would evolve if the remaining observations, known
+in the benchmark to be healthy, continued to update the local mean and
+standard deviation. It is not used to modify the deployed decision
+boundary.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{cwru_tau_convergence.pdf}
-\caption{Cold-start convergence and retrospective evolution of the local
-operational radius across the four CWRU operating conditions. The blue segment shows the
-sequential estimate during the 100-window calibration interval; the red dotted line marks
-the detected convergence index. The gray segment is retrospective only and is not used by
-the deployed detector. Horizontal lines indicate $\tau_{\mathrm{bridge}}$ and the
-complete-data field p98 reference.}
-
+\caption{Cold-start convergence and retrospective evolution of the
+standardized bridge radius across the four CWRU operating conditions. The
+blue segment shows the sequential estimate
+$\tau_{\mathrm{bridge},k}(t)=\mu_k(t)+z_{\mathrm{MC}}\sigma_k(t)$ during the
+prescribed 100-window calibration interval. The red dotted line marks the
+detected convergence index, and the blue dash-dotted line marks the end of
+the calibration interval. The gray segment is a retrospective continuation
+using the remaining known-healthy observations and is not used by the
+deployed detector. The horizontal orange line indicates the bridge radius
+computed from the complete healthy residual mean and standard deviation,
+whereas the horizontal green line indicates the complete-data empirical p98
+field-oracle reference.}
 \label{fig:tau-convergence}
 \end{figure}
 
-The red dotted line in Figure~\ref{fig:tau-convergence} marks the detected convergence index,
-and the blue dash-dotted line marks the end of the prescribed 100-window cold-start interval.
-The gray segment extends the estimate retrospectively by continuing to incorporate the
-remaining known-healthy observations; it characterizes the subsequent evolution of the
-estimator only and is not used to update the deployed decision boundary. The observed
-post-calibration fluctuations are expected because the healthy residual distribution is not
-perfectly stationary. Later nominal observations modify the estimated residual mean,
-variance, or both, causing the cumulative estimate to increase or decrease without implying
-degradation. This behaviour motivates separating finite calibration from subsequent
-monitoring.
+The proximity between the complete-data bridge radius and the empirical p98
+reference provides an additional calibration check. It indicates whether
+the standardized simulator coverage produces a field acceptance boundary
+consistent with the directly observed upper tail of the healthy residual
+distribution. The two quantities are not mathematically identical: the
+bridge radius depends on the transferred standardized location
+$z_{\mathrm{MC}}$ and the first two local moments, whereas the field-oracle
+radius is a nonparametric empirical quantile.
+
+The observed post-calibration fluctuations do not represent continued
+adaptation of the deployed detector. They arise because later healthy
+observations modify the cumulative residual mean, standard deviation, or
+both. This retrospective evolution characterizes nominal
+within-condition variability and motivates separating finite cold-start
+calibration from subsequent monitoring, during which the operational radius
+is frozen.
 
 Operationally, the result demonstrates that an asset-specific acceptance
 boundary can be established before the complete healthy distribution is
-available. The complete-data p98 reference assumes prior access to all
-healthy observations, whereas the proposed procedure reaches a usable local
-radius during a short initialization interval in every evaluated operating
-condition.
+available. The empirical field p98 reference assumes prior access to all
+healthy observations, whereas the sequential bridge procedure reaches a
+stable local operational radius during a short initialization interval for
+every evaluated operating condition.
 
-The present experiment assumes that the initialization data are
-representative of nominal operation. Detecting assets that are already
-degraded at installation, or determining that no stable nominal radius can
-be established, remains outside the present scope and constitutes future
-work.
+The present experiment assumes that the initialization observations are
+representative of nominal operation. Detecting an asset already degraded at
+installation, or determining that no stable nominal radius can be
+established, remains outside the present scope.
 
 %---------------------------------------------------------------------
 \subsection{Robustness to local initialization}
@@ -1444,38 +1527,23 @@ relative error and convergence within a limited number of calibration
 windows.
 
 \begin{table}[H]
-\centering
-\caption{Stability of local operational-radius estimation for the shared
-NASA representation under different warm-up initializations.}
+\caption{Stability of local operational-radius estimation for the shared NASA representation under different warm-up initializations.}
 \label{tab:nasa-stability}
-
+\centering
 \begin{tabular}{lcccc}
 \toprule
-Bearing &
-$\tau$ mean &
-$\tau$ std &
-Relative error (\%) &
-Convergence (windows)
-\\
+Bearing & $\tau_{\text{mean}}$ & $\tau_{\text{std}}$ & Relative error (\%) & Convergence (windows) \\
 \midrule
-
-1 & 0.0120 & 0.00013 & 0.92 & 48.4\\
-2 & 0.0165 & 0.00010 & 2.07 & 39.0\\
-3 & 0.0204 & 0.00050 & 2.08 & 62.2\\
-4 & 0.0074 & 0.00009 & 1.82 & 45.6\\
-
+1 & 0.012126 & 0.000291 & 2.25 $\pm$ 1.19 & 46.50 $\pm$ 9.26 \\
+2 & 0.016891 & 0.000399 & 1.71 $\pm$ 1.39 & 52.20 $\pm$ 10.35 \\
+3 & 0.020628 & 0.000425 & 1.42 $\pm$ 1.31 & 59.25 $\pm$ 16.82 \\
+4 & 0.007442 & 0.000027 & 0.49 $\pm$ 0.34 & 49.20 $\pm$ 14.50 \\
 \midrule
-Mean &
-0.0141 &
---
-&
-1.72 &
-48.8
-\\
-
+Mean & 0.014272 & 0.000286 & 1.47 $\pm$ 0.86 & 51.79 $\pm$ 12.73 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
 
 
 The stability experiment supports the central deployment hypothesis:
