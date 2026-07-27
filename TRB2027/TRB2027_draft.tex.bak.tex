@@ -739,7 +739,6 @@ The methodology requires only
 
 The CWRU bearing benchmark is used solely as a controlled validation domain.
 
-%=====================================================================
 \section{Experimental Design}
 \label{sec:experimental_design}
 %=====================================================================
@@ -750,154 +749,200 @@ experimental stages, we measure:
 
 \begin{itemize}[leftmargin=1.5em]
     \item false-alarm rate during cold start;
-    \item number of observations required for operational-radius convergence;
-    \item variability of $\tau_k^\star$ across assets and operating regimes;
-    \item post-convergence fault detection performance;
-    \item sensitivity to convergence parameters;
-    \item agreement between online and complete-data calibration; and
-    \item deployment cost avoided by eliminating per-asset representation learning.
+    \item number of accepted samples to operational-radius convergence;
+    \item variability of $\tau_k^\star$ across assets and regimes;
+    \item post-convergence detection rate;
+    \item sensitivity to buffer size and convergence parameters;
+    \item performance of absolute-threshold transfer versus shared-coverage calibration;
+    \item cost of per-asset retraining avoided by the shared-model design.
 \end{itemize}
 
 \paragraph{Stage 1 --- Controlled multi-asset simulation.}
+Four bearing streams are generated with a physics-motivated nominal simulator using
+1200-sample windows, a 30\,Hz shaft frequency, and bounded variation in amplitude, phase, speed,
+offset, and noise. The shared model is trained on 4,000 simulated nominal windows, with 1,000 additional nominal
+windows reserved for validation. 
+Faults are introduced only during evaluation. A separate synthetic test set contains 750 windows per regime.
+Each simulated asset begins in nominal operation and independently calibrates its
+radius. Asset A remains nominal; Assets B--D transition after convergence to outer-race,
+inner-race, and ball-fault regimes.
 
-Four bearing streams are generated with a physics-motivated nominal simulator
-using 1200-sample windows, a 30\,Hz shaft frequency, and bounded variation in
-amplitude, phase, speed, offset, and additive noise.
-The shared representation is trained once on 4,000 simulated healthy windows,
-with 1,000 additional nominal windows reserved for validation.
-Faults are introduced only during evaluation.
-A separate synthetic test set contains 750 windows per operating regime.
-
-Each simulated asset begins in nominal operation and independently estimates
-its operational radius.
-Asset A remains nominal, whereas Assets B--D transition after convergence to
-outer-race, inner-race, and ball-fault regimes.
-
-This stage measures
-
-(i) observations required for convergence;
-
+This stage measures:
+(i) samples to convergence;
 (ii) false alarms before and after convergence;
-
-(iii) separation between reconstruction residuals and the converged operational
-radius after fault onset; and
-
-(iv) whether independently deployed assets converge to stable but
-asset-specific operational radii.
+(iii) the separation between $r_{k,t}$ and $\tau_k^\star$ after fault onset; and
+(iv) whether each nominal asset reaches a stable but asset-specific radius.
 
 \paragraph{Stage 2 --- Direct simulation-to-field deployment on CWRU.}
 
 The nominal representation trained in Stage~1 is transferred unchanged to the
-Case Western Reserve University (CWRU) Drive-End dataset.
-No CWRU observation is used for representation learning, retraining, or
-fine tuning.
+Case Western Reserve University (CWRU) Drive-End dataset. No CWRU observation
+is used for representation learning, retraining, or fine tuning.
 
 Each operating condition is treated as an independent deployment environment.
-During commissioning, healthy observations are processed sequentially.
-Calibration begins after a minimum of $N_{\min}$ healthy windows and continues
-until either
-
-(i) the operational radius satisfies the convergence criterion, or
-
-(ii) a maximum calibration budget $N_{\max}$ is reached.
-
-Once convergence is declared, the operational radius is frozen and all
-subsequent observations are evaluated using the unchanged shared
-representation.
+The first 100 healthy windows are used only to estimate the local
+98th-percentile operational radius, after which fault observations are
+evaluated using the unchanged shared model.
 
 This stage evaluates whether
-
-(i) the learned representation transfers directly from simulation to field;
-
+(i) the learned representation transfers directly from simulation to field,
+and
 (ii) local empirical calibration compensates for the non-transferability of
-absolute reconstruction-error thresholds; and
-
-(iii) the calibration duration can be determined automatically from the
-observed convergence behaviour rather than prescribed a priori.
+the absolute simulator threshold.
 
 The four CWRU operating conditions provide a controlled evaluation of
-score-scale heterogeneity and deployment calibration rather than four
-physically distinct fleet assets.
-Validation on independently monitored run-to-failure bearings is addressed in
-Stage~4 using the NASA IMS dataset.
+score-scale heterogeneity and local calibration rather than four physically
+distinct fleet assets. Validation on independent run-to-failure bearings is
+addressed separately in Stage~4 using the NASA IMS dataset.
+
 
 \paragraph{Stage 3 --- Reference comparison and calibration ablation.}
-
-To quantify the cost of scalability, we construct an intentionally favorable
-but operationally non-scalable reference condition.
-For each CWRU operating condition, three detectors are trained and calibrated
-independently using the complete healthy dataset:
-
+To quantify the cost of scalability, we construct an intentionally favorable but operationally
+non-scalable reference condition. For each CWRU operating condition, three detectors are trained
+and calibrated independently using the complete available healthy dataset:
 (i) a Conv1D autoencoder;
-
 (ii) a one-class SVM operating on PCA-reduced standardized windows; and
-
 (iii) an Elliptic Envelope operating on PCA-reduced standardized windows.
 
-Each detector uses the empirical 98th percentile of its own healthy
-anomaly-score distribution as its decision boundary.
-Fault observations are never used for model fitting or threshold selection.
+Each detector uses the empirical 98th percentile of its own healthy anomaly-score distribution
+as the decision boundary. Fault observations are never used for model fitting or threshold
+selection. These experiments represent an operationally unrealistic upper bound in which
+complete nominal data and asset-specific model development are available for
+every monitored unit.
 
-Using the unchanged simulator-trained representation, we compare three
-deployment strategies:
+Using the unchanged simulator-trained autoencoder, we compare three deployment strategies:
 
 \begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Direct threshold transfer:} apply the absolute synthetic p98 residual
+    threshold unchanged to each CWRU condition;
 
-\item \textbf{Direct threshold transfer:}
-apply the absolute simulator threshold unchanged to each CWRU operating
-condition;
+    \item \textbf{Field oracle:} estimate the p98 operational radius using the complete healthy
+    field dataset of each condition, without retraining the shared representation; and
 
-\item \textbf{Field oracle:}
-estimate the operational radius from the complete healthy dataset available
-for each operating condition, without modifying the shared representation;
-
-\item \textbf{Proposed online calibration:}
-estimate the operational radius sequentially from healthy observations until
-the convergence criterion is satisfied or the maximum calibration budget
-$N_{\max}$ is exhausted.
-
+    \item \textbf{Online local convergence:} estimate the operational radius progressively from the first 100 
+    unlabeled healthy windows using $\tau_{\mathrm{bridge},k}(t)=\mu_k(t)+z_{\mathrm{MC}}\sigma_k(t)$.
 \end{enumerate}
 
-This ablation separates representation transfer from calibration transfer.
-The representation is identical in all three deployment strategies; only the
-information available for estimating the local operational radius changes.
+This ablation separates representation transfer from decision-boundary transfer. The
+representation is identical in all three conditions; only the information available for local
+calibration changes.
 
 \paragraph{Stage 4 --- Multi-unit run-to-failure validation on NASA IMS.}
+A second nominal representation is constructed for the IMS bearing family using simulated
+healthy observations matched to the dataset sampling and operating characteristics. This model
+is trained once and then transferred unchanged to the independently monitored bearings within
+the IMS experiments. Each bearing estimates its own operational radius from an early-life
+unlabeled segment and subsequently enters post-convergence monitoring.
 
-A second nominal representation is constructed for the NASA IMS bearing
-family using simulated healthy observations matched to the dataset sampling
-and operating characteristics.
-The representation is trained once and transferred unchanged to each
-independently monitored bearing.
-
-Each bearing estimates its operational radius from an early-life nominal
-segment using the same convergence-based calibration procedure adopted in the
-CWRU experiments.
-Once convergence is declared, the operational radius is frozen and monitoring
-continues without further adaptation.
-
-This stage evaluates whether the proposed deployment methodology extends from
-heterogeneous operating conditions to physically distinct bearing units
-undergoing naturally evolving degradation.
-
-We report
-
-(i) observations required for convergence;
-
-(ii) variability of the converged operational radius across bearings;
-
+This stage evaluates whether the proposed deployment principle extends from heterogeneous CWRU
+operating conditions to physically distinct bearing units and naturally evolving degradation
+trajectories. We report:
+(i) samples to operational-radius convergence;
+(ii) variability of the converged radius across bearings;
 (iii) healthy-period false-alarm rate;
-
-(iv) first persistent departure after convergence; and
-
+(iv) first persistent departure from the frozen radius; and
 (v) alarm lead time relative to the documented end of the experiment.
 
-\paragraph{Stage 5 --- Edge deployment cost.}
+\paragraph{Stage 5 --- Edge cost.}
+We report model size, parameter count, inference latency per 1200-sample window on CPU, local
+state memory, and the reduction in transmitted data when only scores and selected anomalous
+windows are sent rather than the continuous raw signal.
 
-We report model size, parameter count, CPU inference latency for one
-1200-sample window, local calibration memory requirements, and the reduction
-in transmitted data obtained when only anomaly scores and selected anomalous
-windows are communicated instead of the continuous raw signal.
+\begin{figure}[H]
+\centering
+\resizebox{!}{3.1cm}{%
+\begin{tikzpicture}[
+    node distance=0.55cm,
+    stage/.style={
+        draw,
+        rounded corners=2pt,
+        align=center,
+        minimum height=2.35cm,
+        text width=2.45cm,
+        inner sep=5pt,
+        font=\small
+    },
+    flow/.style={
+        -{Latex[length=2.2mm]},
+        line width=0.7pt
+    },
+    label/.style={
+        font=\footnotesize\itshape,
+        align=center
+    }
+]
+
+%---------------------------------------------------------------------
+% Stages
+%---------------------------------------------------------------------
+
+\node[stage] (s1) {
+    \textbf{Stage 1}\\[0.15cm]
+    Controlled simulation\\[0.12cm]
+    \footnotesize
+    Train one shared nominal representation
+};
+
+\node[stage, right=of s1] (s2) {
+    \textbf{Stage 2}\\[0.15cm]
+    Simulation-to-field transfer\\[0.12cm]
+    \footnotesize
+    Deploy unchanged on CWRU
+};
+
+\node[stage, right=of s2] (s3) {
+    \textbf{Stage 3}\\[0.15cm]
+    Reference and ablation\\[0.12cm]
+    \footnotesize
+    Asset-specific oracle and calibration transfer
+};
+
+\node[stage, right=of s3] (s4) {
+    \textbf{Stage 4}\\[0.15cm]
+    Multi-unit degradation\\[0.12cm]
+    \footnotesize
+    Run-to-failure validation on NASA IMS
+};
+
+\node[stage, right=of s4] (s5) {
+    \textbf{Stage 5}\\[0.15cm]
+    Edge deployment cost\\[0.12cm]
+    \footnotesize
+    Latency, memory, model size, and communication
+};
+
+%---------------------------------------------------------------------
+% Main flow
+%---------------------------------------------------------------------
+
+\draw[flow] (s1) -- (s2);
+\draw[flow] (s2) -- (s3);
+\draw[flow] (s3) -- (s4);
+\draw[flow] (s4) -- (s5);
+
+%---------------------------------------------------------------------
+% Shared methodological principle
+%---------------------------------------------------------------------
+
+\node[
+    draw,
+    dashed,
+    rounded corners=2pt,
+    fit=(s1)(s2)(s3)(s4)(s5),
+    inner sep=8pt,
+    label={[label]below:
+    Fixed shared representation; independently estimated local operational radii}
+] {};
+
+\end{tikzpicture}%
+}
+\caption{\footnotesize Deployment-oriented experimental protocol. The experiments progress from controlled
+representation learning to direct field transfer, ideal-reference comparison, multi-unit
+run-to-failure validation, and measurement of the edge-deployment footprint. Across deployment
+stages, the nominal representation remains fixed while each monitored unit estimates its own
+local operational radius.}
+\label{fig:experimental-protocol}
+\end{figure}
 
 
 %=====================================================================
@@ -905,147 +950,104 @@ windows are communicated instead of the continuous raw signal.
 \label{sec:results}
 %=====================================================================
 
-The experiments address three complementary deployment questions.
-First, the CWRU experiments establish the performance attainable under an
-ideal but operationally non-scalable condition in which an independent
-autoencoder is trained and calibrated for each operating condition.
-Second, they evaluate whether one simulator-trained shared representation,
-combined only with convergence-based local calibration, can recover a
-comparable operating point without field-model retraining.
-Third, the NASA IMS run-to-failure experiment evaluates whether the same
-deployment principle extends to independently monitored physical units
-undergoing naturally evolving degradation.
+The experiments address three complementary deployment questions. First, the
+CWRU experiments establish the performance attainable under an ideal but
+operationally non-scalable condition in which separate detectors are trained
+and calibrated for each operating condition. Second, they evaluate whether a
+simulator-trained shared representation, combined only with short local
+calibration, can approach that ideal performance without field-model
+retraining. Third, the NASA IMS run-to-failure experiment evaluates whether
+the same deployment principle extends to independently monitored physical
+units undergoing naturally evolving degradation.
 
 The CWRU evaluation includes four operating conditions corresponding to
 1730, 1750, 1772, and 1797\,RPM. Across these conditions, the experiments
 contain 1,414 healthy windows, 1,621 ball-fault windows, 1,621
-inner-race-fault windows, and 2,846 outer-race-fault windows.
-All windows contain 1,200 samples and are processed identically by the
-corresponding representation models.
-
-The NASA IMS evaluation subsequently considers four independently monitored
+inner-race-fault windows, and 2,846 outer-race-fault windows. All windows
+contain 1,200 samples and are processed identically across detectors. The
+NASA IMS evaluation subsequently considers four independently monitored
 bearings from Experiment~2, each represented by 984 chronologically ordered
-recordings.
-
+recordings, of which the first 100 are reserved for early-life calibration.
 %---------------------------------------------------------------------
 \subsection{Ideal asset-specific reference}
 \label{sec:oracle-results}
 %---------------------------------------------------------------------
 
-Table~\ref{tab:asset-specific-by-condition} reports the performance of
-autoencoders trained independently for each CWRU operating condition using
-the complete healthy dataset available for that condition. These experiments
-constitute an oracle reference rather than a deployable fleet architecture:
-they assume complete nominal data, an independently fitted preprocessing
-transformation, and separate representation learning and calibration for
-every operating environment.
+Table~\ref{tab:asset-specific-summary} reports the performance of three detectors trained
+independently for each CWRU operating condition using the complete healthy dataset available for
+that condition. These experiments constitute an oracle reference rather than a deployable fleet
+architecture, assuming complete nominal data and independent training and calibration for every
+operating condition.
 
-Each asset-specific autoencoder uses the empirical 98th percentile of its
-own healthy reconstruction-error distribution as its decision boundary.
-Fault observations are never used for representation learning or threshold
-selection.
+Since each detector is calibrated at the empirical 98th percentile of its healthy anomaly-score
+distribution, the healthy false-alarm rate is approximately 2\% by construction. The comparison
+therefore evaluates the diagnostic quality of the anomaly score rather than threshold estimation.
 
 \begin{table}[H]
 \centering
-\caption{Ideal asset-specific autoencoder performance on CWRU. Each
-autoencoder is trained and calibrated independently using the complete
-healthy dataset of the corresponding operating condition. FAR denotes
-healthy false-alarm rate and DR denotes fault detection rate.}
-\label{tab:asset-specific-by-condition}
-
-\begin{tabular}{lccccc}
+\caption{Ideal asset-specific detector performance on CWRU. Values are mean
+$\pm$ standard deviation across the four operating conditions. Each detector is trained and
+calibrated separately using the complete healthy dataset of the corresponding condition.}
+\label{tab:asset-specific-summary}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lcccc}
 \toprule
-RPM &
-Threshold &
+Detector &
 Healthy FAR (\%) &
 Ball DR (\%) &
 Inner-race DR (\%) &
 Outer-race DR (\%)\\
 \midrule
+Asset-specific AE
+& $2.29 \pm 0.12$
+& $100.00 \pm 0.00$
+& $100.00 \pm 0.00$
+& $100.00 \pm 0.00$\\
 
-1730 &
-0.6485 &
-2.23 &
-100.00 &
-100.00 &
-100.00 \\
+Asset-specific OC-SVM
+& $2.29 \pm 0.12$
+& $3.09 \pm 6.17$
+& $25.05 \pm 0.13$
+& $2.71 \pm 3.15$\\
 
-1750 &
-0.7590 &
-2.23 &
-100.00 &
-100.00 &
-100.00 \\
-
-1772 &
-0.7248 &
-2.23 &
-100.00 &
-100.00 &
-100.00 \\
-
-1797 &
-0.4591 &
-2.46 &
-100.00 &
-100.00 &
-100.00 \\
-
-\midrule
-
-Mean &
--- &
-$2.29 \pm 0.12$ &
-$100.00 \pm 0.00$ &
-$100.00 \pm 0.00$ &
-$100.00 \pm 0.00$ \\
-
+Asset-specific Elliptic Envelope
+& $2.29 \pm 0.12$
+& $0.62 \pm 1.23$
+& $14.43 \pm 10.63$
+& $1.76 \pm 3.15$\\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
-The asset-specific autoencoders achieve 100\% detection for all evaluated
-fault families under every operating condition while reproducing the
-expected approximately 2\% healthy false-alarm rate induced by empirical
-p98 calibration.
+The asset-specific autoencoder achieves 100\% detection for all evaluated fault families under
+all four operating conditions. In contrast, the classical one-class detectors reproduce the
+target false-alarm rate but provide little diagnostic separation, with average ball-fault
+detection rates of 3.09\% (OC-SVM) and 0.62\% (Elliptic Envelope).
 
-The absolute reconstruction-error threshold differs substantially across
-operating conditions, ranging from approximately 0.46 to 0.76. This
-variation is important for the deployment problem addressed in this paper:
-even when independently trained models produce identical diagnostic
-performance, their numerical score scales are not interchangeable.
-
-The asset-specific results therefore define a favorable but operationally
-non-scalable reference. Each deployment environment receives its own
-preprocessing transformation, representation model, and complete-data
-calibration. The subsequent experiments evaluate whether one shared
-simulator-trained representation, combined only with local operational-radius
-calibration, can approach this condition-specific operating point without
-any field-model training.
+These results indicate that nominal calibration alone is insufficient. Although all detectors
+achieve the prescribed healthy false-alarm rate, only the reconstruction-based representation
+consistently separates healthy and faulty operation. The asset-specific autoencoder is therefore
+used as the oracle reference for evaluating the cost of shared-model deployment.
 
 
-%---------------------------------------------------------------------
 \subsection{Repeated-run stability of the asset-specific autoencoder}
 \label{sec:ae-stability}
-%---------------------------------------------------------------------
 
 To assess sensitivity to stochastic optimization, the complete
 asset-specific autoencoder training and evaluation procedure was repeated
 five times using independent random initializations. The architecture,
 preprocessing, datasets, training protocol, and empirical p98 calibration
-remained unchanged.
-
-Across all operating conditions, healthy false-alarm rate and the detection
-rates for ball-, inner-race-, and outer-race faults remained unchanged
-across repetitions. Only the numerical reconstruction threshold varied, as
-summarized in Table~\ref{tab:ae-threshold-stability}.
-
+remained unchanged. Across all operating conditions, no variation was
+observed in healthy false-alarm rate or in the detection rates for ball-,
+inner-race-, and outer-race faults. Only the numerical reconstruction-error
+threshold varied between runs, as summarized in
+Table~\ref{tab:ae-threshold-stability}. Thus, stochastic training altered the
+absolute residual scale without changing calibrated diagnostic performance.
 \begin{table}[H]
 \centering
-\caption{Repeated-run variability of the asset-specific autoencoder
-reconstruction threshold over five independent random initializations.
-Healthy false-alarm and fault-detection performance remained unchanged
-across runs.}
+\caption{Repeated-run variability of the asset-specific autoencoder threshold
+over five independent random initializations. Healthy false-alarm and fault
+detection rates remained unchanged across runs.}
 \label{tab:ae-threshold-stability}
 
 \begin{tabular}{lc}
@@ -1060,18 +1062,13 @@ RPM & Reconstruction threshold \\
 \end{tabular}
 \end{table}
 
-This result is particularly noteworthy because the detector is retrained
-five times on exactly the same healthy dataset. The observed variability
-therefore arises solely from stochastic optimization rather than from
-changes in operating conditions.
-
-The experiment demonstrates that identical diagnostic performance does not
-require a unique numerical reconstruction threshold. Different optimization
-trajectories converge to diagnostically equivalent representations while
-producing different residual scales. This observation motivates the
-deployment strategy developed in the remainder of the paper: the shared
-representation is transferred unchanged, whereas each deployed asset
-estimates only its own local operational radius.
+Repeating the complete training and evaluation procedure five times under
+independent random initializations produced identical healthy false-alarm
+and fault-detection performance across all operating conditions; only the
+absolute reconstruction threshold varied slightly between runs
+($0.459$--$0.759$), without affecting diagnostic performance. This confirms
+that stochastic optimization converges to diagnostically equivalent nominal
+representations despite differing absolute residual scales.
 
 
 %---------------------------------------------------------------------
@@ -1079,52 +1076,33 @@ estimates only its own local operational radius.
 \label{sec:shared-deployment-results}
 %---------------------------------------------------------------------
 
-The shared autoencoder is trained once using simulated healthy observations
-and transferred unchanged to all four CWRU operating conditions. No CWRU
-observation is used to retrain, fine-tune, or otherwise modify either the
-representation or its preprocessing transformation.
+The shared autoencoder is trained once using simulated healthy observations and is transferred
+unchanged to all four CWRU conditions. No CWRU observation is used to retrain, fine-tune, or
+otherwise modify the model or its preprocessing transformation.
 
 Three calibration conditions are evaluated:
 
 \begin{enumerate}[leftmargin=1.5em]
-
-    \item \textbf{Direct threshold transfer}, in which the absolute empirical
-    p98 residual threshold estimated from simulated nominal data is applied
-    unchanged to each field operating condition;
-
-    \item \textbf{Field oracle}, in which the empirical p98 operational radius
-    is computed retrospectively from the complete healthy field dataset of
-    each operating condition, without retraining the shared representation;
-
-    \item \textbf{Proposed online calibration}, in which the local empirical
-    p98 operational radius is estimated sequentially from the commissioning
-    residual stream, assumed nominal during initialization. Convergence is
-    evaluated only after a minimum calibration size $N_{\min}=40$, and
-    calibration continues until the stability criterion is satisfied or the
-    maximum budget $N_{\max}=200$ is reached.
+    \item \textbf{Direct threshold transfer}, in which the absolute p98 residual threshold
+    estimated in simulation is applied unchanged in the field;
+    \item \textbf{Field oracle}, in which the p98 operational radius is computed using the
+    complete healthy field dataset for each condition; and
+    \item \textbf{Proposed online convergence}, in which the local p98 operational radius is
+    estimated progressively from only the first 100 unlabeled healthy windows.
 \end{enumerate}
 
-Once convergence is detected, the corresponding operational radius is frozen
-and used for subsequent monitoring. The effective calibration duration is
-therefore determined independently for each operating condition rather than
-fixed in advance.
-
-Table~\ref{tab:shared-deployment} reports the complete CWRU deployment
-results.
+Table~\ref{tab:shared-deployment} reports the complete results.
 
 \begin{table}[H]
 \centering
-\caption{Simulation-to-field deployment of the shared autoencoder on CWRU.
-FAR denotes healthy false-alarm rate and DR denotes fault detection rate.
-The field oracle uses every available healthy window, whereas the proposed
-online procedure stops automatically when the empirical p98 radius satisfies
-the convergence criterion. Healthy FAR is calculated over the complete
-healthy dataset to permit direct comparison between calibration strategies.
-A dash indicates that sequential calibration is not applicable.}
+\caption{Simulation-to-field deployment of the shared autoencoder on CWRU. FAR denotes the
+healthy false-alarm rate and DR the fault detection rate. The field-oracle radius uses every
+available healthy window; the online radius uses only the first 100 healthy windows. A dash
+indicates that convergence is not applicable because the threshold is computed directly rather
+than estimated sequentially.}
 \label{tab:shared-deployment}
-
 \resizebox{\linewidth}{!}{
-\begin{tabular}{llrrrrrrr}
+\begin{tabular}{llrrrrrrrr}
 \toprule
 RPM &
 Calibration &
@@ -1134,7 +1112,8 @@ Ball DR &
 Inner DR &
 Outer DR &
 Healthy windows &
-Calibration windows \\
+Warm-up &
+Convergence \\
 &
 &
 &
@@ -1143,97 +1122,64 @@ Calibration windows \\
 (\%) &
 (\%) &
 &
-\\
+(windows) &
+(windows) \\
 \midrule
 
 1730 & Direct threshold transfer
-& 0.1027 & 100.00 & 100.00 & 100.00 & 100.00
-& 404 & -- \\
-
+& 0.0979 & 100.00 & 100.00 & 100.00 & 100.00 & 404 & 0 & -- \\
 1730 & Field oracle
-& 0.3578 & 2.23 & 99.75 & 100.00 & 99.86
-& 404 & -- \\
-
-1730 & Proposed online calibration
-& 0.3520 & 3.71 & 99.75 & 100.00 & 100.00
-& 404 & 49 \\
+& 0.2005 & 2.23 & 100.00 & 100.00 & 100.00 & 404 & 404 & -- \\
+1730 & Proposed online convergence
+& 0.1984 & 2.97 & 100.00 & 100.00 & 100.00 & 404 & 100 & 38 \\
 
 \addlinespace
 
 1750 & Direct threshold transfer
-& 0.1027 & 100.00 & 100.00 & 100.00 & 100.00
-& 404 & -- \\
-
+& 0.0979 & 100.00 & 100.00 & 100.00 & 100.00 & 404 & 0 & -- \\
 1750 & Field oracle
-& 0.3434 & 2.23 & 100.00 & 100.00 & 100.00
-& 404 & -- \\
-
-1750 & Proposed online calibration
-& 0.3440 & 1.98 & 100.00 & 100.00 & 100.00
-& 404 & 62 \\
+& 0.1786 & 2.23 & 100.00 & 100.00 & 100.00 & 404 & 404 & -- \\
+1750 & Proposed online convergence
+& 0.1759 & 2.97 & 100.00 & 100.00 & 100.00 & 404 & 100 & 58 \\
 
 \addlinespace
 
 1772 & Direct threshold transfer
-& 0.1027 & 100.00 & 100.00 & 100.00 & 100.00
-& 403 & -- \\
-
+& 0.0979 & 100.00 & 100.00 & 100.00 & 100.00 & 403 & 0 & -- \\
 1772 & Field oracle
-& 0.3512 & 2.23 & 100.00 & 100.00 & 100.00
-& 403 & -- \\
-
-1772 & Proposed online calibration
-& 0.3550 & 1.24 & 100.00 & 100.00 & 100.00
-& 403 & 58 \\
+& 0.1997 & 2.23 & 100.00 & 100.00 & 100.00 & 403 & 403 & -- \\
+1772 & Proposed online convergence
+& 0.2072 & 0.50 & 100.00 & 100.00 & 100.00 & 403 & 100 & 43 \\
 
 \addlinespace
 
 1797 & Direct threshold transfer
-& 0.1027 & 100.00 & 100.00 & 100.00 & 100.00
-& 203 & -- \\
-
+& 0.0979 & 100.00 & 100.00 & 100.00 & 100.00 & 203 & 0 & -- \\
 1797 & Field oracle
-& 0.3886 & 2.46 & 98.03 & 100.00 & 100.00
-& 203 & -- \\
-
-1797 & Proposed online calibration
-& 0.3869 & 3.45 & 98.52 & 100.00 & 100.00
-& 203 & 49 \\
+& 0.2474 & 2.46 & 96.80 & 100.00 & 100.00 & 203 & 203 & -- \\
+1797 & Proposed online convergence
+& 0.2364 & 5.91 & 98.77 & 100.00 & 100.00 & 203 & 100 & 65 \\
 
 \bottomrule
 \end{tabular}}
 \end{table}
 
-Direct transfer of the absolute simulator threshold fails under every
-operating condition. Although it produces an apparent 100\% detection rate
-for all evaluated fault families, it simultaneously classifies every healthy
-field window as anomalous. The absolute residual scale learned in simulation
-therefore does not transfer directly to the field.
+Direct transfer of the absolute simulator threshold fails under every operating condition. Its
+100\% apparent fault-detection rate is meaningless because it simultaneously classifies
+100\% of the healthy field windows as anomalous. The shared representation therefore transfers,
+but its absolute reconstruction-error scale does not.
 
-In contrast, local calibration restores an operationally meaningful decision
-boundary without modifying the shared representation. The complete-data field
-oracle reproduces the expected approximately 2\% healthy false-alarm rate and
-achieves 99.45\% average ball-fault detection, 100\% inner-race detection,
-and 99.96\% outer-race detection.
+The field-oracle calibration restores the target false-alarm level, obtaining an average healthy
+FAR of $2.29\pm0.12$\%. With this complete knowledge of each field condition, the unchanged
+simulator-trained model obtains $99.20\pm1.60$\% ball-fault detection and 100\% detection of
+both inner- and outer-race faults.
 
-The proposed online calibration reaches a closely comparable operating point
-using only the observations available during commissioning. All four
-operating conditions satisfy the convergence criterion before the maximum
-calibration budget is exhausted, requiring 49, 62, 58, and 49 windows for
-1730, 1750, 1772, and 1797\,RPM, respectively. The mean calibration duration
-is therefore $54.5 \pm 6.6$ windows.
+The proposed online procedure reaches comparable performance using only the first 100 healthy
+windows. Across the four operating conditions, it achieves an average healthy FAR of
+$3.09\pm2.22$\%, ball-fault detection of $99.69\pm0.62$\%, and 100\% detection of both
+inner- and outer-race faults. The online operational radius converges after
+$51.0\pm12.6$ windows, with observed convergence indices ranging from 38 to 65 windows.
 
-Across the four conditions, the proposed procedure obtains a mean healthy FAR
-of $2.60 \pm 1.18$\%, 99.57\% average ball-fault detection, 100\%
-inner-race detection, and 100\% outer-race detection. These results are
-close to the complete-data oracle despite requiring neither complete prior
-knowledge of the healthy field distribution nor independent representation
-learning for each operating condition.
-
-The central result is therefore not that the online procedure outperforms
-the complete-data oracle. Rather, it approximates the oracle operating point
-through a short, automatically terminated commissioning phase while retaining
-one fixed fleet-wide representation.
 
 %---------------------------------------------------------------------
 \subsection{Cost of scalable deployment}
@@ -1308,270 +1254,202 @@ operational-radius calibration, achieves near-oracle detection performance
 without asset-specific representation learning, substantially reducing
 deployment complexity.
 
-\begin{table}[H]
-\centering
-\caption{Agreement between the converged online operational radius and the
-complete-data field-oracle p98 reference. Relative difference is computed as
-$100|\tau_{\mathrm{online}}-\tau_{\mathrm{oracle}}|/
-\tau_{\mathrm{oracle}}$. Post-calibration FAR is evaluated only on healthy
-windows occurring after the declared convergence point.}
-\label{tab:online-oracle-agreement}
-
-\begin{tabular}{lccccc}
-\toprule
-RPM &
-$\tau_{\mathrm{oracle}}$ &
-$\tau_{\mathrm{online}}$ &
-Relative difference (\%) &
-Calibration windows &
-Post-calibration FAR (\%) \\
-\midrule
-1730 & 0.3578 & 0.3520 & 1.64 & 49 & 3.94 \\
-1750 & 0.3434 & 0.3440 & 0.19 & 62 & 1.75 \\
-1772 & 0.3512 & 0.3550 & 1.06 & 58 & 0.87 \\
-1797 & 0.3886 & 0.3869 & 0.44 & 49 & 3.90 \\
-\midrule
-Mean & -- & -- & 0.83 & $54.5 \pm 6.6$ & 2.62 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
 %---------------------------------------------------------------------
 \subsection{Operational-radius convergence}
 \label{sec:radius-convergence-results}
 %---------------------------------------------------------------------
 
 Figure~\ref{fig:tau-convergence} illustrates the sequential estimation of
-the local operational radius under the fixed shared representation. During
-commissioning, the simulator contributes neither an absolute
-reconstruction-error threshold nor a standardized residual scale. The only
-fleet-wide calibration quantity is the target nominal coverage,
-$1-\alpha=0.98$.
-
-For operating condition $k$, the operational radius available after
-observing $t$ commissioning residuals is estimated directly as
+the local operational radius under the fixed shared representation. In the
+CWRU deployment experiment, the simulator contributes no absolute
+reconstruction-error threshold. Instead, it provides the standardized
+nominal radius
 
 \begin{equation}
-\tau_k(t)
+z_{\mathrm{MC}}
 =
-\widehat{Q}_{k,t}(0.98),
-\label{eq:tau-online-p98}
+\frac{\tau_{\mathrm{MC}}-\mu_{\mathrm{MC}}}
+{\sigma_{\mathrm{MC}}},
+\label{eq:z-mc}
 \end{equation}
 
-where $\widehat{Q}_{k,t}(0.98)$ denotes the empirical 98th percentile of the
-local reconstruction residuals observed up to commissioning instant $t$.
-The shared representation remains unchanged throughout this process; only
-the asset-specific decision boundary is estimated locally.
+where $\mu_{\mathrm{MC}}$, $\sigma_{\mathrm{MC}}$, and
+$\tau_{\mathrm{MC}}$ are computed from the simulated nominal residual
+distribution.
 
-Convergence is evaluated after a minimum calibration period
-$N_{\min}=40$. Using the criterion defined in
-Eq.~\eqref{eq:convergence}, calibration terminates when the relative change
-in $\tau_k(t)$ remains below the prescribed tolerance for the required
-number of consecutive updates. If convergence is not observed, calibration
-continues until the maximum commissioning budget $N_{\max}=200$ is reached.
-An asset that does not converge within this interval is not released into
-active monitoring and is instead assigned a calibration-failure status.
-
-For retrospective comparison, the complete-data field-oracle radius is
+For operating condition $k$, the sequential bridge radius is then estimated
+from the local residual statistics available up to calibration instant $t$,
 
 \begin{equation}
-\tau_{k}^{\mathrm{oracle}}
+\tau_{\mathrm{bridge},k}(t)
 =
-\widehat{Q}_{k,\mathrm{all}}(0.98),
+\mu_k(t)+z_{\mathrm{MC}}\sigma_k(t),
+\label{eq:tau-bridge-online}
+\end{equation}
+
+where $\mu_k(t)$ and $\sigma_k(t)$ denote the cumulative mean and standard
+deviation of the nominal field residuals observed up to time $t$. Thus, the
+absolute simulator threshold is not transferred. Only its standardized
+location relative to the simulated nominal distribution is retained, while
+the corresponding reconstruction-error scale is estimated independently
+from each deployment environment.
+
+For comparison, the complete-data field-oracle radius is defined as
+
+\begin{equation}
+\tau_{\mathrm{p98},k}^{\mathrm{oracle}}
+=
+\widehat{Q}_{k}(0.98),
 \label{eq:tau-field-p98}
 \end{equation}
 
-where the quantile is computed using every available healthy field window
-for operating condition $k$. This quantity is unavailable during
-commissioning and is used only to assess how closely the online procedure
-approximates the operating point obtained with complete nominal knowledge.
+using all available healthy field residuals for operating condition $k$.
+This empirical p98 value is not available during cold start and is shown
+only as a retrospective oracle reference.
 
-All four CWRU operating conditions satisfy the convergence criterion before
-the maximum calibration budget is exhausted. Convergence is detected after
-49, 62, 58, and 49 windows for 1730, 1750, 1772, and 1797\,RPM,
-respectively, corresponding to a mean commissioning duration of
-$54.5 \pm 6.6$ windows. At convergence, the resulting operational radii
-differ from their complete-data field-oracle references by only 1.64\%,
-0.19\%, 1.06\%, and 0.44\%, respectively.
+The first 100 healthy windows constitute the prescribed cold-start
+calibration interval. Across the four operating conditions, the convergence
+criterion is satisfied after 38--65 windows, before the calibration budget
+is exhausted. The subsequent gray segment is retrospective only: it shows
+how the bridge estimator would evolve if the remaining observations, known
+in the benchmark to be healthy, continued to update the local mean and
+standard deviation. It is not used to modify the deployed decision
+boundary.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{cwru_tau_convergence.pdf}
-\caption{Sequential estimation of the empirical p98 operational radius
-during CWRU commissioning. For each operating condition, the blue segment
-shows the online estimate $\tau_k(t)=\widehat{Q}_{k,t}(0.98)$ until the
-convergence criterion is satisfied. The red dotted line marks the declared
-convergence point, at which the operational radius is frozen and active
-monitoring begins. The gray segment is a retrospective continuation obtained
-by incorporating additional observations known from the benchmark to be
-healthy; it is shown only to characterize the subsequent behaviour of the
-estimator and is not used to modify the deployed decision boundary. The
-horizontal dashed line indicates the complete-data field-oracle p98
-reference.}
+\caption{Cold-start convergence and retrospective evolution of the
+standardized bridge radius across the four CWRU operating conditions. The
+blue segment shows the sequential estimate
+$\tau_{\mathrm{bridge},k}(t)=\mu_k(t)+z_{\mathrm{MC}}\sigma_k(t)$ during the
+prescribed 100-window calibration interval. The red dotted line marks the
+detected convergence index, and the blue dash-dotted line marks the end of
+the calibration interval. The gray segment is a retrospective continuation
+using the remaining known-healthy observations and is not used by the
+deployed detector. The horizontal orange line indicates the bridge radius
+computed from the complete healthy residual mean and standard deviation,
+whereas the horizontal green line indicates the complete-data empirical p98
+field-oracle reference.}
 \label{fig:tau-convergence}
 \end{figure}
 
-The retrospective trajectories show that an empirical upper quantile can
-continue to change after an apparently stable interval when additional
-high-residual nominal observations arrive. This behaviour is expected
-because, during short commissioning periods, the empirical p98 estimate is
-determined by only a small number of observations in the upper tail. The
-post-convergence trajectories therefore do not represent continued
-adaptation of the deployed detector; they show how the estimator would have
-evolved had calibration remained active.
+The proximity between the complete-data bridge radius and the empirical p98
+reference provides an additional calibration check. It indicates whether
+the standardized simulator coverage produces a field acceptance boundary
+consistent with the directly observed upper tail of the healthy residual
+distribution. The two quantities are not mathematically identical: the
+bridge radius depends on the transferred standardized location
+$z_{\mathrm{MC}}$ and the first two local moments, whereas the field-oracle
+radius is a nonparametric empirical quantile.
 
-The operationally relevant result is the close agreement between the frozen
-online radius and the complete-data oracle. Despite using only 49--62
-commissioning observations, the online procedure recovers an acceptance
-boundary within 2\% of the radius obtained retrospectively from all
-available healthy observations. The resulting post-calibration healthy
-false-alarm rates range from 0.87\% to 3.94\%, remaining close to the
-nominal 2\% operating point despite the substantially reduced calibration
-information.
+The observed post-calibration fluctuations do not represent continued
+adaptation of the deployed detector. They arise because later healthy
+observations modify the cumulative residual mean, standard deviation, or
+both. This retrospective evolution characterizes nominal
+within-condition variability and motivates separating finite cold-start
+calibration from subsequent monitoring, during which the operational radius
+is frozen.
 
-The purpose of the convergence criterion is not to prove that the population
-98th percentile has been recovered exactly. It provides an operational
-stopping rule indicating that the local radius has remained sufficiently
-stable for deployment under the selected parameters
-$(N_{\min},N_{\max},L,\varepsilon_C,m)$. These parameters may be adjusted to
-reflect the commissioning duration and false-alarm tolerance of a particular
-application.
+Operationally, the result demonstrates that an asset-specific acceptance
+boundary can be established before the complete healthy distribution is
+available. The empirical field p98 reference assumes prior access to all
+healthy observations, whereas the sequential bridge procedure reaches a
+stable local operational radius during a short initialization interval for
+every evaluated operating condition.
 
-The present experiment assumes that commissioning observations are
-representative of nominal operation. Failure to obtain a stable operational
-radius within $N_{\max}$ may indicate insufficient commissioning data,
-non-stationary operating conditions, or an asset whose initial behaviour is
-inconsistent with the assumed nominal state. Distinguishing among these
-causes is outside the present evaluation, but the calibration-failure status
-provides a conservative mechanism that prevents an unconverged asset from
-entering active monitoring.
+The present experiment assumes that the initialization observations are
+representative of nominal operation. Detecting an asset already degraded at
+installation, or determining that no stable nominal radius can be
+established, remains outside the present scope.
 
 %---------------------------------------------------------------------
 \subsection{Robustness to local initialization}
 \label{sec:initialization-robustness}
 %---------------------------------------------------------------------
 
-A practical deployment question is whether convergence-based local
-calibration depends critically on the particular nominal observations
-encountered during commissioning. To evaluate this sensitivity, the shared
-simulator-trained representation, preprocessing transformation, target
-coverage, and convergence parameters were kept fixed. Only the observations
-available during local initialization and their arrival order were varied.
+A practical deployment question is whether local calibration depends
+critically on the particular healthy observations available during
+installation. To evaluate this sensitivity, the shared simulator-trained
+representation, preprocessing, and all model parameters were kept fixed.
+Only the initialization observations were varied.
 
-For each CWRU operating condition, five independent commissioning sequences
-were generated by randomly permuting the available healthy residuals using
-different random seeds. For each sequence, calibration was evaluated after
-$N_{\min}=40$ observations and continued until the empirical p98 operational
-radius satisfied the prescribed stability criterion or the maximum budget
-$N_{\max}=200$ was exhausted. Once convergence was declared, the radius was
-frozen. Healthy false-alarm rate was then evaluated only on healthy
-observations excluded from that commissioning sequence, while fault-detection
-rates were evaluated using the unchanged shared representation.
-
-Table~\ref{tab:initialization-robustness} summarizes the resulting
-variability across the five commissioning sequences.
+For each CWRU operating condition, five independent warm-up sequences were
+generated by randomly sampling 100 healthy windows with different random
+seeds. Each sequence independently estimated the local operational radius,
+after which fault detection was evaluated using the unchanged shared
+representation.
 
 \begin{table}[H]
 \centering
-\caption{Robustness of convergence-based local calibration to commissioning
-sample variability. The shared simulator-trained representation and all
-calibration parameters remained fixed; only the healthy observations and
-their arrival order were varied. Values are mean $\pm$ standard deviation
-over five random seeds. FAR is evaluated on healthy observations excluded
-from calibration.}
+\caption{Robustness of online operational-radius estimation under different random warm-up samples. The shared simulator-trained representation remained fixed throughout the experiment. Only the 100 healthy initialization windows used for local calibration were randomly changed. Values are mean $\pm$ standard deviation over five random seeds.}
 \label{tab:initialization-robustness}
-
 \resizebox{\linewidth}{!}{
-\begin{tabular}{lccccccc}
+\begin{tabular}{lcccccc}
 \toprule
 RPM &
 $\tau_{\mathrm{online}}$ &
-Relative oracle error (\%) &
-Post-calibration FAR (\%) &
+Healthy FAR (\%) &
 Ball DR (\%) &
 Inner DR (\%) &
 Outer DR (\%) &
-Calibration windows \\
+Convergence (windows) \\
 \midrule
-
 1730 &
-$0.3486 \pm 0.0023$ &
-$2.59 \pm 0.63$ &
-$5.38 \pm 1.39$ &
+$0.2905 \pm 0.0041$ &
+$4.08 \pm 2.04$ &
+$99.75 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$100.00 \pm 0.00$ &
+$45.6 \pm 13.2$ \\
+
+1750 &
+$0.3080 \pm 0.0063$ &
+$3.49 \pm 2.47$ &
 $99.95 \pm 0.11$ &
 $100.00 \pm 0.00$ &
 $100.00 \pm 0.00$ &
-$55.6 \pm 8.2$ \\
-
-1750 &
-$0.3451 \pm 0.0111$ &
-$2.53 \pm 1.65$ &
-$4.23 \pm 5.63$ &
-$99.90 \pm 0.14$ &
-$100.00 \pm 0.00$ &
-$100.00 \pm 0.00$ &
-$57.4 \pm 7.9$ \\
+$54.2 \pm 13.6$ \\
 
 1772 &
-$0.3511 \pm 0.0086$ &
-$1.82 \pm 1.37$ &
-$2.54 \pm 2.18$ &
+$0.3097 \pm 0.0076$ &
+$2.18 \pm 1.66$ &
 $100.00 \pm 0.00$ &
 $100.00 \pm 0.00$ &
-$99.97 \pm 0.06$ &
-$54.4 \pm 5.9$ \\
+$100.00 \pm 0.00$ &
+$49.4 \pm 13.8$ \\
 
 1797 &
-$0.3915 \pm 0.0065$ &
-$1.40 \pm 1.02$ &
-$2.21 \pm 2.23$ &
-$97.98 \pm 0.71$ &
+$0.3415 \pm 0.0051$ &
+$3.49 \pm 2.44$ &
+$96.16 \pm 0.22$ &
 $100.00 \pm 0.00$ &
-$99.97 \pm 0.06$ &
-$64.4 \pm 26.0$ \\
+$100.00 \pm 0.00$ &
+$56.2 \pm 15.0$ \\
 
 \bottomrule
 \end{tabular}}
 \end{table}
 
-All 20 commissioning runs satisfied the convergence criterion before
-$N_{\max}=200$, yielding a 100\% calibration success rate. Across the five
-independent commissioning sequences, the fleet-averaged operational radius
-remained within $2.08 \pm 0.71$\% of the complete-data oracle, while the
-fleet-averaged post-calibration false-alarm rate was
-$3.59 \pm 1.59$\%. Ball-, inner-race-, and outer-race detection remained
-essentially unchanged throughout the experiment.
+Across all repetitions, the estimated operational radii remained close to
+their complete-data field-oracle values despite the different
+initialization samples. Detection performance was correspondingly stable:
+ball-fault detection remained between approximately 96\% and 100\%, while
+inner- and outer-race faults continued to be detected with essentially
+unchanged performance. The principal variability appeared in the healthy
+false-alarm rate, which depends on the particular empirical percentile
+estimated from only 100 initialization windows.
 
-These experiments evaluate the robustness of the complete commissioning
-procedure rather than the variability of a fixed-size percentile estimate.
-The shared representation, preprocessing pipeline, convergence criterion,
-and calibration parameters remained unchanged; only the healthy
-commissioning observations and their arrival order were varied.
+This behaviour is expected statistically because the empirical
+98th-percentile is determined by only a few extreme observations. Small
+changes in those observations therefore produce modest changes in the
+estimated operational radius without materially affecting diagnostic
+separation.
 
-Some variability is expected because the empirical 98th percentile is
-determined by relatively few upper-tail observations. Consequently,
-different commissioning samples may produce slightly different operational
-radii and healthy false-alarm rates despite converging to essentially the
-same diagnostic operating point. The largest false-alarm rate observed in
-this experiment was 13.8\%, corresponding to one commissioning sequence for
-the 1750\,RPM operating condition.
-
-Together with Table~\ref{tab:online-oracle-agreement}, these results indicate
-that the proposed deployment strategy is robust to realistic commissioning
-variability. Table~\ref{tab:online-oracle-agreement} evaluates agreement
-between the chronological commissioning sequence and the complete-data
-oracle, whereas the present experiment demonstrates that comparable
-operating points are recovered under different nominal initialization
-samples without modifying the shared representation.
-
-The CWRU results establish that convergence-based local calibration can
-recover an operating point close to the complete-data oracle under
-controlled score-scale heterogeneity. The remaining question is whether
-this agreement is sufficient under physically distinct assets and naturally
-evolving degradation, where the objective is not classification of
-predefined fault windows but persistent early detection over time. The NASA
-IMS experiment addresses this second and operationally more demanding
-setting.
+These results show that the transferable object remains the shared
+canonical representation, whereas the local operational radius is
+consistently recovered from short unlabeled initialization data despite
+variations in the specific warm-up observations.
 
 %---------------------------------------------------------------------
 \subsection{Multi-unit run-to-failure validation on NASA IMS}
@@ -1666,7 +1544,7 @@ Mean & 0.014272 & 0.000286 & 1.47 $\pm$ 0.86 & 51.79 $\pm$ 12.73 \\
 \end{tabular}
 \end{table}
 
-The representation remains unchanged throughout all operating conditions. Only the locally estimated operational radius differs between deployments.
+
 
 The stability experiment supports the central deployment hypothesis:
 the transferable object is the nominal representation, while each physical
@@ -1837,8 +1715,6 @@ CPU latency (p95) & 6.62 ms & Local residual buffer & 100 samples \\
 \end{tabular}
 \end{table}
 
-Each bearing converges to a different operational radius despite sharing exactly the same nominal representation.
-
 
 \section{Mathematical Scope and Deployment Guarantees}
 \label{sec:math_perspective}
@@ -1879,20 +1755,18 @@ Together, these results justify treating diagnosis as membership testing around 
 
 \section{Discussion}
 \label{sec:discussion}
-Calibration should not be interpreted as parameter tuning. It is the identification of an unknown physical property of the monitored asset: its nominal operational radius.
-
 The principal result of this work is not that a Conv1D autoencoder can separate CWRU fault
 classes, a capability already demonstrated extensively in the literature. The contribution lies
 instead in the deployment methodology: a single canonical nominal representation can be shared
 across heterogeneous assets, while each physical unit independently estimates its own operational
 radius without retraining the representation.
-
 From a procurement perspective, this separation gives fleet operators a concrete basis for
 specifying deployment requirements: rather than accepting per-asset models developed ad hoc by
 each vendor, an operator can require a single validated, versioned nominal representation
 together with documented local calibration behaviour, independent of which organization,
 component OEM, third-party analytics provider, or in-house engineering team, produces and
 maintains it.
+
 
 The repeated-run and initialization-robustness experiments jointly support this claim from two
 sides. Independent random initializations converge to slightly different reconstruction-error
@@ -1925,39 +1799,6 @@ stability criterion is met, after which the radius is frozen or tightly constrai
 the edge footprint reported in Section~\ref{sec:edge-results}, this deployment model enables
 day-one monitoring without fault labels, isolates asset-specific adaptation to local calibration,
 and requires only lightweight edge computation.
-
-Conventional CBM deployments typically require asset-specific engineering of models and alarm thresholds. The present results suggest that this engineering effort can instead be replaced by a standardized commissioning procedure in which every asset estimates its own operational radius while reusing a common nominal representation.
-
-\begin{remark}
-The variability observed for the 1750\,RPM commissioning samples is not
-specific to the shared-representation architecture. It reflects the
-finite-sample uncertainty inherent in estimating an upper empirical
-quantile before the complete nominal distribution is available. An
-asset-specific detector calibrated from the same limited commissioning
-sample would be subject to the same statistical limitation; the
-complete-data oracle avoids it only by assuming retrospective access to all
-healthy observations.
-\end{remark}
-
-The convergence rule used in the present experiments is operational rather
-than universal. Specifically, calibration is declared after the relative
-variation of the empirical p98 radius remains below
-$\varepsilon_C=0.01$ over a look-back interval $L=10$ for
-$m=10$ consecutive updates. These parameters define a configurable trade-off
-between commissioning duration and protection against transient plateaus in
-the upper-quantile estimate. Requiring more consecutive stable updates, a
-longer look-back interval, or a tighter tolerance would generally delay
-deployment but may reduce sensitivity to the particular upper-tail
-observations encountered during short commissioning sequences. Conversely,
-less restrictive settings would shorten calibration at the cost of greater
-threshold variability. The present study does not claim that
-$(L,\varepsilon_C,m)=(10,0.01,10)$ is optimal; it demonstrates that this
-single fixed configuration produced convergence in all evaluated CWRU
-commissioning runs while preserving near-oracle diagnostic performance.
-Systematic selection of these parameters according to application-specific
-false-alarm and commissioning-time requirements remains an important topic
-for future work.
-
 
 
 \subsection{Limitations}
@@ -2037,14 +1878,13 @@ foundation for large-scale edge condition monitoring, where an OEM can centrally
 maintain the shared representation while each deployed asset performs its own lightweight local
 calibration automatically, without operator intervention or manual threshold tuning.
 
-Conventional CBM deployments typically require asset-specific engineering of models and alarm thresholds. The present results suggest that this engineering effort can instead be replaced by a standardized commissioning procedure in which every asset estimates its own operational radius while reusing a common nominal representation.
-The representation is shared. The operational radius is individual.
-
 %\vspace{-0.3cm}
 %\setlength{\bibhang}{1em}
 %\setlength{\bibitemsep}{0.4em plus 0.02em minus 0.02em}
 %\renewcommand{\bibfont}{\footnotesize}
 %\enlargethispage{3\baselineskip}
 \printbibliography
+
+
 
 \end{document}
