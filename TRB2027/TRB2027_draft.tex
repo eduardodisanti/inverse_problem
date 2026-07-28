@@ -127,13 +127,18 @@ estimates only its own operational radius during commissioning. The
 contribution is therefore a fleet-deployment methodology rather than a new
 anomaly-detection architecture.
 
-\textbf{Practical Applications:} A validated nominal representation can be developed, versioned, and
-maintained centrally for each compatible asset family, for example by an
-original equipment manufacturer, and distributed unchanged across the
-corresponding fleet. Each installed asset requires only a short unsupervised
-commissioning phase and lightweight edge inference, eliminating per-asset
-representation training and manual threshold engineering during fleet
-rollout.
+\textbf{Practical Applications:} A validated nominal representation can be
+developed, versioned, and maintained once for a compatible asset family,
+for example by an original equipment manufacturer, and distributed
+unchanged across the corresponding fleet. Deployment no longer requires
+collecting large asset-specific datasets, training and validating an
+independent representation for every installed unit, or maintaining
+asset-specific model versions. Instead, each asset performs only a short
+unsupervised commissioning procedure to estimate its own local operational
+radius while reusing the shared representation. The methodology is equally
+compatible with centralized and edge deployment architectures, since only
+lightweight local inference and operational-radius estimation are required
+after installation.
 
 \end{abstract}
 
@@ -529,7 +534,7 @@ A related and rapidly growing literature addresses cross-condition and
 cross-machine transfer through domain adaptation, typically aligning source
 and target feature distributions via maximum mean discrepancy, adversarial
 domain classifiers, or pseudo-labeled fine-tuning
-\cite{wang2026fleet,nguyen2025subdomain,Ning10012026}. These methods
+\cite{wang2026fleet,nguyen2025subdomain,ning2026digitaltwin}. These methods
 substantially reduce the need for labeled target-domain faults and have
 demonstrated strong cross-condition accuracy on CWRU and related
 benchmarks. However, they still require access to target-domain
@@ -673,9 +678,11 @@ transfer to the independent CWRU and NASA IMS benchmarks.
 \paragraph{Stage 2 --- Direct simulation-to-field deployment on CWRU.}
 
 The nominal representation trained in Stage~1 is transferred unchanged to the
-Case Western Reserve University (CWRU) Drive-End dataset.
+Case Western Reserve University (CWRU) Drive-End dataset. Following common
+practice for this accelerometer channel, signals are sampled at 12\,kHz, so
+that each 1,200-sample window corresponds to a 100\,ms acquisition interval.
 No CWRU observation is used for representation learning, retraining, or
-fine tuning.
+fine-tuning.
 
 Each operating condition is treated as an independent deployment environment.
 During commissioning, healthy observations are processed sequentially.
@@ -1418,15 +1425,6 @@ across the five independent commissioning sequences.
 
 \begin{table}[H]
 \centering
-\caption{Robustness of convergence-based local calibration to commissioning
-sample variability. The shared simulator-trained representation and all
-calibration parameters remained fixed; only the healthy commissioning
-observations and their arrival order were varied. Values are reported as
-mean $\pm$ standard deviation over five independent commissioning
-realizations. FAR is evaluated only on healthy observations excluded from
-calibration.}
-\label{tab:initialization-robustness}
-
 \resizebox{\linewidth}{!}{
 \begin{tabular}{lccccccc}
 \toprule
@@ -1478,6 +1476,14 @@ $64.4 \pm 26.0$ \\
 
 \bottomrule
 \end{tabular}}
+\caption{Robustness of convergence-based local calibration to commissioning
+sample variability. The shared simulator-trained representation and all
+calibration parameters remained fixed; only the healthy commissioning
+observations and their arrival order were varied. Values are reported as
+mean $\pm$ standard deviation over five independent commissioning
+realizations. FAR is evaluated only on healthy observations excluded from
+calibration.}
+\label{tab:initialization-robustness}
 \end{table}
 
 All 20 commissioning runs satisfied the convergence criterion before
@@ -1485,7 +1491,11 @@ reaching the maximum calibration budget, yielding a calibration success
 rate of 100\%. Across all operating conditions, the estimated operational
 radius remained within $2.08 \pm 0.71$\% of the complete-data oracle, while
 the fleet-averaged post-calibration healthy false-alarm rate was
-$3.59 \pm 1.59$\%. Fault-detection performance remained essentially unchanged throughout all
+$3.59 \pm 1.59$\%. Both quantities are computed in two stages: for each of
+the five commissioning seeds, the metric is first averaged across the four
+CWRU operating conditions, yielding five seed-level values; the reported
+mean and standard deviation are then taken across these five values.
+Fault-detection performance remained essentially unchanged throughout all
 commissioning realizations, indicating that the complete deployment
 procedure is robust to realistic variability in the local initialization
 sample and its arrival order.
@@ -1632,10 +1642,13 @@ Mean &
 94.61 &
 45.42
 \\
-
 \bottomrule
 \end{tabular}}
 \end{table}
+Bearing 3 exhibits the largest relative deviation from its oracle radius
+(2.87\%) among the four monitored units. This is consistent with its
+higher sensitivity to commissioning-sample variability, as quantified in
+Section~\ref{sec:nasa-stability-sec}.
 
 These results demonstrate that the transferable engineering artefact is the shared nominal representation rather than an asset-specific detector.
 The same representation identifies substantially different operational radii for different physical assets while requiring neither representation retraining nor threshold engineering.
@@ -1644,7 +1657,7 @@ Once estimated during commissioning, each operational radius continues to separa
 %---------------------------------------------------------------------
 \subsubsection{Stability of local operational-radius estimation}
 %---------------------------------------------------------------------
-
+\label{sec:nasa-stability-sec}
 A practical deployment methodology must be robust to the particular
 early-life observations encountered during commissioning and to their
 arrival order. To evaluate this property, the shared representation was kept
