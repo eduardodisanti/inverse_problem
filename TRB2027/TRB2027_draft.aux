@@ -41,10 +41,10 @@
 \abx@aux@page{5}{2}
 \abx@aux@page{6}{2}
 \abx@aux@page{7}{2}
-\abx@aux@page{8}{2}
-\abx@aux@page{9}{2}
 \abx@aux@cite{0}{smith2015}
 \abx@aux@segm{0}{0}{smith2015}
+\abx@aux@page{8}{3}
+\abx@aux@page{9}{3}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces  Conventional fleet deployment requires engineering, validating, versioning and maintaining an independent nominal representation for each monitored asset. The proposed deployment architecture instead distributes one shared nominal representation unchanged across the fleet, while each asset estimates only its local operational radius during commissioning. The NASA IMS experiments demonstrate that these locally estimated radii differ substantially between physical assets, despite using the same representation, the same target nominal coverage, and the same convergence criterion. \relax }}{3}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:oem-deployment}{{1}{3}{Conventional fleet deployment requires engineering, validating, versioning and maintaining an independent nominal representation for each monitored asset. The proposed deployment architecture instead distributes one shared nominal representation unchanged across the fleet, while each asset estimates only its local operational radius during commissioning. The NASA IMS experiments demonstrate that these locally estimated radii differ substantially between physical assets, despite using the same representation, the same target nominal coverage, and the same convergence criterion. \relax }{figure.caption.1}{}}
@@ -55,6 +55,11 @@
 \abx@aux@segm{0}{0}{chandola2009}
 \abx@aux@cite{0}{zhao2019}
 \abx@aux@segm{0}{0}{zhao2019}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{4}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{4}{Related Work}{section.2}{}}
+\abx@aux@page{11}{4}
+\abx@aux@page{12}{4}
+\abx@aux@page{13}{4}
 \abx@aux@cite{0}{scholkopf1999}
 \abx@aux@segm{0}{0}{scholkopf1999}
 \abx@aux@cite{0}{bishop1994}
@@ -63,11 +68,6 @@
 \abx@aux@segm{0}{0}{hinton2006}
 \abx@aux@cite{0}{sakurada2014}
 \abx@aux@segm{0}{0}{sakurada2014}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{4}{section.2}\protected@file@percent }
-\newlabel{sec:related}{{2}{4}{Related Work}{section.2}{}}
-\abx@aux@page{11}{4}
-\abx@aux@page{12}{4}
-\abx@aux@page{13}{4}
 \abx@aux@cite{0}{bronstein2021}
 \abx@aux@segm{0}{0}{bronstein2021}
 \abx@aux@cite{0}{li2023invariant}
@@ -76,8 +76,8 @@
 \abx@aux@segm{0}{0}{wang2026fleet}
 \abx@aux@cite{0}{nguyen2025subdomain}
 \abx@aux@segm{0}{0}{nguyen2025subdomain}
-\abx@aux@cite{0}{chen2026digitaltwin}
-\abx@aux@segm{0}{0}{chen2026digitaltwin}
+\abx@aux@cite{0}{Ning10012026}
+\abx@aux@segm{0}{0}{Ning10012026}
 \abx@aux@cite{0}{disanti2026inverse}
 \abx@aux@segm{0}{0}{disanti2026inverse}
 \abx@aux@cite{0}{disanti2026quotient}
@@ -100,7 +100,13 @@
 \newlabel{eq:decision}{{2}{6}{Deployment architecture: shared representation, local operational radius}{equation.3.2}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4}Experimental Design}{6}{section.4}\protected@file@percent }
 \newlabel{sec:experimental_design}{{4}{6}{Experimental Design}{section.4}{}}
-\@writefile{toc}{\contentsline {paragraph}{Stage 1 --- Controlled multi-asset simulation.}{7}{section*.2}\protected@file@percent }
+\abx@aux@cite{0}{disanti2026quotient}
+\abx@aux@segm{0}{0}{disanti2026quotient}
+\abx@aux@cite{0}{disanti2026inverse}
+\abx@aux@segm{0}{0}{disanti2026inverse}
+\@writefile{toc}{\contentsline {paragraph}{Stage 1 --- Construction of the shared nominal representation.}{7}{section*.2}\protected@file@percent }
+\abx@aux@page{25}{7}
+\abx@aux@page{26}{7}
 \@writefile{toc}{\contentsline {paragraph}{Stage 2 --- Direct simulation-to-field deployment on CWRU.}{7}{section*.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Stage 3 --- Reference comparison and calibration ablation.}{7}{section*.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Stage 4 --- Multi-unit run-to-failure validation on NASA IMS.}{8}{section*.5}\protected@file@percent }
@@ -113,105 +119,95 @@
 \newlabel{tab:asset-specific-by-condition}{{1}{9}{Ideal asset-specific autoencoder performance on CWRU. Each autoencoder is trained and calibrated independently using the complete healthy dataset of the corresponding operating condition. FAR denotes healthy false-alarm rate and DR denotes fault detection rate.\relax }{table.caption.7}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Repeated-run stability of the asset-specific autoencoder}{10}{subsection.5.2}\protected@file@percent }
 \newlabel{sec:ae-stability}{{5.2}{10}{Repeated-run stability of the asset-specific autoencoder}{subsection.5.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Stability of the reconstruction threshold\relax }}{10}{table.caption.8}\protected@file@percent }
-\newlabel{tab:ae-threshold-stability}{{2}{10}{Stability of the reconstruction threshold\relax }{table.caption.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Repeated-run variability of the asset-specific reconstruction threshold over five independent random initialisations.\relax }}{10}{table.caption.8}\protected@file@percent }
+\newlabel{tab:ae-threshold-stability}{{2}{10}{Repeated-run variability of the asset-specific reconstruction threshold over five independent random initialisations.\relax }{table.caption.8}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Direct simulation-to-field deployment}{10}{subsection.5.3}\protected@file@percent }
 \newlabel{sec:shared-deployment-results}{{5.3}{10}{Direct simulation-to-field deployment}{subsection.5.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Simulation-to-field deployment of the shared autoencoder on CWRU. FAR denotes healthy false-alarm rate and DR denotes fault detection rate. The field oracle uses every available healthy window, whereas the proposed online procedure stops automatically when the empirical p98 radius satisfies the convergence criterion. Healthy FAR is calculated over the complete healthy dataset to permit direct comparison between calibration strategies. A dash indicates that sequential calibration is not applicable.\relax }}{11}{table.caption.9}\protected@file@percent }
-\newlabel{tab:shared-deployment}{{3}{11}{Simulation-to-field deployment of the shared autoencoder on CWRU. FAR denotes healthy false-alarm rate and DR denotes fault detection rate. The field oracle uses every available healthy window, whereas the proposed online procedure stops automatically when the empirical p98 radius satisfies the convergence criterion. Healthy FAR is calculated over the complete healthy dataset to permit direct comparison between calibration strategies. A dash indicates that sequential calibration is not applicable.\relax }{table.caption.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Simulation-to-field deployment of the shared autoencoder on CWRU. FAR denotes healthy false-alarm rate and DR denotes fault detection rate. The field oracle uses every available healthy window, whereas the proposed online procedure stops automatically when the empirical p98 radius satisfies the convergence criterion. Healthy FAR is evaluated over the complete healthy sequence to permit direct comparison between calibration strategies, including observations used during commissioning. A dash indicates that sequential calibration is not applicable.\relax }}{11}{table.caption.9}\protected@file@percent }
+\newlabel{tab:shared-deployment}{{3}{11}{Simulation-to-field deployment of the shared autoencoder on CWRU. FAR denotes healthy false-alarm rate and DR denotes fault detection rate. The field oracle uses every available healthy window, whereas the proposed online procedure stops automatically when the empirical p98 radius satisfies the convergence criterion. Healthy FAR is evaluated over the complete healthy sequence to permit direct comparison between calibration strategies, including observations used during commissioning. A dash indicates that sequential calibration is not applicable.\relax }{table.caption.9}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Cost of scalable deployment}{11}{subsection.5.4}\protected@file@percent }
 \newlabel{sec:deployment-cost}{{5.4}{11}{Cost of scalable deployment}{subsection.5.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Ideal but non-scalable asset-specific deployment versus the proposed fleet-scalable deployment. Values are mean $\pm $ standard deviation across the four CWRU operating conditions.\relax }}{12}{table.caption.10}\protected@file@percent }
-\newlabel{tab:oracle-vs-proposed}{{4}{12}{Ideal but non-scalable asset-specific deployment versus the proposed fleet-scalable deployment. Values are mean $\pm $ standard deviation across the four CWRU operating conditions.\relax }{table.caption.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Ideal but non-scalable asset-specific deployment versus the proposed fleet-scalable deployment. Values are mean $\pm $ standard deviation across the four CWRU operating conditions. The shared field-oracle strategy uses the complete healthy dataset only to estimate the local radius; it does not retrain the shared representation.\relax }}{12}{table.caption.10}\protected@file@percent }
+\newlabel{tab:oracle-vs-proposed}{{4}{12}{Ideal but non-scalable asset-specific deployment versus the proposed fleet-scalable deployment. Values are mean $\pm $ standard deviation across the four CWRU operating conditions. The shared field-oracle strategy uses the complete healthy dataset only to estimate the local radius; it does not retrain the shared representation.\relax }{table.caption.10}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Agreement between the converged online operational radius and the complete-data field-oracle p98 reference. Relative difference is computed as $100|\tau _{\mathrm  {online}}-\tau _{\mathrm  {oracle}}|/ \tau _{\mathrm  {oracle}}$. Post-calibration FAR is evaluated only on healthy windows occurring after the declared convergence point.\relax }}{12}{table.caption.11}\protected@file@percent }
 \newlabel{tab:online-oracle-agreement}{{5}{12}{Agreement between the converged online operational radius and the complete-data field-oracle p98 reference. Relative difference is computed as $100|\tau _{\mathrm {online}}-\tau _{\mathrm {oracle}}|/ \tau _{\mathrm {oracle}}$. Post-calibration FAR is evaluated only on healthy windows occurring after the declared convergence point.\relax }{table.caption.11}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Operational-radius convergence}{12}{subsection.5.5}\protected@file@percent }
 \newlabel{sec:radius-convergence-results}{{5.5}{12}{Operational-radius convergence}{subsection.5.5}{}}
-\newlabel{eq:tau-online-p98}{{3}{12}{Operational-radius convergence}{equation.5.3}{}}
-\newlabel{eq:tau-field-p98}{{4}{12}{Operational-radius convergence}{equation.5.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Sequential estimation of the empirical p98 operational radius during CWRU commissioning. For each operating condition, the blue segment shows the online estimate $\tau _k(t)=\setbox \z@ \hbox {\mathsurround \z@ $\textstyle Q$}\mathaccent "0362{Q}_{k,t}(0.98)$ until the convergence criterion is satisfied. The red dotted line marks the declared convergence point, at which the operational radius is frozen and active monitoring begins. The gray segment is a retrospective continuation obtained by incorporating additional observations known from the benchmark to be healthy; it is shown only to characterize the subsequent behaviour of the estimator and is not used to modify the deployed decision boundary. The horizontal dashed line indicates the complete-data field-oracle p98 reference.\relax }}{13}{figure.caption.12}\protected@file@percent }
-\newlabel{fig:tau-convergence}{{2}{13}{Sequential estimation of the empirical p98 operational radius during CWRU commissioning. For each operating condition, the blue segment shows the online estimate $\tau _k(t)=\widehat {Q}_{k,t}(0.98)$ until the convergence criterion is satisfied. The red dotted line marks the declared convergence point, at which the operational radius is frozen and active monitoring begins. The gray segment is a retrospective continuation obtained by incorporating additional observations known from the benchmark to be healthy; it is shown only to characterize the subsequent behaviour of the estimator and is not used to modify the deployed decision boundary. The horizontal dashed line indicates the complete-data field-oracle p98 reference.\relax }{figure.caption.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Robustness to local initialization}{14}{subsection.5.6}\protected@file@percent }
-\newlabel{sec:initialization-robustness}{{5.6}{14}{Robustness to local initialization}{subsection.5.6}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Robustness of convergence-based local calibration to commissioning sample variability. The shared simulator-trained representation and all calibration parameters remained fixed; only the healthy commissioning observations and their arrival order were varied. Values are reported as mean $\pm $ standard deviation over five independent commissioning realizations. FAR is evaluated only on healthy observations excluded from calibration.\relax }}{14}{table.caption.13}\protected@file@percent }
-\newlabel{tab:initialization-robustness}{{6}{14}{Robustness of convergence-based local calibration to commissioning sample variability. The shared simulator-trained representation and all calibration parameters remained fixed; only the healthy commissioning observations and their arrival order were varied. Values are reported as mean $\pm $ standard deviation over five independent commissioning realizations. FAR is evaluated only on healthy observations excluded from calibration.\relax }{table.caption.13}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Multi-unit run-to-failure deployment on NASA IMS}{15}{subsection.5.7}\protected@file@percent }
-\newlabel{sec:nasa-results}{{5.7}{15}{Multi-unit run-to-failure deployment on NASA IMS}{subsection.5.7}{}}
+\newlabel{eq:tau-online-p98}{{3}{13}{Operational-radius convergence}{equation.5.3}{}}
+\newlabel{eq:convergence}{{4}{13}{Operational-radius convergence}{equation.5.4}{}}
+\newlabel{eq:tau-field-p98}{{5}{13}{Operational-radius convergence}{equation.5.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Sequential estimation of the empirical p98 operational radius during CWRU commissioning. For each operating condition, the blue segment shows the online estimate defined in Eq.\nobreakspace  {}\eqref  {eq:tau-online-p98}, $\tau _k(t)=\setbox \z@ \hbox {\mathsurround \z@ $\textstyle Q$}\mathaccent "0362{Q}_{k,t}(0.98)$, until the convergence criterion is satisfied. The red dotted line marks the declared convergence point, at which the operational radius is frozen and active monitoring begins. The gray segment is a retrospective continuation obtained by incorporating additional observations known from the benchmark to be healthy; it is shown only to characterize the subsequent behaviour of the estimator and is not used to modify the deployed operational radius. The horizontal dashed line indicates the complete-data field-oracle reference defined in Eq.\nobreakspace  {}\eqref  {eq:tau-field-p98}.\relax }}{14}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:tau-convergence}{{2}{14}{Sequential estimation of the empirical p98 operational radius during CWRU commissioning. For each operating condition, the blue segment shows the online estimate defined in Eq.~\eqref {eq:tau-online-p98}, $\tau _k(t)=\widehat {Q}_{k,t}(0.98)$, until the convergence criterion is satisfied. The red dotted line marks the declared convergence point, at which the operational radius is frozen and active monitoring begins. The gray segment is a retrospective continuation obtained by incorporating additional observations known from the benchmark to be healthy; it is shown only to characterize the subsequent behaviour of the estimator and is not used to modify the deployed operational radius. The horizontal dashed line indicates the complete-data field-oracle reference defined in Eq.~\eqref {eq:tau-field-p98}.\relax }{figure.caption.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Robustness to local initialization}{15}{subsection.5.6}\protected@file@percent }
+\newlabel{sec:initialization-robustness}{{5.6}{15}{Robustness to local initialization}{subsection.5.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Robustness of convergence-based local calibration to commissioning sample variability. The shared simulator-trained representation and all calibration parameters remained fixed; only the healthy commissioning observations and their arrival order were varied. Values are reported as mean $\pm $ standard deviation over five independent commissioning realizations. FAR is evaluated only on healthy observations excluded from calibration.\relax }}{15}{table.caption.13}\protected@file@percent }
+\newlabel{tab:initialization-robustness}{{6}{15}{Robustness of convergence-based local calibration to commissioning sample variability. The shared simulator-trained representation and all calibration parameters remained fixed; only the healthy commissioning observations and their arrival order were varied. Values are reported as mean $\pm $ standard deviation over five independent commissioning realizations. FAR is evaluated only on healthy observations excluded from calibration.\relax }{table.caption.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Multi-unit run-to-failure deployment on NASA IMS}{16}{subsection.5.7}\protected@file@percent }
+\newlabel{sec:nasa-results}{{5.7}{16}{Multi-unit run-to-failure deployment on NASA IMS}{subsection.5.7}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces NASA IMS deployment results using one shared simulator-trained representation and convergence-based local operational-radius estimation.\relax }}{16}{table.caption.14}\protected@file@percent }
 \newlabel{tab:nasa-main-results}{{7}{16}{NASA IMS deployment results using one shared simulator-trained representation and convergence-based local operational-radius estimation.\relax }{table.caption.14}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.7.1}Stability of local operational-radius estimation}{16}{subsubsection.5.7.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Stability of local operational-radius estimation under repeated NASA commissioning experiments using one fixed shared representation.\relax }}{16}{table.caption.15}\protected@file@percent }
-\newlabel{tab:nasa-stability}{{8}{16}{Stability of local operational-radius estimation under repeated NASA commissioning experiments using one fixed shared representation.\relax }{table.caption.15}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Edge deployment implications}{16}{subsection.5.8}\protected@file@percent }
-\newlabel{sec:edge-results}{{5.8}{16}{Edge deployment implications}{subsection.5.8}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.7.1}Stability of local operational-radius estimation}{17}{subsubsection.5.7.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Stability of local operational-radius estimation under repeated NASA commissioning experiments using one fixed shared representation.\relax }}{17}{table.caption.15}\protected@file@percent }
+\newlabel{tab:nasa-stability}{{8}{17}{Stability of local operational-radius estimation under repeated NASA commissioning experiments using one fixed shared representation.\relax }{table.caption.15}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Edge deployment implications}{17}{subsection.5.8}\protected@file@percent }
+\newlabel{sec:edge-results}{{5.8}{17}{Edge deployment implications}{subsection.5.8}{}}
 \abx@aux@cite{0}{disanti2026quotient}
 \abx@aux@segm{0}{0}{disanti2026quotient}
 \abx@aux@cite{0}{disanti2026inverse}
 \abx@aux@segm{0}{0}{disanti2026inverse}
-\abx@aux@cite{0}{rudin1976}
-\abx@aux@segm{0}{0}{rudin1976}
-\abx@aux@cite{0}{disanti2026inverse}
-\abx@aux@segm{0}{0}{disanti2026inverse}
-\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Edge-deployment footprint of the proposed shared nominal representation.\relax }}{17}{table.caption.16}\protected@file@percent }
-\newlabel{tab:edge}{{9}{17}{Edge-deployment footprint of the proposed shared nominal representation.\relax }{table.caption.16}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Mathematical Scope and Deployment Guarantees}{17}{section.6}\protected@file@percent }
-\newlabel{sec:math_perspective}{{6}{17}{Mathematical Scope and Deployment Guarantees}{section.6}{}}
-\abx@aux@page{25}{17}
-\abx@aux@page{26}{17}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Observation model}{17}{subsection.6.1}\protected@file@percent }
-\newlabel{sec:obs_model}{{6.1}{17}{Observation model}{subsection.6.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Compactness and factorization}{17}{subsection.6.2}\protected@file@percent }
-\newlabel{sec:compactness}{{6.2}{17}{Compactness and factorization}{subsection.6.2}{}}
-\newlabel{prop:compactness}{{1}{17}{Relative compactness of the nominal orbit}{proposition.1}{}}
-\abx@aux@page{27}{17}
-\abx@aux@page{28}{17}
-\abx@aux@cite{0}{disanti2026inverse}
-\abx@aux@segm{0}{0}{disanti2026inverse}
-\newlabel{prop:factorization_prop}{{2}{18}{Factorization through the nuisance quotient}{proposition.2}{}}
-\abx@aux@page{29}{18}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Discussion}{18}{section.7}\protected@file@percent }
-\newlabel{sec:discussion}{{7}{18}{Discussion}{section.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Edge-deployment footprint of the proposed shared nominal representation.\relax }}{18}{table.caption.16}\protected@file@percent }
+\newlabel{tab:edge}{{9}{18}{Edge-deployment footprint of the proposed shared nominal representation.\relax }{table.caption.16}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Mathematical Scope and Deployment Guarantees}{18}{section.6}\protected@file@percent }
+\newlabel{sec:math_perspective}{{6}{18}{Mathematical Scope and Deployment Guarantees}{section.6}{}}
+\abx@aux@page{27}{18}
+\abx@aux@page{28}{18}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Observation model}{18}{subsection.6.1}\protected@file@percent }
+\newlabel{sec:obs_model}{{6.1}{18}{Observation model}{subsection.6.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Compactness and factorization}{18}{subsection.6.2}\protected@file@percent }
+\newlabel{sec:compactness}{{6.2}{18}{Compactness and factorization}{subsection.6.2}{}}
+\newlabel{prop:compactness}{{1}{18}{Compactness of the nominal observation set}{proposition.1}{}}
+\newlabel{prop:factorization_prop}{{2}{19}{Factorization through the diagnostic quotient}{proposition.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Discussion}{19}{section.7}\protected@file@percent }
+\newlabel{sec:discussion}{{7}{19}{Discussion}{section.7}{}}
 \abx@aux@cite{0}{disanti2026inverse}
 \abx@aux@segm{0}{0}{disanti2026inverse}
 \abx@aux@cite{0}{disanti2026quotient}
 \abx@aux@segm{0}{0}{disanti2026quotient}
 \abx@aux@cite{0}{disanti2025blueprints}
 \abx@aux@segm{0}{0}{disanti2025blueprints}
-\abx@aux@page{30}{19}
-\abx@aux@page{31}{19}
-\abx@aux@page{32}{19}
+\abx@aux@page{29}{20}
+\abx@aux@page{30}{20}
+\abx@aux@page{31}{20}
 \abx@aux@cite{0}{disanti2026quotient}
 \abx@aux@segm{0}{0}{disanti2026quotient}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Limitations}{20}{subsection.7.1}\protected@file@percent }
-\newlabel{sec:limitations}{{7.1}{20}{Limitations}{subsection.7.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Future Work}{20}{subsection.7.2}\protected@file@percent }
-\abx@aux@page{33}{20}
-\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{20}{section.8}\protected@file@percent }
-\abx@aux@page{34}{21}
-\abx@aux@page{35}{21}
-\abx@aux@page{36}{21}
-\abx@aux@page{37}{21}
-\abx@aux@page{38}{21}
-\abx@aux@page{39}{21}
-\abx@aux@page{40}{21}
-\abx@aux@page{41}{21}
-\abx@aux@page{42}{21}
-\abx@aux@page{43}{21}
-\abx@aux@page{44}{21}
-\abx@aux@page{45}{21}
-\abx@aux@page{46}{22}
-\abx@aux@page{47}{22}
-\abx@aux@page{48}{22}
-\abx@aux@page{49}{22}
-\abx@aux@page{50}{22}
-\abx@aux@page{51}{22}
-\abx@aux@page{52}{22}
-\abx@aux@read@bbl@mdfivesum{0A6AE5B21DF005DCC8D585F725DFAA7A}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Limitations}{21}{subsection.7.1}\protected@file@percent }
+\newlabel{sec:limitations}{{7.1}{21}{Limitations}{subsection.7.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Future Work}{21}{subsection.7.2}\protected@file@percent }
+\abx@aux@page{32}{21}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{22}{section.8}\protected@file@percent }
+\abx@aux@page{33}{22}
+\abx@aux@page{34}{22}
+\abx@aux@page{35}{22}
+\abx@aux@page{36}{22}
+\abx@aux@page{37}{22}
+\abx@aux@page{38}{22}
+\abx@aux@page{39}{23}
+\abx@aux@page{40}{23}
+\abx@aux@page{41}{23}
+\abx@aux@page{42}{23}
+\abx@aux@page{43}{23}
+\abx@aux@page{44}{23}
+\abx@aux@page{45}{23}
+\abx@aux@page{46}{23}
+\abx@aux@page{47}{23}
+\abx@aux@page{48}{23}
+\abx@aux@page{49}{23}
+\abx@aux@page{50}{23}
+\abx@aux@read@bbl@mdfivesum{3F9FE8A484394A0B086003C534DC34A5}
 \abx@aux@defaultrefcontext{0}{bishop1994}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{bronstein2021}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{li2023invariant}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{chandola2009}{nyt/global//global/global}
-\abx@aux@defaultrefcontext{0}{chen2026digitaltwin}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{disanti2025blueprints}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{disanti2026quotient}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{disanti2026inverse}{nyt/global//global/global}
@@ -219,11 +215,11 @@
 \abx@aux@defaultrefcontext{0}{hinton2006}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{nguyen2025subdomain}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{jardine2006}{nyt/global//global/global}
+\abx@aux@defaultrefcontext{0}{Ning10012026}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{randall2011}{nyt/global//global/global}
-\abx@aux@defaultrefcontext{0}{rudin1976}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{sakurada2014}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{scholkopf1999}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{smith2015}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{wang2026fleet}{nyt/global//global/global}
 \abx@aux@defaultrefcontext{0}{zhao2019}{nyt/global//global/global}
-\gdef \@abspage@last{22}
+\gdef \@abspage@last{23}

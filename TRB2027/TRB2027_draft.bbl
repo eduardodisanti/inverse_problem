@@ -179,32 +179,6 @@
       \verb 10.1145/1541880.1541882
       \endverb
     \endentry
-    \entry{chen2026digitaltwin}{article}{}
-      \true{moreauthor}
-      \true{morelabelname}
-      \name{author}{1}{}{%
-        {{hash=4586ef311c4aae361d131d5ea09c75a2}{%
-           family={Chen},
-           familyi={C\bibinitperiod},
-           given={[Nombre]},
-           giveni={[\bibinitperiod}}}%
-      }
-      \strng{namehash}{d71b68aa2eddc21dc961d488c3eef273}
-      \strng{fullhash}{d71b68aa2eddc21dc961d488c3eef273}
-      \strng{bibnamehash}{d71b68aa2eddc21dc961d488c3eef273}
-      \strng{authorbibnamehash}{d71b68aa2eddc21dc961d488c3eef273}
-      \strng{authornamehash}{d71b68aa2eddc21dc961d488c3eef273}
-      \strng{authorfullhash}{d71b68aa2eddc21dc961d488c3eef273}
-      \field{sortinit}{C}
-      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Systems Science \& Control Engineering}
-      \field{title}{A digital twin-driven cross-domain adaptation method for bearing intelligent fault diagnosis}
-      \field{year}{2026}
-    \endentry
     \entry{disanti2025blueprints}{article}{}
       \name{author}{1}{}{%
         {{hash=d7624ed290ebb2251bf0deddf23f183d}{%
@@ -471,6 +445,69 @@
       \verb 10.1016/j.ymssp.2005.09.012
       \endverb
     \endentry
+    \entry{Ning10012026}{article}{}
+      \name{author}{5}{}{%
+        {{hash=7f767255518572617501e73a3ce27e69}{%
+           family={Ning},
+           familyi={N\bibinitperiod},
+           given={Siyuan},
+           giveni={S\bibinitperiod}}}%
+        {{hash=567dee5f618fbf8f791f8b60d3497940}{%
+           family={Qiao},
+           familyi={Q\bibinitperiod},
+           given={Zijian},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=615f6c4c26953db2defd9f4f3f609450}{%
+           family={Peng},
+           familyi={P\bibinitperiod},
+           given={Bohao},
+           giveni={B\bibinitperiod}}}%
+        {{hash=314dafeca8c1fe6ac490a226e6275926}{%
+           family={Zhu},
+           familyi={Z\bibinitperiod},
+           given={Ronghua},
+           giveni={R\bibinitperiod}}}%
+        {{hash=bf6efb49c2fa5e6ce3eb9f6afa2b2747}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Cailiang},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Taylor \& Francis}%
+      }
+      \strng{namehash}{f3e46fec74bf998ae867417152a328b1}
+      \strng{fullhash}{ae105dcc710d6888b12091567c969330}
+      \strng{bibnamehash}{ae105dcc710d6888b12091567c969330}
+      \strng{authorbibnamehash}{ae105dcc710d6888b12091567c969330}
+      \strng{authornamehash}{f3e46fec74bf998ae867417152a328b1}
+      \strng{authorfullhash}{ae105dcc710d6888b12091567c969330}
+      \field{sortinit}{N}
+      \field{sortinithash}{22369a73d5f88983a108b63f07f37084}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Nondestructive Testing and Evaluation}
+      \field{number}{0}
+      \field{title}{A digital twin-driven cross-domain adaptation method for bearing intelligent fault diagnosis}
+      \field{volume}{0}
+      \field{year}{2026}
+      \field{pages}{1\bibrangedash 23}
+      \range{pages}{23}
+      \verb{doi}
+      \verb 10.1080/10589759.2025.2610726
+      \endverb
+      \verb{eprint}
+      \verb https://doi.org/10.1080/10589759.2025.2610726
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1080/10589759.2025.2610726
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1080/10589759.2025.2610726
+      \endverb
+    \endentry
     \entry{randall2011}{article}{}
       \name{author}{2}{}{%
         {{hash=ff9fdebf11515a32b4cd580da1b011a5}{%
@@ -506,33 +543,6 @@
       \verb{doi}
       \verb 10.1016/j.ymssp.2010.07.017
       \endverb
-    \endentry
-    \entry{rudin1976}{book}{}
-      \name{author}{1}{}{%
-        {{hash=33be2fc2739d3493c6d6cc5d56a4c41e}{%
-           family={Rudin},
-           familyi={R\bibinitperiod},
-           given={Walter},
-           giveni={W\bibinitperiod}}}%
-      }
-      \list{publisher}{1}{%
-        {McGraw-Hill}%
-      }
-      \strng{namehash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \strng{fullhash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \strng{bibnamehash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \strng{authorbibnamehash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \strng{authornamehash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \strng{authorfullhash}{33be2fc2739d3493c6d6cc5d56a4c41e}
-      \field{sortinit}{R}
-      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{edition}{3rd}
-      \field{title}{Principles of Mathematical Analysis}
-      \field{year}{1976}
     \endentry
     \entry{sakurada2014}{inproceedings}{}
       \name{author}{2}{}{%
