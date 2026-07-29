@@ -11,11 +11,8 @@
 \usetikzlibrary{arrows.meta,positioning,calc,fit}
 
 % Theorem environments
-\newtheorem{proposition}{Proposition}
-\newtheorem{corollary}{Corollary}
 \newtheorem{definition}{Definition}
 \newtheorem{remark}{Remark}
-\newtheorem{assumption}{Assumption}
 
 % Mathematical notation
 \newcommand{\X}{\mathcal{X}} 
@@ -208,8 +205,6 @@ monitoring, one-class anomaly detection, adaptive calibration, and fleet deploym
 Section~\ref{sec:method} introduces the deployment methodology.
 Section~\ref{sec:experimental_design} presents the experimental protocol.
 Section~\ref{sec:results} reports the deployment results.
-Section~\ref{sec:math_perspective} summarizes the mathematical interpretation underlying the
-deployment guarantees.
 Section~\ref{sec:discussion} closes with a discussion of industrial implications, limitations,
 and future work.
 
@@ -372,6 +367,21 @@ representation itself rather than an absolute decision threshold.
 Different assets identify different operational radii while sharing exactly
 the same representation, the same target nominal coverage, and the same
 commissioning procedure.
+
+\paragraph{Structural and coverage properties.}
+Two properties support this architecture. First, any residual constant on
+nuisance-induced equivalence classes factors through the diagnostic quotient,
+so a single fleet-wide representation is structurally admissible. Second, if
+the commissioning residuals and a future nominal residual are exchangeable, a
+radius taken as the $k$-th order statistic with
+$k=\lceil(1-\alpha)(n+1)\rceil$ satisfies $P(r_{n+1}\le\tau)\ge 1-\alpha$
+without any assumption on the residual distribution; attaining the target
+coverage requires $n\ge 1/\alpha-1$, or 49 windows at $\alpha=0.02$, which is
+consistent with the commissioning durations reported in
+Section~\ref{sec:results}. The convergence criterion makes $n$ data-dependent,
+so the bound holds approximately rather than exactly. The full
+functional-analytic and topological development is given in our companion work
+\citep{disanti2026quotient,disanti2026inverse}.
 
 %=====================================================================
 \section{Experimental Design}
@@ -580,7 +590,7 @@ own healthy reconstruction-error distribution as its decision boundary.
 Fault observations are never used for representation learning or threshold
 selection.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Ideal asset-specific autoencoder performance on CWRU. Each 
 autoencoder is trained and calibrated independently using the complete
@@ -677,8 +687,11 @@ detection rates for ball-, inner-race-, and outer-race faults remained
 unchanged across repetitions. Only the numerical reconstruction threshold
 varied, as summarized in Table~\ref{tab:ae-threshold-stability}.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
+\caption{Repeated-run variability of the asset-specific reconstruction
+threshold over five independent random initialisations.}
+\label{tab:ae-threshold-stability}
 \begin{tabular}{lc}
 \toprule
 RPM & Reconstruction threshold \\
@@ -689,10 +702,6 @@ RPM & Reconstruction threshold \\
 1797 & $0.459 \pm 0.026$ \\
 \bottomrule
 \end{tabular}
-\caption{Repeated-run variability of the asset-specific reconstruction
-threshold over five independent random initialisations.}
-\label{tab:ae-threshold-stability}
-
 \end{table}
 
 Although the detector was retrained five times on exactly the same healthy
@@ -748,7 +757,7 @@ advance.
 Table~\ref{tab:shared-deployment} reports the complete CWRU deployment
 results.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Simulation-to-field deployment of the shared autoencoder on CWRU.
 FAR denotes healthy false-alarm rate, DR fault detection rate. Healthy FAR
@@ -758,7 +767,6 @@ reported in Table~\ref{tab:online-oracle-agreement}. Healthy windows per conditi
 404 (1730, 1750), 403 (1772), 203 (1797). A dash indicates that sequential
 calibration does not apply.}
 \label{tab:shared-deployment}
-\footnotesize
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}llrrrrrr@{}}
 \toprule
@@ -843,34 +851,34 @@ methodology performs no field-model training and estimates only a local
 operational radius through convergence-based commissioning. Across the four
 CWRU conditions, commissioning required only 49--62 nominal observations.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Ideal but non-scalable asset-specific deployment versus the proposed
 fleet-scalable deployment. Values are mean $\pm$ standard deviation across
 the four CWRU operating conditions. Inner-race DR was $100.00 \pm 0.00$ for
-all three strategies and is omitted. The shared field-oracle strategy uses
-the complete healthy dataset only to estimate the local radius; it does not
+all three strategies and is omitted. The last column states what each strategy
+requires from every deployed asset; the shared field-oracle strategy uses the
+complete healthy dataset only to estimate the local radius and does not
 retrain the shared representation.}
 \label{tab:oracle-vs-proposed}
-\footnotesize
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}lccccc@{}}
+\begin{tabular}{@{}lcccl@{}}
 \toprule
-Deployment strategy & FAR & Ball DR & Outer DR & Field    & Calibration \\
-                    & (\%) & (\%)   & (\%)     & training & data \\
+Deployment strategy & FAR & Ball DR & Outer DR & Required per asset \\
+                    & (\%) & (\%)   & (\%)     &                    \\
 \midrule
 
-Asset-specific AE oracle
+Asset-specific oracle
 & $2.29 \pm 0.12$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$
-& One per condition & All healthy data \\
+& Model + all healthy data \\
 
-Shared AE, field-oracle radius
+Shared AE, oracle radius
 & $2.29 \pm 0.12$ & $99.45 \pm 0.96$ & $99.96 \pm 0.07$
-& None & All healthy data \\
+& All healthy data \\
 
-Proposed: shared AE, online radius
+Proposed: online radius
 & $2.60 \pm 1.18$ & $99.57 \pm 0.71$ & $100.00 \pm 0.00$
-& None & 49--62 observations \\
+& 49--62 observations \\
 
 \bottomrule
 \end{tabular}
@@ -903,7 +911,7 @@ Table~\ref{tab:online-oracle-agreement} examines this local identification
 directly by comparing the converged online radius with the empirical p98
 radius obtained retrospectively from every available healthy observation.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Agreement between the converged online operational radius and the
 complete-data field-oracle p98 reference. Relative difference is computed as
@@ -911,9 +919,6 @@ $100|\tau_{\mathrm{online}}-\tau_{\mathrm{oracle}}|/
 \tau_{\mathrm{oracle}}$. Post-calibration FAR is evaluated only on healthy
 windows occurring after the declared convergence point.}
 \label{tab:online-oracle-agreement}
-
-\footnotesize
-\setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lccccc@{}}
 \toprule
 RPM & $\tau_{\mathrm{oracle}}$ & $\tau_{\mathrm{online}}$ & Relative & Cal.    & Post-cal. \\
@@ -1015,7 +1020,7 @@ that would be obtained under complete nominal knowledge.
 %complete-data field-oracle references by only 1.64\%, 0.19\%, 1.06\%,
 %and 0.44\%, respectively.
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\linewidth]{cwru_tau_convergence.pdf}
 \caption{Sequential estimation of the empirical p98 operational radius
@@ -1092,7 +1097,7 @@ shared representation without retraining.
 
 Table~\ref{tab:initialization-robustness} summarizes the results obtained
 across the five independent commissioning sequences.
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Robustness of convergence-based local calibration to commissioning
 sample variability. The shared simulator-trained representation and all
@@ -1103,8 +1108,7 @@ realizations. Inner-race DR was $100.00 \pm 0.00$ under every condition and
 is omitted. FAR is evaluated only on healthy observations excluded from
 calibration.}
 \label{tab:initialization-robustness}
-\small
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{5pt}
 \begin{tabular}{@{}lcccccc@{}}
 \toprule
 RPM & $\tau_{\mathrm{online}}$ & Oracle    & Post-cal. & Ball DR & Outer DR & Cal.    \\
@@ -1160,15 +1164,15 @@ commissioning experiments was 13.8\%. However, this isolated realization did
 not alter the deployment outcome: convergence was still achieved, the
 estimated operational radius remained within 4\% of the oracle estimate,
 and fault-detection performance remained essentially unchanged.
-
-The observed variability therefore reflects finite-sample uncertainty in
-estimating an extreme empirical quantile rather than instability of the
-proposed deployment methodology. From the quotient-space formulation, this
-behaviour is expected: the operational radius estimates the local
-neighbourhood of the nominal manifold rather than representing an arbitrary
-decision threshold. Consequently, different healthy commissioning samples
-should produce slightly different neighbourhood estimates while preserving
-the underlying nominal representation.
+The observed spread reflects finite-sample uncertainty in estimating an extreme
+empirical quantile rather than instability of the deployment methodology. Its
+direction, however, is systematic: post-calibration rates lie above the nominal
+2\% operating point in every condition. This is consistent with the stopping
+rule, which terminates when the upper-tail estimate has been locally stable and
+therefore tends to stop at instants of quiet tail behaviour, biasing $\tau$
+slightly downward. Linear interpolation in the empirical quantile, which
+returns a value below the corresponding order statistic, acts in the same
+direction.
 
 Together with the oracle-agreement results of
 Table~\ref{tab:online-oracle-agreement}, these experiments establish that
@@ -1220,14 +1224,12 @@ The learned operational radius remains predictive throughout the subsequent degr
 post-departure exceedance rate of 94.6\% and lead times ranging from
 14.5~h to 74.0~h before the documented end of the experiment.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{NASA IMS deployment results using one shared simulator-trained
 representation and convergence-based local operational-radius estimation.}
 \label{tab:nasa-main-results}
 
-\footnotesize
-\setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lccccc@{}}
 \toprule
 Bearing & Cal.    & $\tau_k$ & Relative   & Post-departure & Lead time \\
@@ -1267,12 +1269,8 @@ Across twenty independent commissioning experiments (four bearings and five
 random initialization samples), calibration converged successfully in every
 case. Table~\ref{tab:nasa-stability} summarizes the resulting variability.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
-\caption{Stability of local operational-radius estimation under repeated
-NASA commissioning experiments using one fixed shared representation.}
-\label{tab:nasa-stability}
-
 \caption{Stability of local operational-radius estimation under repeated
 NASA commissioning experiments using one fixed shared representation.
 Calibration converged in all twenty realizations (success rate 100\%).}
@@ -1294,6 +1292,17 @@ Mean & -- & -- & 0.83 & 4.98 & 50.0 \\
 \end{tabular}
 \end{table}
 
+
+The observed spread reflects finite-sample uncertainty in estimating an extreme
+empirical quantile rather than instability of the deployment methodology. Its
+direction, however, is systematic: post-calibration rates lie above the nominal
+2\% operating point in every condition. This is consistent with the stopping
+rule, which terminates when the upper-tail estimate has been locally stable and
+therefore tends to stop at instants of quiet tail behaviour, biasing $\tau$
+slightly downward. Linear interpolation in the empirical quantile, which
+returns a value below the corresponding order statistic, acts in the same
+direction.
+
 These experiments demonstrate that the operational radius is simultaneously
 asset-specific and statistically stable. Different physical units identify
 different local neighbourhoods of the same shared nominal representation,
@@ -1302,6 +1311,7 @@ in the estimated radius. The transferable engineering artefact is therefore
 the shared nominal representation itself, while commissioning consists only
 of identifying the local operational neighbourhood associated with each
 physical asset.
+
 
 %---------------------------------------------------------------------
 \subsection{Edge deployment implications}
@@ -1317,141 +1327,6 @@ model training and no fault labels are required after installation.
 
 The only fleet-wide artifact is the shared nominal representation, trained
 once and distributed to every operational unit.
-
-
-\section{Mathematical Scope and Coverage Properties}
-\label{sec:math_perspective}
-
-Two properties support the proposed architecture: one structural, justifying
-why a single representation may be shared across a fleet, and one statistical,
-characterizing what the locally estimated radius guarantees.
-
-\paragraph{Structural decomposition.} Let $X\subset\mathbb{R}^n$ be the space
-of observation windows, $\theta\in\Theta$ the latent diagnostic state, and
-$\eta\in E$ nuisance variables (sensor coupling, mounting, operating point,
-noise), with $x=F(\theta,\eta)$. The nuisance group $G_{\mathrm{nuis}}$ acts on
-$E$ while preserving $\theta$, inducing diagnostic equivalence $x\sim x'$. Two
-elementary facts follow. If $E$ is compact and $F(\theta_N,\cdot)$ continuous,
-the nominal observation set $O_N=F(\theta_N,E)$ is compact in $X$; and any
-residual score constant on equivalence classes factors uniquely through the
-quotient projection $\pi:X\to X/{\sim}$. Together these justify treating fleet
-deployment as two inverse problems at different scales: a global one, solved
-once offline, recovering a canonical representation supported by a bounded
-nominal structure; and a local one, solved by each asset, estimating only the
-operational neighbourhood around that fixed representation. The
-functional-analytic development is given in our companion work
-\citep{disanti2026quotient,disanti2026inverse}; the rapid commissioning
-observed experimentally is consistent with this decomposition but is not
-claimed as a consequence of it.
-
-\paragraph{Coverage of the operational radius.} The local radius admits a
-distribution-free finite-sample guarantee. If the commissioning residuals
-$r_1,\dots,r_n$ and a future nominal residual $r_{n+1}$ are exchangeable, and
-$\tau$ is taken as the $k$-th order statistic with
-$k=\lceil(1-\alpha)(n+1)\rceil$, then
-\begin{equation}
-P\!\left(r_{n+1}\le\tau\right)\;\ge\;1-\alpha ,
-\label{eq:coverage}
-\end{equation}
-with no assumption on the residual distribution. Three consequences are
-relevant to deployment. First, the target coverage is attainable only for
-$n\ge 1/\alpha-1$, which for $\alpha=0.02$ requires at least 49 commissioning
-observations; the durations reported in Section~\ref{sec:results} lie at or
-above this bound. Second, the guarantee is one-sided with finite-sample slack
-of order $1/(n+1)$, approximately two percentage points at the commissioning
-sizes observed here, which is the scale of the post-calibration false-alarm
-variation reported in Table~\ref{tab:online-oracle-agreement}. Third, the
-requirement is exchangeability of the commissioning stream rather than any
-distributional form; the permutation experiments of
-Section~\ref{sec:initialization-robustness} probe this assumption directly, and
-the stationarity caveat in Section~\ref{sec:limitations} bounds its scope. The
-empirical quantile used in our implementation approximates this order
-statistic; adopting it exactly would make the coverage bound hold by
-construction.
-\section{Discussion}
-\label{sec:discussion}
-
-Calibration should not be interpreted as parameter tuning. Rather, under a
-fixed shared representation and target nominal coverage, it identifies an
-asset-specific property of nominal operation: its local operational radius.
-
-The principal result of this work is not that a Conv1D autoencoder can separate CWRU fault
-classes, a capability already demonstrated extensively in the literature. The contribution lies
-instead in the deployment methodology: a single canonical nominal representation can be shared
-across heterogeneous assets, while each physical unit independently estimates its own operational
-radius without retraining the representation.
-
-From a procurement perspective, this separation gives fleet operators a concrete basis for
-specifying deployment requirements: rather than accepting per-asset models developed ad hoc by
-each vendor, an operator can require a single validated, versioned nominal representation
-together with documented local calibration behaviour, independent of which organization,
-component OEM, third-party analytics provider, or in-house engineering team, produces and
-maintains it. Deployment cost is thereby decoupled from fleet size: growth increases the number
-of monitored assets, not the number of engineered models, since adding a unit requires only
-distributing the shared representation and estimating its local operational radius.
-
-The repeated-run and initialization-robustness experiments jointly support this claim from two
-complementary directions. Independent random initializations converge to slightly different
-reconstruction-error scales, yet healthy false-alarm rate and fault detection remain essentially
-unchanged after empirical calibration. Conversely, keeping the learned representation fixed while
-varying only the commissioning sample produces only modest variation in the estimated operational
-radius.
-
-Beyond commissioning, the NASA IMS experiments indicate that the estimated operational radius
-remains predictive throughout the subsequent degradation trajectory. Across all evaluated
-bearings, calibration converged after approximately fifty healthy observations, while persistent
-degradation subsequently evolved outside the learned nominal neighbourhood for the vast majority
-of the remaining asset lifetime. Although the four bearings estimated substantially different
-operational radii, all of them used the same shared representation, the same target nominal
-coverage (p98), and the same convergence criterion, without bearing-specific retraining.
-
-This behaviour is consistent with the broader theoretical framework developed in our previous
-work, which formulates industrial diagnosis as an inverse problem over quotient spaces
-\citep{disanti2026inverse,disanti2026quotient,disanti2025blueprints}. Within that formulation,
-the operational radius is not merely a tuned threshold but an estimate of the local neighbourhood
-of the nominal manifold. Consequently, once calibration has converged, trajectories that remain
-nominal are expected to remain inside this neighbourhood, whereas persistent degradation should
-naturally evolve outside it. The NASA IMS experiments provide empirical evidence consistent with
-this theoretical prediction.
-
-Operational-radius convergence also clarifies the role of adaptation: its purpose is to identify
-the asset during commissioning, not to track its aging indefinitely. Once $\tau_k^\star$ has
-been established, continued movement of the anomaly score constitutes diagnostic evidence rather
-than input for further adaptation. Initialization can therefore proceed until a predefined
-stability criterion is satisfied, after which the operational radius is frozen or only tightly
-constrained. Together with the edge footprint reported in
-Section~\ref{sec:edge-results}, this deployment model enables day-one monitoring without fault
-labels, isolates asset-specific adaptation to local calibration, and requires only lightweight
-edge computation.
-
-\begin{remark}
-The variability observed for the 1750\,RPM commissioning samples is not
-specific to the shared-representation architecture. It reflects the
-finite-sample uncertainty inherent in estimating an upper empirical
-quantile before the complete nominal distribution is available. An
-asset-specific detector calibrated from the same limited commissioning
-sample would be subject to the same statistical limitation; the
-complete-data oracle avoids it only by assuming retrospective access to all
-healthy observations.
-\end{remark}
-
-The convergence rule adopted in the present experiments is operational
-rather than universal. Calibration is declared after the relative
-variation of the empirical p98 radius remains below
-$\varepsilon_C=0.01$ over a look-back interval $L=10$ for
-$m=10$ consecutive updates. These parameters define a configurable trade-off
-between commissioning duration and robustness against transient plateaus in
-the upper-tail estimate. Requiring more consecutive stable updates, a
-longer look-back interval, or a tighter tolerance would generally delay
-deployment while reducing sensitivity to short-term fluctuations;
-conversely, less restrictive settings would shorten commissioning at the
-cost of increased threshold variability. The present study does not claim
-that $(L,\varepsilon_C,m)=(10,0.01,10)$ is optimal. Rather, it demonstrates
-that this single fixed configuration achieved successful convergence for
-all evaluated CWRU and NASA IMS commissioning experiments while preserving
-near-oracle diagnostic behaviour. Systematic selection of these parameters
-according to application-specific false-alarm and commissioning-time
-requirements remains an important direction for future work.
 
 \subsection{Limitations}
 \label{sec:limitations}
@@ -1530,7 +1405,7 @@ while eliminating per-asset representation learning.
 The transferable object is therefore not an absolute anomaly threshold, nor an asset-specific
 representation, but a shared canonical nominal representation together with a lightweight local
 calibration mechanism. The central outcome of this work is consequently not a new anomaly
-detector, but a scalable deployment principle: learn the canonical nominal representation once,
+detector, but a scalable deployment principle: learn the canonical nominal representation once, 
 distribute it across the fleet, and let each physical asset identify only its own operational
 radius during installation.
 

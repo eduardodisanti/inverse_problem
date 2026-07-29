@@ -9,53 +9,50 @@ Warning--entry type for "disanti2026inverse" isn't style-file defined
 --line 178 of file references.bib
 Warning--no number and no volume in bronstein2021
 Warning--page numbers missing in bronstein2021
-Warning--no journal in disanti2025blueprints
-Warning--no number and no volume in disanti2025blueprints
-Warning--page numbers missing in disanti2025blueprints
 Warning--no number and no volume in entezami2020
 Warning--page numbers missing in entezami2020
 Warning--no number and no volume in nguyen2025subdomain
 Warning--page numbers missing in nguyen2025subdomain
 Warning--page numbers missing in wang2026fleet
-You've used 18 entries,
+You've used 17 entries,
             2861 wiz_defined-function locations,
-            710 strings with 8167 characters,
-and the built_in function-call counts, 13413 in all, are:
-= -- 1063
-> -- 1172
+            708 strings with 8045 characters,
+and the built_in function-call counts, 12929 in all, are:
+= -- 1024
+> -- 1146
 < -- 3
-+ -- 364
-- -- 388
-* -- 1290
-:= -- 2480
-add.period$ -- 52
-call.type$ -- 18
-change.case$ -- 147
-chr.to.int$ -- 17
-cite$ -- 28
-duplicate$ -- 323
-empty$ -- 720
-format.name$ -- 444
-if$ -- 2468
++ -- 356
+- -- 378
+* -- 1257
+:= -- 2385
+add.period$ -- 50
+call.type$ -- 17
+change.case$ -- 141
+chr.to.int$ -- 16
+cite$ -- 24
+duplicate$ -- 308
+empty$ -- 687
+format.name$ -- 434
+if$ -- 2385
 int.to.chr$ -- 2
 int.to.str$ -- 0
-missing$ -- 16
-newline$ -- 90
-num.names$ -- 178
-pop$ -- 115
+missing$ -- 15
+newline$ -- 86
+num.names$ -- 168
+pop$ -- 111
 preamble$ -- 1
-purify$ -- 253
+purify$ -- 241
 quote$ -- 0
-skip$ -- 332
+skip$ -- 315
 stack$ -- 0
-substring$ -- 588
-swap$ -- 101
+substring$ -- 566
+swap$ -- 97
 text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 356
-warning$ -- 10
-while$ -- 157
+type$ -- 336
+warning$ -- 7
+while$ -- 147
 width$ -- 0
-write$ -- 234
-(There were 12 warnings)
+write$ -- 223
+(There were 9 warnings)
