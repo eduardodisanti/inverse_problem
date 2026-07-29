@@ -1,101 +1,90 @@
-\begin{thebibliography}{18}
-\providecommand{\natexlab}[1]{#1}
+\begin{thebibliography}{}
 
-\bibitem[{Jardine et~al.(2006)Jardine, Lin, and Banjevic}]{jardine2006}
-Jardine, Andrew K.~S., Daming Lin, and Dragan Banjevic, A Review on Machinery
-  Diagnostics and Prognostics Implementing Condition-Based Maintenance.
-  \emph{Mechanical Systems and Signal Processing}, Vol.~20, No.~7, 2006, pp.
-  1483--1510.
+\bibitem[\protect\citeauthoryear{Bishop}{Bishop}{1994}]{bishop1994}
+Bishop, C.~M. (1994).
+\newblock Novelty detection and neural network validation.
+\newblock {\em IEE Proceedings -- Vision, Image and Signal Processing\/}~{\em 141\/}(4), 217--222.
 
-\bibitem[{Zhao et~al.(2019)Zhao, Yan, Chen, Mao, Wang, and Gao}]{zhao2019}
-Zhao, Rui, Ruqiang Yan, Zhenghua Chen, Kezhi Mao, Peng Wang, and Robert~X. Gao,
-  Deep Learning and Its Applications to Machine Health Monitoring.
-  \emph{Mechanical Systems and Signal Processing}, Vol. 115, 2019, pp.
-  213--237.
+\bibitem[\protect\citeauthoryear{Bronstein, Bruna, Cohen, and Veli{\v{c}}kovi{\'c}}{Bronstein et~al.}{2021}]{bronstein2021}
+Bronstein, M.~M., J.~Bruna, T.~Cohen, and P.~Veli{\v{c}}kovi{\'c} (2021).
+\newblock Geometric deep learning: Grids, groups, graphs, geodesics, and gauges.
+\newblock {\em arXiv preprint\/}.
 
-\bibitem[{Entezami et~al.(2020)Entezami, Roberts, Weston, Stewart, Amini, and
-  Papaelias}]{entezami2020}
-Entezami, Mani, Clive Roberts, Paul Weston, Edward Stewart, Arash Amini, and
-  Mayorkinos Papaelias, Perspectives on railway axle bearing condition
-  monitoring. \emph{Proceedings of the Institution of Mechanical Engineers,
-  Part F: Journal of Rail and Rapid Transit}, 2020.
+\bibitem[\protect\citeauthoryear{Carvalho, Zhang, Geyer, Cotrini, and Buhmann}{Carvalho et~al.}{2023}]{li2023invariant}
+Carvalho, J. B.~S., M.~Zhang, R.~Geyer, C.~Cotrini, and J.~M. Buhmann (2023).
+\newblock Invariant anomaly detection under distribution shifts: A causal perspective.
+\newblock In {\em Advances in Neural Information Processing Systems}, Volume~36.
 
-\bibitem[{Chandola et~al.(2009)Chandola, Banerjee, and Kumar}]{chandola2009}
-Chandola, Varun, Arindam Banerjee, and Vipin Kumar, Anomaly Detection: A
-  Survey. \emph{ACM Computing Surveys}, Vol.~41, No.~3, 2009, pp. 15:1--15:58.
+\bibitem[\protect\citeauthoryear{Chandola, Banerjee, and Kumar}{Chandola et~al.}{2009}]{chandola2009}
+Chandola, V., A.~Banerjee, and V.~Kumar (2009).
+\newblock Anomaly detection: A survey.
+\newblock {\em ACM Computing Surveys\/}~{\em 41\/}(3), 15:1--15:58.
 
-\bibitem[{Randall and Antoni(2011)}]{randall2011}
-Randall, Robert~B. and J{\'e}r{\^o}me Antoni, Rolling Element Bearing
-  Diagnostics --- A Tutorial. \emph{Mechanical Systems and Signal Processing},
-  Vol.~25, No.~2, 2011, pp. 485--520.
+\bibitem[\protect\citeauthoryear{Di~Santi}{Di~Santi}{2025}]{disanti2025blueprints}
+Di~Santi, E. (2025).
+\newblock The blueprints of intelligence: A functional-topological foundation for perception and representation.
 
-\bibitem[{Di~Santi(2026{\natexlab{a}})}]{disanti2026quotient}
-Di~Santi, Eduardo, \emph{Anomaly Detection as an Inverse Problem on Quotient
-  Spaces: Equivalence Relations and Functional Manifolds as a General
-  Diagnostic Framework}, 2026{\natexlab{a}}.
+\bibitem[\protect\citeauthoryear{Di~Santi}{Di~Santi}{2026a}]{disanti2026quotient}
+Di~Santi, E. (2026a).
+\newblock Anomaly detection as an inverse problem on quotient spaces: Equivalence relations and functional manifolds as a general diagnostic framework.
 
-\bibitem[{Di~Santi(2026{\natexlab{b}})}]{disanti2026inverse}
-Di~Santi, Eduardo, \emph{Self-Supervision, Manifold Saturation, and Emergent
-  Operational Classes: Learning from Scarce Observations as Inverse Recovery of
-  Compact Functional Structure}, 2026{\natexlab{b}}.
+\bibitem[\protect\citeauthoryear{Di~Santi}{Di~Santi}{2026b}]{disanti2026inverse}
+Di~Santi, E. (2026b).
+\newblock Self-supervision, manifold saturation, and emergent operational classes: Learning from scarce observations as inverse recovery of compact functional structure.
 
-\bibitem[{Smith and Randall(2015)}]{smith2015}
-Smith, Wade~A. and Robert~B. Randall, Rolling Element Bearing Diagnostics Using
-  the Case Western Reserve University Data: A Benchmark Study. \emph{Mechanical
-  Systems and Signal Processing}, Vol. 64--65, 2015, pp. 100--131.
+\bibitem[\protect\citeauthoryear{Entezami, Roberts, Weston, Stewart, Amini, and Papaelias}{Entezami et~al.}{2020}]{entezami2020}
+Entezami, M., C.~Roberts, P.~Weston, E.~Stewart, A.~Amini, and M.~Papaelias (2020).
+\newblock Perspectives on railway axle bearing condition monitoring.
+\newblock {\em Proceedings of the Institution of Mechanical Engineers, Part F: Journal of Rail and Rapid Transit\/}.
 
-\bibitem[{Sch{\"o}lkopf et~al.(1999)Sch{\"o}lkopf, Williamson, Smola,
-  Shawe-Taylor, and Platt}]{scholkopf1999}
-Sch{\"o}lkopf, Bernhard, Robert~C. Williamson, Alex~J. Smola, John
-  Shawe-Taylor, and John~C. Platt, Support Vector Method for Novelty Detection.
-  In \emph{Advances in Neural Information Processing Systems}, 1999, Vol.~12.
+\bibitem[\protect\citeauthoryear{Hinton and Salakhutdinov}{Hinton and Salakhutdinov}{2006}]{hinton2006}
+Hinton, G.~E. and R.~R. Salakhutdinov (2006).
+\newblock Reducing the dimensionality of data with neural networks.
+\newblock {\em Science\/}~{\em 313\/}(5786), 504--507.
 
-\bibitem[{Bishop(1994)}]{bishop1994}
-Bishop, Christopher~M., Novelty Detection and Neural Network Validation.
-  \emph{IEE Proceedings -- Vision, Image and Signal Processing}, Vol. 141,
-  No.~4, 1994, pp. 217--222.
+\bibitem[\protect\citeauthoryear{Jardine, Lin, and Banjevic}{Jardine et~al.}{2006}]{jardine2006}
+Jardine, A. K.~S., D.~Lin, and D.~Banjevic (2006).
+\newblock A review on machinery diagnostics and prognostics implementing condition-based maintenance.
+\newblock {\em Mechanical Systems and Signal Processing\/}~{\em 20\/}(7), 1483--1510.
 
-\bibitem[{Hinton and Salakhutdinov(2006)}]{hinton2006}
-Hinton, Geoffrey~E. and Ruslan~R. Salakhutdinov, Reducing the Dimensionality of
-  Data with Neural Networks. \emph{Science}, Vol. 313, No. 5786, 2006, pp.
-  504--507.
+\bibitem[\protect\citeauthoryear{{Nguyen}, {Nguyen}, and {Hoang}}{{Nguyen} et~al.}{2025}]{nguyen2025subdomain}
+{Nguyen}, T.~H., D.~T. {Nguyen}, and S.~H. {Hoang} (2025).
+\newblock Knowledge-driven subdomain adaptation for bearing fault diagnosis.
+\newblock {\em Journal of Vibration and Control\/}.
 
-\bibitem[{Sakurada and Yairi(2014)}]{sakurada2014}
-Sakurada, Mayu and Takehisa Yairi, Anomaly Detection Using Autoencoders with
-  Nonlinear Dimensionality Reduction. In \emph{Proceedings of the 2nd Workshop
-  on Machine Learning for Sensory Data Analysis}, ACM, 2014, pp. 4--11.
+\bibitem[\protect\citeauthoryear{Ning, Qiao, Peng, Zhu, and Zhang}{Ning et~al.}{2026}]{ning2026digitaltwin}
+Ning, S., Z.~Qiao, B.~Peng, R.~Zhu, and C.~Zhang (2026).
+\newblock A digital twin-driven cross-domain adaptation method for bearing intelligent fault diagnosis.
+\newblock {\em Nondestructive Testing and Evaluation\/}~{\em 0\/}(0), 1--23.
 
-\bibitem[{Bronstein et~al.(2021)Bronstein, Bruna, Cohen, and
-  Veli{\v{c}}kovi{\'c}}]{bronstein2021}
-Bronstein, Michael~M., Joan Bruna, Taco Cohen, and Petar Veli{\v{c}}kovi{\'c},
-  Geometric Deep Learning: Grids, Groups, Graphs, Geodesics, and Gauges.
-  \emph{arXiv preprint}, 2021.
+\bibitem[\protect\citeauthoryear{Randall and Antoni}{Randall and Antoni}{2011}]{randall2011}
+Randall, R.~B. and J.~Antoni (2011).
+\newblock Rolling element bearing diagnostics --- a tutorial.
+\newblock {\em Mechanical Systems and Signal Processing\/}~{\em 25\/}(2), 485--520.
 
-\bibitem[{Carvalho et~al.(2023)Carvalho, Zhang, Geyer, Cotrini, and
-  Buhmann}]{li2023invariant}
-Carvalho, Jo{\~a}o B.~S., Mengtao Zhang, Robin Geyer, Carlos Cotrini, and
-  Joachim~M. Buhmann, Invariant Anomaly Detection under Distribution Shifts: A
-  Causal Perspective. In \emph{Advances in Neural Information Processing
-  Systems}, 2023, Vol.~36.
+\bibitem[\protect\citeauthoryear{Sakurada and Yairi}{Sakurada and Yairi}{2014}]{sakurada2014}
+Sakurada, M. and T.~Yairi (2014).
+\newblock Anomaly detection using autoencoders with nonlinear dimensionality reduction.
+\newblock In {\em Proceedings of the 2nd Workshop on Machine Learning for Sensory Data Analysis}, pp.\  4--11. ACM.
 
-\bibitem[{Wang et~al.(2026)}]{wang2026fleet}
-Wang, B. et~al., Fleet-based transfer learning for anomaly detection in
-  {[machinery]}. \emph{Reliability Engineering \& System Safety}, 2026.
+\bibitem[\protect\citeauthoryear{Sch{\"o}lkopf, Williamson, Smola, Shawe-Taylor, and Platt}{Sch{\"o}lkopf et~al.}{1999}]{scholkopf1999}
+Sch{\"o}lkopf, B., R.~C. Williamson, A.~J. Smola, J.~Shawe-Taylor, and J.~C. Platt (1999).
+\newblock Support vector method for novelty detection.
+\newblock In {\em Advances in Neural Information Processing Systems}, Volume~12.
 
-\bibitem[{Hue et~al.(2025)Hue, Thuan, and Hong}]{nguyen2025subdomain}
-Hue, Nguyen~Thi, Nguyen~Duc Thuan, and Hoang~Si Hong, Knowledge-driven
-  subdomain adaptation for bearing fault diagnosis. \emph{Journal of Vibration
-  and Control}, 2025.
+\bibitem[\protect\citeauthoryear{Smith and Randall}{Smith and Randall}{2015}]{smith2015}
+Smith, W.~A. and R.~B. Randall (2015).
+\newblock Rolling element bearing diagnostics using the case western reserve university data: A benchmark study.
+\newblock {\em Mechanical Systems and Signal Processing\/}~{\em 64--65}, 100--131.
 
-\bibitem[{Ning et~al.(2026)Ning, Qiao, Peng, Zhu, and
-  Zhang}]{ning2026digitaltwin}
-Ning, Siyuan, Zijian Qiao, Bohao Peng, Ronghua Zhu, and Cailiang Zhang, A
-  digital twin-driven cross-domain adaptation method for bearing intelligent
-  fault diagnosis. \emph{Nondestructive Testing and Evaluation}, Vol.~0, No.~0,
-  2026, pp. 1--23.
+\bibitem[\protect\citeauthoryear{Wang, Baraldi, Zio, Brown, and Gauthier}{Wang et~al.}{2026}]{wang2026fleet}
+Wang, B., P.~Baraldi, E.~Zio, J.~Brown, and S.~Gauthier (2026).
+\newblock Fleet-based transfer learning for anomaly detection in industrial systems.
+\newblock {\em Mechanical Systems and Signal Processing\/}~{\em 244}.
 
-\bibitem[{Di~Santi(2025)}]{disanti2025blueprints}
-Di~Santi, Eduardo, The Blueprints of Intelligence: A Functional-Topological
-  Foundation for Perception and Representation, 2025.
+\bibitem[\protect\citeauthoryear{Zhao, Yan, Chen, Mao, Wang, and Gao}{Zhao et~al.}{2019}]{zhao2019}
+Zhao, R., R.~Yan, Z.~Chen, K.~Mao, P.~Wang, and R.~X. Gao (2019).
+\newblock Deep learning and its applications to machine health monitoring.
+\newblock {\em Mechanical Systems and Signal Processing\/}~{\em 115}, 213--237.
 
 \end{thebibliography}

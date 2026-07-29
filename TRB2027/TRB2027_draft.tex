@@ -50,63 +50,43 @@
 %=====================================================================
 \begin{abstract}
 
-\textbf{Objectives:} Deploying condition monitoring across large fleets of
-heterogeneous assets remains challenging because representation learning,
-threshold engineering, and commissioning are typically repeated for every
-monitored unit. This work investigates whether these activities can be
-decoupled by sharing one nominal representation across the fleet while
-allowing each asset to identify only its own local operational radius during
-commissioning.
+\textbf{Objectives:} Condition monitoring is normally deployed by collecting
+data from each asset, fitting a detector to it, and engineering its
+thresholds, so effort grows with fleet size. This work asks whether
+representation learning can be decoupled from deployment: one representation
+shared fleet-wide, each asset identifying only its own local operational
+radius at commissioning.
 
-\textbf{Methods:} For each compatible asset family, a canonical nominal representation,
-implemented as a Conv1D autoencoder, is trained once offline using simulated
-healthy signals and transferred unchanged to every deployed asset within
-that family. 
-Each deployed unit estimates its operational radius as an empirical residual quantile from a short stream of
-unlabeled nominal observations using a convergence-based commissioning
-procedure. The methodology is evaluated under controlled operating
-conditions using the Case Western Reserve University (CWRU) bearing dataset
-and then validated on four independent run-to-failure bearings from the NASA
-IMS dataset. Comparisons include direct simulator-threshold transfer,
-complete-data oracle calibration, and independently trained asset-specific
-autoencoders.
+\textbf{Methods:} For each asset family, a canonical nominal representation,
+a convolutional autoencoder, is trained once offline on simulated healthy
+signals and transferred unchanged to every deployed unit. Each unit estimates
+its operational radius as an empirical residual quantile from a short
+unlabeled nominal stream, stopped automatically by a convergence criterion.
+Bearings serve as a validation vehicle: the Case Western Reserve University
+(CWRU) dataset across four operating conditions, and four run-to-failure
+bearings from the NASA Intelligent Maintenance Systems (IMS) dataset,
+benchmarked against threshold transfer, oracle calibration, and
+asset-specific detectors.
 
-\textbf{Findings:} Direct transfer of the absolute simulator threshold
-classified every healthy CWRU field window as anomalous, confirming that the
-nominal representation transfers whereas its absolute reconstruction-error
-scale does not. Convergence-based commissioning recovered operational radii
-within an average of 0.83\% of the complete-data oracle after
-$54.5 \pm 6.6$ windows, achieving a healthy false-alarm rate of
-$2.60 \pm 1.18$\%, 99.57\% ball-fault detection, and 100\% detection of
-inner- and outer-race faults. Across 20 repeated CWRU commissioning
-realizations, calibration succeeded in every case despite variation in the
-available nominal observations and their arrival order. On NASA IMS, four
-independently monitored bearings converged to distinct asset-specific
-operational radii after approximately 50 recordings, subsequently exhibited
-persistent departure from their respective nominal neighbourhoods, and
-provided an average warning of 45.4 hours before the documented end of the
-experiment.
+\textbf{Findings:} Transferring the absolute simulator threshold flagged
+every healthy CWRU window as anomalous: the representation transfers, its
+error scale does not. Commissioning recovered radii within 0.83\% of the
+complete-data oracle after 55 windows on average, yielding a healthy
+false-alarm rate of 2.60\%, 99.57\% ball-fault detection and 100\% inner- and
+outer-race detection; all 20 repeated CWRU realizations converged. The four
+IMS bearings converged to distinct radii and departed persistently from them
+on average 45.4 hours before the documented end of run.
 
-\textbf{Novelty:} The central engineering contribution is the separation of
-representation learning from deployment calibration. Rather than training
-and maintaining a new detector for every asset, the proposed methodology
-deploys one validated shared nominal representation while each asset
-estimates only its own operational radius during commissioning. The
-contribution is therefore a fleet-deployment methodology rather than a new
-anomaly-detection architecture.
+\textbf{Novelty:} The contribution is a fleet-deployment methodology rather
+than a new anomaly-detection architecture: the transferable artefact is a
+validated shared nominal representation, and the only asset-specific quantity
+estimated at deployment is a scalar operational radius.
 
-\textbf{Practical Applications:} A validated nominal representation can be
-developed, versioned, and maintained once for a compatible asset family,
-for example by an original equipment manufacturer, and distributed
-unchanged across the corresponding fleet. Deployment no longer requires
-collecting large asset-specific datasets, training and validating an
-independent representation for every installed unit, or maintaining
-asset-specific model versions. Instead, each asset performs only a short
-unsupervised commissioning procedure to estimate its own local operational
-radius while reusing the shared representation. The methodology is equally
-compatible with centralized and edge deployment architectures, since only
-lightweight local inference and operational-radius estimation are required
-after installation.
+\textbf{Practical Applications:} A component manufacturer or analytics
+provider can validate, version, and maintain one representation per asset
+family and distribute it unchanged, so commissioning needs no asset-specific
+data, training, or threshold engineering, only a short unsupervised
+calibration suited to edge deployment.
 
 \end{abstract}
 
@@ -131,308 +111,96 @@ run-to-failure validation
 Modern transportation systems increasingly rely on condition-monitoring technologies to supervise
 large populations of operational assets, including rolling-element bearings, axleboxes, traction
 motors, gearboxes, pumps, actuators, vehicles, and spatially indexed infrastructure segments
-\cite{jardine2006,zhao2019}. Rolling-element bearings are among the most safety-critical of these
-components: railway axlebox bearings alone are monitored across thousands of independently
-operating vehicles, where defects can propagate to derailment-level failures if undetected
-\cite{entezami2020}. Although machine-learning research has produced increasingly capable
-anomaly-detection models \cite{chandola2009,zhao2019}, the deployment
-problem remains largely unresolved: a detector that performs well for one
-asset under one calibrated operating condition does not automatically scale
-to hundreds or thousands of independently commissioned units.
+\citep{jardine2006,zhao2019}. Railway axlebox bearings alone are monitored across thousands of
+independently operating vehicles, where undetected defects can propagate to derailment-level
+failures \citep{entezami2020}. Although machine-learning research has produced increasingly
+capable anomaly-detection models \citep{chandola2009,zhao2019}, the deployment problem remains
+largely unresolved: a detector that performs well for one asset under one calibrated operating
+condition does not automatically scale to hundreds or thousands of independently commissioned
+units.
 
-In practice, fleet growth therefore scales not only the number of monitored
-assets but also the engineering effort required to train, validate, version,
-and maintain asset-specific models.
+Fleet growth therefore scales not only the number of monitored assets but also the engineering
+effort required to train, validate, version, and maintain asset-specific models, and at rollout
+several constraints arise simultaneously. Representative fault examples are rarely available, and
+waiting months or years for failures to accumulate is operationally unacceptable. Installation
+factors such as sensor coupling, operating point, mounting, and environmental noise alter the
+numerical scale of anomaly scores between assets \citep{randall2011}: axlebox bearings of
+nominally identical rolling stock are exposed to different track quality, wheel wear, load
+distribution, and wayside versus on-board sensor placement, so that a detector calibrated on one
+vehicle rarely transfers its absolute decision threshold to another \citep{entezami2020}.
 
-At fleet rollout, several constraints arise simultaneously. First, representative fault examples
-are rarely available. Second, waiting months or years for failures to accumulate is operationally
-unacceptable. Third, installation-specific factors such as sensor coupling, operating point,
-mounting, and environmental noise alter the numerical scale of anomaly scores between assets
-\cite{randall2011}. In railway fleets, for example, axlebox bearings of nominally identical rolling
-stock are exposed to different track quality, wheel wear, load distribution, and wayside versus
-on-board sensor placement, so that a detector calibrated on one vehicle rarely transfers its
-absolute decision threshold to another \cite{entezami2020}. Finally, training, calibrating,
-validating, and maintaining a separate representation model for every physical unit creates an
-engineering burden that grows directly with fleet size.
-
-
-The practical question is therefore not simply
+The practical question is therefore not how an anomalous condition can be detected, but rather:
 
 \begin{quote}
-\textbf{Q1.} \emph{How can an anomalous condition be detected?}
+\textbf{Q1.} \emph{How can a single nominal representation be deployed across a heterogeneous
+fleet while allowing every physical asset to identify only its own local operational
+neighbourhood, without per-asset representation learning or manual threshold engineering?}
 \end{quote}
 
-but rather
+This paper addresses Q1 by separating representation engineering from deployment calibration. A
+canonical nominal representation is learned once, offline, for a compatible asset family and
+deployed unchanged across the corresponding fleet, remaining fixed throughout the asset lifetime.
+During commissioning, each physical asset identifies only its own operational radius from a short
+stream of unlabeled nominal observations. This defines an OEM-centralized deployment model: the
+representation is engineered, validated, versioned, and maintained centrally, for example by the
+original equipment manufacturer (OEM), while fleet expansion requires only distributing that
+representation and estimating one local radius per asset.
 
-\textbf{Q2.}
-\emph{How can a single nominal representation be deployed across a
-heterogeneous fleet while allowing every physical asset to identify only its
-own local operational neighbourhood, without per-asset representation
-learning or manual threshold engineering?}
+The transferable component is therefore not an anomaly threshold but the shared nominal
+representation itself, whose absolute residual scale depends on simulator, preprocessing, and
+operating conditions and does not transfer. Deployment is thus a local inverse problem: it does
+not learn a new representation, but estimates an asset-specific property of nominal operation
+under a fixed shared representation and calibration protocol, following the formulations
+introduced in our previous work \citep{disanti2026quotient,disanti2026inverse}.
 
-This paper addresses Q2 by separating representation engineering from
-deployment calibration. A canonical nominal representation is learned once, offline, for a
-compatible asset family and subsequently deployed unchanged across the
-corresponding fleet. During commissioning, each physical asset
-identifies only its own operational radius from a short stream of unlabeled
-nominal observations. The shared representation remains fixed throughout the
-asset lifetime.
+% >>> LA FIGURA 1 VA AQUÍ, SIN TOCAR <
 
-This separation also defines an OEM-centralized deployment model. The shared
-nominal representation is engineered, validated, versioned, and maintained
-centrally, for example by the original equipment manufacturer (OEM), whereas
-each deployed asset performs only a lightweight local commissioning.
-Consequently, fleet expansion no longer requires developing,
-validating, and maintaining an independent representation model for every
-physical unit. Instead, deployment consists only of distributing the shared
-representation and estimating one local operational radius for each asset.
-
-From a broader perspective, deployment can be interpreted as a local inverse
-problem. The shared representation is recovered once during offline model
-engineering, whereas commissioning consists only of identifying the local
-operational neighbourhood of each physical asset. In this sense, deployment does not learn a new representation; it estimates
-an asset-specific property of nominal operation under the fixed shared
-representation and calibration protocol.
-This interpretation follows the inverse-problem and
-quotient-space formulations introduced in our previous work
-\cite{disanti2026quotient,disanti2026inverse}, while the present paper
-addresses their engineering realization for scalable fleet deployment.
-
-The transferable component is therefore not an anomaly threshold but the
-shared nominal representation itself. Absolute reconstruction-error
-thresholds generally do not transfer because their numerical scale depends
-on the simulator, preprocessing, operating conditions, and residual
-statistics. Instead, the proposed methodology transfers one shared nominal
-representation together with a fleet-wide nominal coverage, while each asset
-independently estimates the local operational radius required to realise
-that coverage. The deployable model is therefore common to the fleet; only
-the operational radius is asset-specific.
-
-\begin{figure}[htbp]
-\centering
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}[
-    font=\small,
-    >=Latex,
-    flow/.style={
-        -{Latex[length=2mm]},
-        line width=0.55pt
-    },
-    panel/.style={
-        draw,
-        rounded corners=2pt,
-        line width=0.6pt
-    },
-    mainbox/.style={
-        draw,
-        rounded corners=2pt,
-        align=center,
-        minimum height=0.85cm,
-        inner sep=4pt
-    },
-    assetbox/.style={
-        draw,
-        rounded corners=2pt,
-        align=center,
-        minimum width=1.72cm,
-        minimum height=0.95cm,
-        inner sep=3pt
-    },
-    paneltitle/.style={
-        font=\bfseries,
-        align=center
-    },
-    footnote/.style={
-        font=\footnotesize,
-        align=center
-    }
-]
-
-% Fixed canvas: prevents TikZ from creating an oversized bounding box
-\path[use as bounding box] (0,0) rectangle (15.4,5.25);
-
-% ============================================================
-% LEFT PANEL
-% ============================================================
-\draw[panel] (0.00,0.15) rectangle (7.70,5.10);
-
-\node[paneltitle] at (3.80,4.72)
-    {Conventional per-asset deployment};
-
-\node[
-    mainbox,
-    text width=5.8cm
-] (oem-left) at (3.80,3.90)
-    {OEM / engineering organization};
-
-\node[assetbox] (model-a) at (1.30,2.65)
-    {Representation\\$M_A$};
-
-\node[assetbox] (model-b) at (3.85,2.65)
-    {Representation\\$M_B$};
-
-\node[assetbox] (model-k) at (6.40,2.65)
-    {Representation\\$M_K$};
-
-\draw[flow] (oem-left.south) -- (model-a.north);
-\draw[flow] (oem-left.south) -- (model-b.north);
-\draw[flow] (oem-left.south) -- (model-k.north);
-
-\node[assetbox] (asset-a) at (1.30,1.48)
-    {Asset $A$};
-
-\node[assetbox] (asset-b) at (3.85,1.48)
-    {Asset $B$};
-
-\node[assetbox] (asset-k) at (6.40,1.48)
-    {Asset $K$};
-
-\draw[flow] (model-a.south) -- (asset-a.north);
-\draw[flow] (model-b.south) -- (asset-b.north);
-\draw[flow] (model-k.south) -- (asset-k.north);
-
-\node[
-    footnote,
-    text width=8.4cm
-] at (3.80,0.55)
-    {$K$ independently engineered, validated, versioned,
-     and maintained nominal representations};
-
-% ============================================================
-% RIGHT PANEL
-% ============================================================
-\draw[panel] (7.75,0.15) rectangle (15.55,5.10);
-
-\node[paneltitle] at (11.60,4.72)
-    {Proposed OEM-centralized deployment};
-
-\node[
-    mainbox,
-    text width=5.4cm
-] (shared) at (11.60,3.62)
-    {One shared nominal representation 
-     engineered, validated, versioned, and maintained centrally};
-
-\node[assetbox] (local-a) at (9.25,2.00)
-    {Asset $A$\\[1mm]
-     estimate $\tau_A^\star$};
-
-\node[assetbox] (local-b) at (11.60,2.00)
-    {Asset $B$\\[1mm]
-     estimate $\tau_B^\star$};
-
-\node[assetbox] (local-k) at (13.95,2.00)
-    {Asset $K$\\[1mm]
-     estimate $\tau_K^\star$};
-
-\draw[flow] (shared.south) -- (local-a.north);
-\draw[flow] (shared.south) -- (local-b.north);
-\draw[flow] (shared.south) -- (local-k.north);
-
-\node[
-    footnote,
-    text width=8.4cm
-] at (11.60,0.72)
-    {One centrally governed representation plus\\
-     lightweight local calibration at each asset};
-
-\end{tikzpicture}%
-}
-\caption{
-Conventional fleet deployment requires engineering, validating,
-versioning and maintaining an independent nominal representation for
-each monitored asset. The proposed deployment architecture instead
-distributes one shared nominal representation unchanged across the
-fleet, while each asset estimates only its local operational radius
-during commissioning. The NASA IMS experiments demonstrate that these
-locally estimated radii differ substantially between physical assets,
-despite using the same representation, the same target nominal coverage,
-and the same convergence criterion.
-}
-\label{fig:oem-deployment}
-\end{figure}
-
-This formulation also changes the relevant experimental comparison. The
-appropriate reference is not another globally shared detector but an
-operationally unrealistic upper bound in which every physical asset has its
-complete nominal history available for independent representation learning
-and calibration. Evaluating Q2 therefore requires answering a third
-question:
+This formulation also changes the relevant experimental comparison. The appropriate reference is
+not another globally shared detector but an operationally unrealistic upper bound in which every
+physical asset has its complete nominal history available for independent representation learning
+and calibration. Evaluating Q1 therefore requires answering a second question:
 
 \begin{quote}
-\textbf{Q3.} \emph{What is the operational cost of replacing independently engineered
-asset-specific representations with one centrally maintained shared
-representation and lightweight local commissioning?}
+\textbf{Q2.} \emph{What is the operational cost of replacing independently engineered
+asset-specific representations with one centrally maintained shared representation and
+lightweight local commissioning?}
 \end{quote}
 
-Q3 is evaluated in two complementary deployment scenarios. The first uses
-the CWRU \cite{smith2015} benchmark to quantify simulation-to-field transfer under controlled
-operating-condition variability while comparing the proposed methodology
-with ideal asset-specific representations. The second uses the NASA IMS
-run-to-failure dataset to evaluate the complete deployment protocol on
-independently monitored physical assets undergoing naturally evolving
-degradation.
+Q2 is evaluated in two complementary scenarios. The first uses the CWRU \citep{smith2015}
+benchmark to quantify simulation-to-field transfer under controlled operating-condition
+variability, comparing the proposed methodology with ideal asset-specific representations trained
+and calibrated on the complete healthy dataset of each condition. The second uses the NASA IMS
+run-to-failure dataset to evaluate the complete deployment protocol on independently monitored
+physical assets undergoing naturally evolving degradation. In both, the proposed method uses no
+field observations for representation learning and estimates the local operational radius through
+convergence-based commissioning, requiring only tens of nominal observations. The results show
+that the cost of scalable deployment is small: detection performance remains close to that of
+independently engineered asset-specific detectors, with no field retraining at any point.
 
-The asset-specific reference methods are trained and calibrated using the
-complete healthy dataset of each operating condition. In contrast, the
-proposed method uses no field observations for representation learning and
-estimates the local operational radius through convergence-based
-commissioning, requiring only 49--62 healthy observations across the
-evaluated CWRU conditions.
-
-The experimental results show that the cost of scalable deployment is
-small. Under controlled CWRU operating conditions, replacing
-asset-specific representations with one shared simulator-trained
-representation reduced ball-fault detection only marginally (99.57\%
-versus 100\%) while preserving complete inner- and outer-race detection.
-The local operational radius converged after approximately fifty
-commissioning observations without requiring any field retraining.
-
-The NASA IMS experiments further demonstrate that the same deployment
-principle extends to independently monitored physical assets. All four
-bearings identified distinct local operational radii using the same shared
-representation, the same target nominal coverage, and the same convergence
-criterion. After commissioning, every bearing subsequently departed
-persistently from its own estimated nominal neighbourhood, providing early
-warning between 14.5 and 74 hours before the documented end of the
-experiment and supporting the interpretation of the operational radius as a
-physical property of the local nominal behaviour rather than a tuned
-decision threshold.
-
-The contribution of this paper is therefore not a new anomaly-detection
-architecture but a deployment methodology for fleet-scale condition
-monitoring. Although a Conv1D autoencoder is used as the experimental representation,
-the deployment principle is representation-agnostic. The principal contributions are:
+The contribution of this paper is therefore not a new anomaly-detection architecture but a
+deployment methodology for fleet-scale condition monitoring. Although a Conv1D autoencoder is
+used as the experimental representation, the deployment principle is representation-agnostic.
+Rolling-element bearings serve as a validation vehicle rather than as the target application: they
+were selected because public run-to-failure data with documented ground truth exists for them,
+which permits the deployment claim to be tested against an observable outcome. The principal
+contributions are:
 
 \begin{enumerate}[leftmargin=1.5em]
-\item an OEM-centralized fleet-deployment architecture in which a single
-shared canonical nominal representation is engineered, validated, and
-maintained centrally, while deployed assets perform only lightweight local
-operational-radius calibration;
+\item an OEM-centralized fleet-deployment architecture in which one shared canonical nominal
+representation is engineered, validated, and maintained centrally and transferred unchanged across
+heterogeneous assets, with no field-data retraining and no per-asset representation learning after
+installation;
 
-\item a direct simulation-to-field deployment methodology in which a single
-shared nominal representation is transferred unchanged across heterogeneous
-assets without field-data retraining;
+\item an online commissioning procedure that estimates each asset's local operational radius from
+a short stream of unlabeled observations, together with a convergence criterion that determines
+automatically when to stop and freeze it;
 
-\item an online commissioning procedure that estimates each asset's local
-operational radius from a short stream of unlabeled observations;
-
-\item a convergence criterion that determines automatically when sufficient
-nominal behaviour has been observed to complete commissioning and freeze the
-operational radius;
-
-\item experimental evidence that independently monitored physical assets
-identify substantially different local operational radii while sharing the
-same representation, target nominal coverage, and convergence criterion;
+\item experimental evidence that independently monitored physical assets identify substantially
+different local operational radii while sharing the same representation, target nominal coverage,
+and convergence criterion; and
 
 \item an evaluation against ideal asset-specific detectors trained and calibrated with complete
-healthy datasets; and
-
-\item an edge-oriented deployment model that eliminates per-asset
-representation learning after installation, allowing fleet-wide deployment
-through distribution of one shared representation and local unsupervised
-calibration.
-
+healthy datasets.
 \end{enumerate}
 
 The remainder of the paper is organized as follows. Section~\ref{sec:related} reviews condition
@@ -445,38 +213,48 @@ deployment guarantees.
 Section~\ref{sec:discussion} closes with a discussion of industrial implications, limitations,
 and future work.
 
-%=====================================================================
 \section{Related Work}
 \label{sec:related}
-%=====================================================================
 
 Condition-based maintenance (CBM) has become a central component of modern
 transportation asset management, where condition monitoring supports the
 operation of large fleets of heterogeneous assets
-\cite{jardine2006,chandola2009,zhao2019}. Considerable progress has been made
+\citep{jardine2006,chandola2009,zhao2019}. Considerable progress has been made
 in improving anomaly-detection algorithms; however, comparatively little
 attention has been paid to how these detectors are engineered, commissioned,
 and maintained at fleet scale once thousands of independent physical assets
 must be deployed.
+
+Deployed practice, however, is largely not model-based. For rotating
+machinery the established approach combines physically interpretable
+features with severity criteria standardized in ISO~20816, which superseded
+ISO~10816 and ISO~7919: an absolute criterion, in which tabulated zone
+boundaries are applied without per-unit calibration, and a change criterion
+referenced to a baseline established for each installed machine. Envelope
+demodulation complements this by attributing spectral peaks to kinematic
+defect frequencies, yielding fault type rather than fault presence. This
+matters for the present work in two ways. First, absolute thresholds
+demonstrably do transfer in that setting, so the non-transferability
+reported here is a property of learned reconstruction residuals, not a
+general claim. Second, the kinematic route still requires per-asset
+engineering, since bearing geometry, shaft speed, and monitored bands must
+be configured for every installed unit; the effort is human rather than
+computational, but it still scales with fleet size. The deployment problem
+addressed here is therefore sharpest for asset families with no tabulated
+severity chart and no kinematic defect model.
 
 Most machine-learning approaches formulate this problem as supervised fault
 classification, requiring representative fault examples during training.
 While effective on benchmark datasets, these methods assume that deployment
 conditions remain close to those observed during model development.
 
-One-class methods, including one-class SVM \cite{scholkopf1999},
-neural-network novelty detection \cite{bishop1994}, and autoencoder-based
-anomaly detection \cite{hinton2006,sakurada2014}, reduce the dependence on
+One-class methods, including one-class SVM \citep{scholkopf1999},
+neural-network novelty detection \citep{bishop1994}, and autoencoder-based
+anomaly detection \citep{hinton2006,sakurada2014}, reduce the dependence on
 fault labels by learning only nominal behaviour. More recent
 representation-learning approaches further improve anomaly detection by
 constructing latent spaces in which healthy operation occupies a compact
 region while degraded behaviour becomes more easily separable.
-
-Most existing work therefore focuses on representation learning itself.
-Comparatively little attention has been devoted to the deployment
-architecture: how a validated nominal representation can be commissioned,
-governed, and reused across an entire fleet while allowing each physical
-asset to retain its own operational characteristics.
 
 Adaptive thresholds have been widely used to compensate for changing
 operating conditions. However, unrestricted adaptation risks absorbing
@@ -488,47 +266,40 @@ representation remains fixed and subsequent departures become diagnostic
 evidence rather than input for further adaptation.
 
 The proposed deployment strategy is also related to invariant
-representation learning \cite{bronstein2021} and anomaly detection under
-distribution shift \cite{li2023invariant}, both of which seek
-representations that are insensitive to nuisance variability. Our
-contribution, however, lies at a different level. Rather than proposing a
-new representation-learning architecture, we address the deployment problem
-by combining a shared nominal representation with local operational-radius
-calibration, eliminating per-asset representation learning while preserving
-a common nominal coverage across the fleet.
+representation learning \citep{bronstein2021} and anomaly detection under
+distribution shift \citep{li2023invariant}, both of which seek
+representations that are insensitive to nuisance variability.
 
 A related and rapidly growing literature addresses cross-condition and
 cross-machine transfer through domain adaptation, typically aligning source
 and target feature distributions via maximum mean discrepancy, adversarial
 domain classifiers, or pseudo-labeled fine-tuning
-\cite{wang2026fleet,nguyen2025subdomain,ning2026digitaltwin}. These methods
+\citep{nguyen2025subdomain,ning2026digitaltwin}. Closest to the present work,
+\citet{wang2026fleet} propose a two-stage unsupervised transfer framework for
+fleets: an encoder--decoder is pre-trained on one source system for which a
+long operational history exists, and its architecture and parameters then
+initialize a \emph{dedicated} model for each target system of the same fleet,
+validated in part on traction systems of a fleet of trains. These methods
 substantially reduce the need for labeled target-domain faults and have
-demonstrated strong cross-condition accuracy on CWRU and related
-benchmarks. However, they still require access to target-domain
-observations during an explicit adaptation or fine-tuning stage, executed
+demonstrated strong cross-condition accuracy. However, they still require
+target-domain observations during an explicit adaptation stage executed
 independently for each new operating condition or physical unit. This
-reintroduces, at a smaller scale, the same per-asset engineering burden
-that fleet-wide deployment seeks to eliminate: every newly installed asset
-still triggers a training procedure, even when it requires no fault
-labels.
+reintroduces, at a smaller scale, the same per-asset engineering burden that
+fleet-wide deployment seeks to eliminate: every newly installed asset still
+triggers a training procedure, even when it requires no fault labels.
 
 The distinction is therefore not between supervised and unsupervised
 deployment, nor between labeled and unlabeled adaptation, but between
-architectures that require engineering work whenever a new asset is
-deployed and one in which deployment consists only of estimating a local
-operational radius while reusing an already validated shared
-representation.
-
-From an engineering perspective, this also changes the transferable object.
-Existing transfer-learning approaches transfer model parameters and then
-adapt them to each target asset. In the proposed methodology, the
-transferable engineering artefact is the validated nominal representation
-itself, whereas the only asset-specific quantity estimated during
-deployment is the local operational radius.
+architectures in which each new asset triggers engineering work and one in
+which deployment consists only of estimating a local operational radius while
+reusing an already validated shared representation. Existing transfer
+approaches transfer model parameters and then adapt them per asset; here the
+transferable artefact is the validated nominal representation itself, and the
+only asset-specific quantity estimated at deployment is that radius.
 
 This viewpoint is also consistent with the inverse-problem and
 quotient-space formulations introduced in our previous work
-\cite{disanti2026inverse,disanti2026quotient}, in which diagnosis is posed
+\citep{disanti2026inverse,disanti2026quotient}, in which diagnosis is posed
 as the recovery of a canonical nominal representation from observations.
 The present paper addresses the engineering realization of that framework
 for scalable fleet deployment rather than its mathematical formulation.
@@ -637,7 +408,7 @@ validation of the quotient-space formulation, including the convergence of
 independently commissioned synthetic assets toward stable asset-specific
 operational radii under the shared representation, is reported in the
 companion theoretical work
-\cite{disanti2026quotient,disanti2026inverse}. Since the objective of the
+\citep{disanti2026quotient,disanti2026inverse}. Since the objective of the
 present paper is to evaluate fleet deployment rather than simulation
 fidelity, the quantitative results reported here focus exclusively on
 transfer to the independent CWRU and NASA IMS benchmarks.
@@ -809,11 +580,11 @@ own healthy reconstruction-error distribution as its decision boundary.
 Fault observations are never used for representation learning or threshold
 selection.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
-\caption{Ideal asset-specific autoencoder performance on CWRU. Each
+\caption{Ideal asset-specific autoencoder performance on CWRU. Each 
 autoencoder is trained and calibrated independently using the complete
-healthy dataset of the corresponding operating condition. FAR denotes
+healthy dataset of the corresponding operating condition. FAR denotes 
 healthy false-alarm rate and DR denotes fault detection rate.}
 \label{tab:asset-specific-by-condition}
 
@@ -906,7 +677,7 @@ detection rates for ball-, inner-race-, and outer-race faults remained
 unchanged across repetitions. Only the numerical reconstruction threshold
 varied, as summarized in Table~\ref{tab:ae-threshold-stability}.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \begin{tabular}{lc}
 \toprule
@@ -977,97 +748,48 @@ advance.
 Table~\ref{tab:shared-deployment} reports the complete CWRU deployment
 results.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{Simulation-to-field deployment of the shared autoencoder on CWRU.
-FAR denotes healthy false-alarm rate and DR denotes fault detection rate.
-The field oracle uses every available healthy window, whereas the proposed
-online procedure stops automatically when the empirical p98 radius satisfies
-the convergence criterion. Healthy FAR is evaluated over the complete
-healthy sequence to permit direct comparison between calibration strategies,
-including observations used during commissioning. A dash indicates that
-sequential calibration is not applicable.}
+FAR denotes healthy false-alarm rate, DR fault detection rate. Healthy FAR
+covers the complete healthy sequence, including commissioning observations,
+so that calibration strategies remain comparable; post-convergence FAR is
+reported in Table~\ref{tab:online-oracle-agreement}. Healthy windows per condition:
+404 (1730, 1750), 403 (1772), 203 (1797). A dash indicates that sequential
+calibration does not apply.}
 \label{tab:shared-deployment}
-
-\resizebox{\linewidth}{!}{
-\begin{tabular}{llrrrrrrr}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llrrrrrr@{}}
 \toprule
-RPM &
-Calibration &
-$\tau$ &
-Healthy FAR &
-Ball DR &
-Inner DR &
-Outer DR &
-Healthy windows &
-Calibration windows \\
-&
-&
-&
-(\%) &
-(\%) &
-(\%) &
-(\%) &
-&
-\\
+RPM & Calibration & $\tau$ & FAR & Ball & Inner & Outer & Cal. \\
+    &             &        & (\%) & DR (\%) & DR (\%) & DR (\%) & windows \\
 \midrule
 
-1730 & Direct threshold transfer
-& 0.1027 & 100.00 & 100.00 & 100.00 & 100.00
-& 404 & -- \\
-
-1730 & Field oracle
-& 0.3578 & 2.23 & 99.75 & 100.00 & 99.86
-& 404 & -- \\
-
-1730 & Proposed online calibration
-& 0.3520 & 3.71 & 99.75 & 100.00 & 100.00
-& 404 & 49 \\
+1730 & Direct threshold transfer  & 0.1027 & 100.00 & 100.00 & 100.00 & 100.00 & -- \\
+1730 & Field oracle               & 0.3578 &   2.23 &  99.75 & 100.00 &  99.86 & -- \\
+1730 & Proposed online calibration& 0.3520 &   3.71 &  99.75 & 100.00 & 100.00 & 49 \\
 
 \addlinespace
 
-1750 & Direct threshold transfer
-& 0.1027 & 100.00 & 100.00 & 100.00 & 100.00
-& 404 & -- \\
-
-1750 & Field oracle
-& 0.3434 & 2.23 & 100.00 & 100.00 & 100.00
-& 404 & -- \\
-
-1750 & Proposed online calibration
-& 0.3440 & 1.98 & 100.00 & 100.00 & 100.00
-& 404 & 62 \\
+1750 & Direct threshold transfer  & 0.1027 & 100.00 & 100.00 & 100.00 & 100.00 & -- \\
+1750 & Field oracle               & 0.3434 &   2.23 & 100.00 & 100.00 & 100.00 & -- \\
+1750 & Proposed online calibration& 0.3440 &   1.98 & 100.00 & 100.00 & 100.00 & 62 \\
 
 \addlinespace
 
-1772 & Direct threshold transfer
-& 0.1027 & 100.00 & 100.00 & 100.00 & 100.00
-& 403 & -- \\
-
-1772 & Field oracle
-& 0.3512 & 2.23 & 100.00 & 100.00 & 100.00
-& 403 & -- \\
-
-1772 & Proposed online calibration
-& 0.3550 & 1.24 & 100.00 & 100.00 & 100.00
-& 403 & 58 \\
+1772 & Direct threshold transfer  & 0.1027 & 100.00 & 100.00 & 100.00 & 100.00 & -- \\
+1772 & Field oracle               & 0.3512 &   2.23 & 100.00 & 100.00 & 100.00 & -- \\
+1772 & Proposed online calibration& 0.3550 &   1.24 & 100.00 & 100.00 & 100.00 & 58 \\
 
 \addlinespace
 
-1797 & Direct threshold transfer
-& 0.1027 & 100.00 & 100.00 & 100.00 & 100.00
-& 203 & -- \\
-
-1797 & Field oracle
-& 0.3886 & 2.46 & 98.03 & 100.00 & 100.00
-& 203 & -- \\
-
-1797 & Proposed online calibration
-& 0.3869 & 3.45 & 98.52 & 100.00 & 100.00
-& 203 & 49 \\
+1797 & Direct threshold transfer  & 0.1027 & 100.00 & 100.00 & 100.00 & 100.00 & -- \\
+1797 & Field oracle               & 0.3886 &   2.46 &  98.03 & 100.00 & 100.00 & -- \\
+1797 & Proposed online calibration& 0.3869 &   3.45 &  98.52 & 100.00 & 100.00 & 49 \\
 
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 Direct transfer of the absolute simulator threshold fails under every
@@ -1121,53 +843,37 @@ methodology performs no field-model training and estimates only a local
 operational radius through convergence-based commissioning. Across the four
 CWRU conditions, commissioning required only 49--62 nominal observations.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{Ideal but non-scalable asset-specific deployment versus the proposed
 fleet-scalable deployment. Values are mean $\pm$ standard deviation across
-the four CWRU operating conditions. The shared field-oracle strategy uses
+the four CWRU operating conditions. Inner-race DR was $100.00 \pm 0.00$ for
+all three strategies and is omitted. The shared field-oracle strategy uses
 the complete healthy dataset only to estimate the local radius; it does not
 retrain the shared representation.}
 \label{tab:oracle-vs-proposed}
-
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lcccccc}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lccccc@{}}
 \toprule
-Deployment strategy &
-Healthy FAR (\%) &
-Ball DR (\%) &
-Inner DR (\%) &
-Outer DR (\%) &
-Field model training &
-Local calibration data \\
+Deployment strategy & FAR & Ball DR & Outer DR & Field    & Calibration \\
+                    & (\%) & (\%)   & (\%)     & training & data \\
 \midrule
 
 Asset-specific AE oracle
-& $2.29 \pm 0.12$
-& $100.00 \pm 0.00$
-& $100.00 \pm 0.00$
-& $100.00 \pm 0.00$
-& One model per condition
-& Complete healthy dataset \\
+& $2.29 \pm 0.12$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$
+& One per condition & All healthy data \\
 
-Shared AE with field-oracle radius
-& $2.29 \pm 0.12$
-& $99.45 \pm 0.96$
-& $100.00 \pm 0.00$
-& $99.96 \pm 0.07$
-& None
-& Complete healthy dataset \\
+Shared AE, field-oracle radius
+& $2.29 \pm 0.12$ & $99.45 \pm 0.96$ & $99.96 \pm 0.07$
+& None & All healthy data \\
 
-Proposed shared AE with online radius
-& $2.60 \pm 1.18$
-& $99.57 \pm 0.71$
-& $100.00 \pm 0.00$
-& $100.00 \pm 0.00$
-& None
-& 49--62 observations \\
+Proposed: shared AE, online radius
+& $2.60 \pm 1.18$ & $99.57 \pm 0.71$ & $100.00 \pm 0.00$
+& None & 49--62 observations \\
 
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 Replacing four independently trained autoencoders with one
@@ -1197,7 +903,7 @@ Table~\ref{tab:online-oracle-agreement} examines this local identification
 directly by comparing the converged online radius with the empirical p98
 radius obtained retrospectively from every available healthy observation.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{Agreement between the converged online operational radius and the
 complete-data field-oracle p98 reference. Relative difference is computed as
@@ -1206,24 +912,21 @@ $100|\tau_{\mathrm{online}}-\tau_{\mathrm{oracle}}|/
 windows occurring after the declared convergence point.}
 \label{tab:online-oracle-agreement}
 
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lccccc}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lccccc@{}}
 \toprule
-RPM &
-$\tau_{\mathrm{oracle}}$ &
-$\tau_{\mathrm{online}}$ &
-Relative difference (\%) &
-Calibration windows &
-Post-calibration FAR (\%) \\
+RPM & $\tau_{\mathrm{oracle}}$ & $\tau_{\mathrm{online}}$ & Relative & Cal.    & Post-cal. \\
+    &                          &                          & diff.\ (\%) & windows & FAR (\%)  \\
 \midrule
 1730 & 0.3578 & 0.3520 & 1.64 & 49 & 3.94 \\
 1750 & 0.3434 & 0.3440 & 0.19 & 62 & 1.75 \\
 1772 & 0.3512 & 0.3550 & 1.06 & 58 & 0.87 \\
 1797 & 0.3886 & 0.3869 & 0.44 & 49 & 3.90 \\
 \midrule
-Mean & -- & -- & 0.83 & $54.5 \pm 6.6$ & 2.62 \\
+Mean & --     & --     & 0.83 & $54.5 \pm 6.6$ & 2.62 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 The converged online radii differ from their complete-data oracle references
@@ -1304,15 +1007,15 @@ for operating condition $k$. This quantity is unavailable during
 commissioning and is used only to assess agreement with the operating point
 that would be obtained under complete nominal knowledge.
 
-All four CWRU operating conditions satisfy the convergence criterion before
-the maximum commissioning budget is exhausted. Convergence is detected
-after 49, 62, 58, and 49 windows for 1730, 1750, 1772, and
-1797\,RPM, respectively, corresponding to a mean commissioning duration of
-$54.5 \pm 6.6$ windows. The resulting operational radii differ from their
-complete-data field-oracle references by only 1.64\%, 0.19\%, 1.06\%,
-and 0.44\%, respectively.
+%All four CWRU operating conditions satisfy the convergence criterion before
+%the maximum commissioning budget is exhausted. Convergence is detected
+%after 49, 62, 58, and 49 windows for 1730, 1750, 1772, and
+%1797\,RPM, respectively, corresponding to a mean commissioning duration of
+%$54.5 \pm 6.6$ windows. The resulting operational radii differ from their
+%complete-data field-oracle references by only 1.64\%, 0.19\%, 1.06\%,
+%and 0.44\%, respectively.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{cwru_tau_convergence.pdf}
 \caption{Sequential estimation of the empirical p98 operational radius
@@ -1389,68 +1092,39 @@ shared representation without retraining.
 
 Table~\ref{tab:initialization-robustness} summarizes the results obtained
 across the five independent commissioning sequences.
-
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lccccccc}
-\toprule
-RPM &
-$\tau_{\mathrm{online}}$ &
-Relative oracle error (\%) &
-Post-calibration FAR (\%) &
-Ball DR (\%) &
-Inner DR (\%) &
-Outer DR (\%) &
-Calibration windows \\
-\midrule
-
-1730 &
-$0.3486 \pm 0.0023$ &
-$2.59 \pm 0.63$ &
-$5.38 \pm 1.39$ &
-$99.95 \pm 0.11$ &
-$100.00 \pm 0.00$ &
-$100.00 \pm 0.00$ &
-$55.6 \pm 8.2$ \\
-
-1750 &
-$0.3451 \pm 0.0111$ &
-$2.53 \pm 1.65$ &
-$4.23 \pm 5.63$ &
-$99.90 \pm 0.14$ &
-$100.00 \pm 0.00$ &
-$100.00 \pm 0.00$ &
-$57.4 \pm 7.9$ \\
-
-1772 &
-$0.3511 \pm 0.0086$ &
-$1.82 \pm 1.37$ &
-$2.54 \pm 2.18$ &
-$100.00 \pm 0.00$ &
-$100.00 \pm 0.00$ &
-$99.97 \pm 0.06$ &
-$54.4 \pm 5.9$ \\
-
-1797 &
-$0.3915 \pm 0.0065$ &
-$1.40 \pm 1.02$ &
-$2.21 \pm 2.23$ &
-$97.98 \pm 0.71$ &
-$100.00 \pm 0.00$ &
-$99.97 \pm 0.06$ &
-$64.4 \pm 26.0$ \\
-
-\bottomrule
-\end{tabular}}
 \caption{Robustness of convergence-based local calibration to commissioning
 sample variability. The shared simulator-trained representation and all
 calibration parameters remained fixed; only the healthy commissioning
 observations and their arrival order were varied. Values are reported as
 mean $\pm$ standard deviation over five independent commissioning
-realizations. FAR is evaluated only on healthy observations excluded from
+realizations. Inner-race DR was $100.00 \pm 0.00$ under every condition and
+is omitted. FAR is evaluated only on healthy observations excluded from
 calibration.}
 \label{tab:initialization-robustness}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+RPM & $\tau_{\mathrm{online}}$ & Oracle    & Post-cal. & Ball DR & Outer DR & Cal.    \\
+    &                          & error (\%) & FAR (\%)  & (\%)    & (\%)     & windows \\
+\midrule
+
+1730 & $0.3486 \pm 0.0023$ & $2.59 \pm 0.63$ & $5.38 \pm 1.39$
+     & $99.95 \pm 0.11$ & $100.00 \pm 0.00$ & $55.6 \pm 8.2$ \\
+
+1750 & $0.3451 \pm 0.0111$ & $2.53 \pm 1.65$ & $4.23 \pm 5.63$
+     & $99.90 \pm 0.14$ & $100.00 \pm 0.00$ & $57.4 \pm 7.9$ \\
+
+1772 & $0.3511 \pm 0.0086$ & $1.82 \pm 1.37$ & $2.54 \pm 2.18$
+     & $100.00 \pm 0.00$ & $99.97 \pm 0.06$ & $54.4 \pm 5.9$ \\
+
+1797 & $0.3915 \pm 0.0065$ & $1.40 \pm 1.02$ & $2.21 \pm 2.23$
+     & $97.98 \pm 0.71$ & $99.97 \pm 0.06$ & $64.4 \pm 26.0$ \\
+
+\bottomrule
+\end{tabular}
 \end{table}
 
 All 20 commissioning runs satisfied the convergence criterion before
@@ -1546,71 +1220,27 @@ The learned operational radius remains predictive throughout the subsequent degr
 post-departure exceedance rate of 94.6\% and lead times ranging from
 14.5~h to 74.0~h before the documented end of the experiment.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{NASA IMS deployment results using one shared simulator-trained
 representation and convergence-based local operational-radius estimation.}
 \label{tab:nasa-main-results}
 
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lccccc}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lccccc@{}}
 \toprule
-Bearing &
-Calibration
-(windows) &
-$\tau_k$ &
-Relative
-error (\%) &
-Post-departure
-exceedance (\%) &
-Lead
-time (h)
-\\
+Bearing & Cal.    & $\tau_k$ & Relative   & Post-departure & Lead time \\
+        & windows &          & error (\%) & exceedance (\%) & (h)       \\
 \midrule
-
-1 &
-49 &
-0.010680 &
-0.10 &
-99.12 &
-74.00
-\\
-
-2 &
-57 &
-0.014950 &
-0.35 &
-86.42 &
-38.83
-\\
-
-3 &
-49 &
-0.018930 &
-2.87 &
-95.88 &
-14.50
-\\
-
-4 &
-49 &
-0.006672 &
-0.18 &
-97.02 &
-54.33
-\\
-
+1 & 49 & 0.010680 & 0.10 & 99.12 & 74.00 \\
+2 & 57 & 0.014950 & 0.35 & 86.42 & 38.83 \\
+3 & 49 & 0.018930 & 2.87 & 95.88 & 14.50 \\
+4 & 49 & 0.006672 & 0.18 & 97.02 & 54.33 \\
 \midrule
-
-Mean &
-51 &
--- &
-0.87 &
-94.61 &
-45.42
-\\
+Mean & 51 & -- & 0.87 & 94.61 & 45.42 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 Bearing 3 exhibits the largest relative deviation from its oracle radius
 (2.87\%) among the four monitored units. This is consistent with its
@@ -1637,76 +1267,31 @@ Across twenty independent commissioning experiments (four bearings and five
 random initialization samples), calibration converged successfully in every
 case. Table~\ref{tab:nasa-stability} summarizes the resulting variability.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{Stability of local operational-radius estimation under repeated
 NASA commissioning experiments using one fixed shared representation.}
 \label{tab:nasa-stability}
 
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lcccccc}
+\caption{Stability of local operational-radius estimation under repeated
+NASA commissioning experiments using one fixed shared representation.
+Calibration converged in all twenty realizations (success rate 100\%).}
+\label{tab:nasa-stability}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lccccc@{}}
 \toprule
-Bearing &
-$\tau_{\rm mean}$ &
-$\tau_{\rm std}$ &
-Relative error (\%) &
-Healthy FAR (\%) &
-Calibration
-(windows) &
-Success
-(\%)
-\\
+Bearing & $\tau_{\mathrm{mean}}$ & $\tau_{\mathrm{std}}$ & Relative   & Healthy   & Cal.    \\
+        &                        &                       & error (\%) & FAR (\%)  & windows \\
 \midrule
-
-1 &
-0.010590 &
-0.000074 &
-0.73 $\pm$ 0.70 &
-5.84 $\pm$ 3.79 &
-49.2 $\pm$ 0.4 &
-100
-\\
-
-2 &
-0.014873 &
-0.000084 &
-0.36 $\pm$ 0.44 &
-3.71 $\pm$ 3.33 &
-49.0 $\pm$ 0.0 &
-100
-\\
-
-3 &
-0.018151 &
-0.000383 &
-1.58 $\pm$ 1.88 &
-4.93 $\pm$ 4.22 &
-52.2 $\pm$ 7.2 &
-100
-\\
-
-4 &
-0.006640 &
-0.000033 &
-0.66 $\pm$ 0.49 &
-5.45 $\pm$ 2.39 &
-49.6 $\pm$ 1.3 &
-100
-\\
-
+1 & 0.010590 & 0.000074 & $0.73 \pm 0.70$ & $5.84 \pm 3.79$ & $49.2 \pm 0.4$ \\
+2 & 0.014873 & 0.000084 & $0.36 \pm 0.44$ & $3.71 \pm 3.33$ & $49.0 \pm 0.0$ \\
+3 & 0.018151 & 0.000383 & $1.58 \pm 1.88$ & $4.93 \pm 4.22$ & $52.2 \pm 7.2$ \\
+4 & 0.006640 & 0.000033 & $0.66 \pm 0.49$ & $5.45 \pm 2.39$ & $49.6 \pm 1.3$ \\
 \midrule
-
-Mean &
--- &
--- &
-0.83 &
-4.98 &
-50.0 &
-100
-\\
-
+Mean & -- & -- & 0.83 & 4.98 & 50.0 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 These experiments demonstrate that the operational radius is simultaneously
@@ -1723,165 +1308,66 @@ physical asset.
 \label{sec:edge-results}
 %---------------------------------------------------------------------
 
-The shared model contains 847,601 trainable parameters and is trained entirely offline.
-Deployment at the monitored asset requires only forward inference, a small residual buffer,
-estimation of an empirical quantile, and the current convergence state.
-No gradient computation, model optimization, fault labels, or asset-specific representation
-learning are required after installation.
+The shared model contains 847,601 trainable parameters (3.39\,MB as raw
+float32, 10.24\,MB serialized). Median CPU inference latency over a
+1,200-sample window is 6.26\,ms (p95: 6.62\,ms), well within the 100\,ms
+acquisition interval. Per-asset state is limited to a 200-sample residual
+buffer of 800 bytes, giving under 1\,kB of calibration state; no per-asset
+model training and no fault labels are required after installation.
 
-On the evaluation platform, inference over a 1,200-sample window requires a median CPU latency
-of only 6.26\,ms (95th percentile: 6.62\,ms), substantially below the 100\,ms acquisition
-interval corresponding to the evaluated windows. Consequently, the proposed deployment operates
-comfortably in real time while leaving ample computational margin for additional edge tasks such
-as communication, diagnostics, or signal preprocessing.
-
-The local deployment state is also extremely compact. Besides the shared model itself, each asset
-stores only a buffer of the most recent 200 reconstruction residuals during commissioning, requiring less than 1\,kB of asset-specific state. The only
-fleet-wide artifact is the shared nominal representation, which is trained once and distributed
-to every operational unit.
-
-\begin{table}[H]
-\centering
-\small
-\caption{Edge-deployment footprint of the proposed shared nominal representation.}
-\label{tab:edge}
-\begin{tabular}{lc|lc}
-\toprule
-Metric & Value & Metric & Value \\
-\midrule
-Model parameters & 847,601 & Residual-buffer memory & 800 bytes \\
-Raw float32 size & 3.39 MB & Total calibration state & $<1$ kB \\
-Serialized (.keras) & 10.24 MB & Per-asset model training & None \\
-CPU latency (median) & 6.26 ms & Fault labels required & None \\
-CPU latency (p95) & 6.62 ms & Local residual buffer & 200 samples \\
-\bottomrule
-\end{tabular}
-\end{table}
+The only fleet-wide artifact is the shared nominal representation, trained
+once and distributed to every operational unit.
 
 
-%=====================================================================
-\section{Mathematical Scope and Deployment Guarantees}
+\section{Mathematical Scope and Coverage Properties}
 \label{sec:math_perspective}
-%=====================================================================
 
-This section summarizes the minimal mathematical framework underlying the
-proposed deployment methodology. The complete functional-analytic and
-topological derivations are developed in our companion works
-\cite{disanti2026quotient,disanti2026inverse}. Here we state only the
-results required to justify why one shared canonical representation and
-independently estimated local operational radii are mathematically
-compatible.
+Two properties support the proposed architecture: one structural, justifying
+why a single representation may be shared across a fleet, and one statistical,
+characterizing what the locally estimated radius guarantees.
 
-\begin{quote}
-\textbf{Scope.} Jointly recovering a nuisance-invariant representation
-\emph{and} estimating asset-specific operational neighbourhoods across a
-heterogeneous fleet constitutes a high-dimensional inverse problem. The
-proposed methodology decouples this task into (i) a \emph{global} inverse
-problem, solved once offline for a compatible asset family, recovering a
-canonical representation supported by a compact nominal observation set
-(Proposition~\ref{prop:compactness}); and (ii) a \emph{local} inverse
-problem, solved independently by each deployed asset, estimating only the
-operational neighbourhood associated with that fixed representation.
-\end{quote}
-
-%---------------------------------------------------------------------
-\subsection{Observation model}
-\label{sec:obs_model}
-%---------------------------------------------------------------------
-
-Let $X\subset\mathbb{R}^n$ denote the space of observation windows,
-$\theta\in\Theta$ the latent diagnostic state, and
+\paragraph{Structural decomposition.} Let $X\subset\mathbb{R}^n$ be the space
+of observation windows, $\theta\in\Theta$ the latent diagnostic state, and
 $\eta\in E$ nuisance variables (sensor coupling, mounting, operating point,
-noise), with
+noise), with $x=F(\theta,\eta)$. The nuisance group $G_{\mathrm{nuis}}$ acts on
+$E$ while preserving $\theta$, inducing diagnostic equivalence $x\sim x'$. Two
+elementary facts follow. If $E$ is compact and $F(\theta_N,\cdot)$ continuous,
+the nominal observation set $O_N=F(\theta_N,E)$ is compact in $X$; and any
+residual score constant on equivalence classes factors uniquely through the
+quotient projection $\pi:X\to X/{\sim}$. Together these justify treating fleet
+deployment as two inverse problems at different scales: a global one, solved
+once offline, recovering a canonical representation supported by a bounded
+nominal structure; and a local one, solved by each asset, estimating only the
+operational neighbourhood around that fixed representation. The
+functional-analytic development is given in our companion work
+\citep{disanti2026quotient,disanti2026inverse}; the rapid commissioning
+observed experimentally is consistent with this decomposition but is not
+claimed as a consequence of it.
 
-\[
-x = F(\theta,\eta).
-\]
-
-The nuisance group $G_{\mathrm{nuis}}$ acts on $E$ while preserving
-$\theta$. Two observations are diagnostically equivalent,
-
-\[
-x\sim x',
-\]
-
-iff
-
-\[
-x' = F(\theta,g\cdot\eta)
-\]
-
-for some $g\in G_{\mathrm{nuis}}$.
-
-%---------------------------------------------------------------------
-\subsection{Compactness and factorization}
-\label{sec:compactness}
-%---------------------------------------------------------------------
-
-\begin{proposition}[Compactness of the nominal observation set]
-\label{prop:compactness}
-Let $E$ be compact and let
-$F(\theta_N,\cdot):E\rightarrow X\subset\mathbb{R}^n$
-be continuous. Then the nominal observation set
-\[
-O_N=\{F(\theta_N,\eta):\eta\in E\}
-\]
-is compact in $X$.
-\end{proposition}
-
-\begin{proof}[Proof sketch]
-For fixed nominal state $\theta_N$, the map
-$F(\theta_N,\cdot)$ is continuous on the compact nuisance space $E$.
-Therefore, its image
-$O_N=F(\theta_N,E)$ is compact.
-\end{proof}
-
-Compactness ensures that nominal observations remain within a bounded,
-closed structure under the assumed nuisance variation. Once the shared
-canonical representation has been recovered, local commissioning therefore
-estimates an operational neighbourhood around a fixed nominal structure
-rather than learning a new representation. The rapid commissioning observed
-experimentally is evidence supporting this decomposition; it is not claimed
-as a consequence of compactness alone.
-
-\begin{proposition}[Factorization through the diagnostic quotient]
-\label{prop:factorization_prop}
-Let
-\[
-\pi:X\rightarrow X/{\sim}
-\]
-denote the quotient projection induced by diagnostic equivalence. If
-$d:X\rightarrow\mathbb{R}$ is constant on equivalence classes, then there
-exists a unique map
-\[
-\bar d:X/{\sim}\rightarrow\mathbb{R}
-\]
-such that
-\[
-d=\bar d\circ\pi.
-\]
-\end{proposition}
-
-\begin{proof}[Proof sketch]
-Because $d$ is constant on every equivalence class,
-\[
-\bar d([x]) := d(x)
-\]
-is well defined. Uniqueness follows directly from the surjectivity of the
-quotient projection.
-\end{proof}
-
-Together, these results justify viewing fleet deployment as the composition
-of two inverse problems operating at different scales. The global inverse
-problem recovers a shared canonical nominal representation only once,
-whereas each deployed asset solves only a local inverse problem consisting
-of estimating the operational neighbourhood associated with that fixed
-representation. In the present implementation, this neighbourhood is estimated by the
-empirical $(1-\alpha)$ residual quantile defined in
-Eq.~\eqref{eq:tau-online-p98}.
-The CWRU and NASA IMS experiments demonstrate that this local inverse
- problem converges rapidly while the shared canonical representation is transferred unchanged across all deployed assets.
-
+\paragraph{Coverage of the operational radius.} The local radius admits a
+distribution-free finite-sample guarantee. If the commissioning residuals
+$r_1,\dots,r_n$ and a future nominal residual $r_{n+1}$ are exchangeable, and
+$\tau$ is taken as the $k$-th order statistic with
+$k=\lceil(1-\alpha)(n+1)\rceil$, then
+\begin{equation}
+P\!\left(r_{n+1}\le\tau\right)\;\ge\;1-\alpha ,
+\label{eq:coverage}
+\end{equation}
+with no assumption on the residual distribution. Three consequences are
+relevant to deployment. First, the target coverage is attainable only for
+$n\ge 1/\alpha-1$, which for $\alpha=0.02$ requires at least 49 commissioning
+observations; the durations reported in Section~\ref{sec:results} lie at or
+above this bound. Second, the guarantee is one-sided with finite-sample slack
+of order $1/(n+1)$, approximately two percentage points at the commissioning
+sizes observed here, which is the scale of the post-calibration false-alarm
+variation reported in Table~\ref{tab:online-oracle-agreement}. Third, the
+requirement is exchangeability of the commissioning stream rather than any
+distributional form; the permutation experiments of
+Section~\ref{sec:initialization-robustness} probe this assumption directly, and
+the stationarity caveat in Section~\ref{sec:limitations} bounds its scope. The
+empirical quantile used in our implementation approximates this order
+statistic; adopting it exactly would make the coverage bound hold by
+construction.
 \section{Discussion}
 \label{sec:discussion}
 
@@ -1900,26 +1386,16 @@ specifying deployment requirements: rather than accepting per-asset models devel
 each vendor, an operator can require a single validated, versioned nominal representation
 together with documented local calibration behaviour, independent of which organization,
 component OEM, third-party analytics provider, or in-house engineering team, produces and
-maintains it.
+maintains it. Deployment cost is thereby decoupled from fleet size: growth increases the number
+of monitored assets, not the number of engineered models, since adding a unit requires only
+distributing the shared representation and estimating its local operational radius.
 
 The repeated-run and initialization-robustness experiments jointly support this claim from two
 complementary directions. Independent random initializations converge to slightly different
 reconstruction-error scales, yet healthy false-alarm rate and fault detection remain essentially
 unchanged after empirical calibration. Conversely, keeping the learned representation fixed while
 varying only the commissioning sample produces only modest variation in the estimated operational
-radius. The transferable object is therefore not an absolute reconstruction-error threshold but a
-shared canonical representation together with a target nominal coverage. The calibration-transfer
-experiments demonstrate that the representation transfers successfully from simulation to field,
-whereas the absolute residual scale does not.
-
-Identifying the shared representation as the transferable object also changes the engineering
-organization of fleet deployment. Rather than developing and maintaining an independent
-representation model for each physical asset, these activities can be centralized, for example by
-the original equipment manufacturer (OEM), while each deployed asset performs only a lightweight
-local calibration during commissioning. Computational scalability is correspondingly decoupled
-from fleet size: growth increases the number of monitored assets, not the number of engineered
-models, since adding a unit requires only distributing the shared representation and estimating
-its local operational radius.
+radius.
 
 Beyond commissioning, the NASA IMS experiments indicate that the estimated operational radius
 remains predictive throughout the subsequent degradation trajectory. Across all evaluated
@@ -1931,18 +1407,12 @@ coverage (p98), and the same convergence criterion, without bearing-specific ret
 
 This behaviour is consistent with the broader theoretical framework developed in our previous
 work, which formulates industrial diagnosis as an inverse problem over quotient spaces
-\cite{disanti2026inverse,disanti2026quotient,disanti2025blueprints}. Within that formulation,
+\citep{disanti2026inverse,disanti2026quotient,disanti2025blueprints}. Within that formulation,
 the operational radius is not merely a tuned threshold but an estimate of the local neighbourhood
 of the nominal manifold. Consequently, once calibration has converged, trajectories that remain
 nominal are expected to remain inside this neighbourhood, whereas persistent degradation should
 naturally evolve outside it. The NASA IMS experiments provide empirical evidence consistent with
 this theoretical prediction.
-
-This perspective shifts commissioning from threshold tuning to manifold identification. Rather
-than adjusting detector parameters for each individual asset, deployment consists of estimating
-the local operational neighbourhood associated with a shared nominal representation. The learned
-representation becomes the transferable engineering artefact, while commissioning reduces to
-identifying the operational radius of each physical asset.
 
 Operational-radius convergence also clarifies the role of adaptation: its purpose is to identify
 the asset during commissioning, not to track its aging indefinitely. Once $\tau_k^\star$ has
@@ -1953,11 +1423,6 @@ constrained. Together with the edge footprint reported in
 Section~\ref{sec:edge-results}, this deployment model enables day-one monitoring without fault
 labels, isolates asset-specific adaptation to local calibration, and requires only lightweight
 edge computation.
-
-Conventional CBM deployments typically require asset-specific engineering of both models and
-alarm thresholds. The present results suggest that this engineering effort can instead be
-replaced by a standardized commissioning procedure in which every asset estimates its own
-operational radius while reusing a common nominal representation.
 
 \begin{remark}
 The variability observed for the 1750\,RPM commissioning samples is not
@@ -2033,10 +1498,15 @@ reconstruction residuals and operational-radius dynamics carries predictive info
 connecting this methodology with physics-informed health indicators and remaining-useful-life
 estimation.
 
-Finally, the mathematical interpretation in \cite{disanti2026quotient} suggests formalizing the
+Finally, the mathematical interpretation in \citep{disanti2026quotient} suggests formalizing the
 operational radius as an asset-specific neighborhood around the transferable canonical
 representation, characterizing its invariance properties and the conditions under which local
 calibration preserves the underlying quotient-space structure.
+
+Finally, the proposed methodology yields detection rather than diagnosis.
+Where a kinematic model is available, envelope analysis attributes a
+departure to a specific fault surface; the operational radius reports only
+that an observation lies outside the nominal neighbourhood.
 
 
 %=====================================================================
@@ -2078,7 +1548,8 @@ The representation is shared. The operational radius is individual.
 %\renewcommand{\bibfont}{\footnotesize}
 %\enlargethispage{3\baselineskip}
 
-\bibliographystyle{trb} 
+%\bibliographystyle{trb} 
+\bibliographystyle{chicago}
 \bibliography{references}
 
 \end{document}

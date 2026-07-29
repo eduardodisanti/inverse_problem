@@ -1,53 +1,61 @@
 This is BibTeX, Version 0.99d (TeX Live 2023)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: TRB2027_draft.aux
-The style file: trb.bst
+The style file: chicago.bst
 Database file #1: references.bib
 Warning--entry type for "disanti2026quotient" isn't style-file defined
 --line 168 of file references.bib
 Warning--entry type for "disanti2026inverse" isn't style-file defined
 --line 178 of file references.bib
-Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
-Warning--empty journal in disanti2025blueprints
+Warning--no number and no volume in bronstein2021
+Warning--page numbers missing in bronstein2021
+Warning--no journal in disanti2025blueprints
+Warning--no number and no volume in disanti2025blueprints
+Warning--page numbers missing in disanti2025blueprints
+Warning--no number and no volume in entezami2020
+Warning--page numbers missing in entezami2020
+Warning--no number and no volume in nguyen2025subdomain
+Warning--page numbers missing in nguyen2025subdomain
+Warning--page numbers missing in wang2026fleet
 You've used 18 entries,
-            3224 wiz_defined-function locations,
-            724 strings with 7531 characters,
-and the built_in function-call counts, 9998 in all, are:
-= -- 758
-> -- 423
-< -- 34
-+ -- 151
-- -- 108
-* -- 772
-:= -- 1453
-add.period$ -- 33
+            2861 wiz_defined-function locations,
+            710 strings with 8167 characters,
+and the built_in function-call counts, 13413 in all, are:
+= -- 1063
+> -- 1172
+< -- 3
++ -- 364
+- -- 388
+* -- 1290
+:= -- 2480
+add.period$ -- 52
 call.type$ -- 18
-change.case$ -- 78
+change.case$ -- 147
 chr.to.int$ -- 17
-cite$ -- 19
-duplicate$ -- 867
-empty$ -- 706
-format.name$ -- 163
-if$ -- 2018
+cite$ -- 28
+duplicate$ -- 323
+empty$ -- 720
+format.name$ -- 444
+if$ -- 2468
 int.to.chr$ -- 2
-int.to.str$ -- 19
-missing$ -- 164
-newline$ -- 58
-num.names$ -- 54
-pop$ -- 290
+int.to.str$ -- 0
+missing$ -- 16
+newline$ -- 90
+num.names$ -- 178
+pop$ -- 115
 preamble$ -- 1
-purify$ -- 90
+purify$ -- 253
 quote$ -- 0
-skip$ -- 307
+skip$ -- 332
 stack$ -- 0
-substring$ -- 503
-swap$ -- 495
-text.length$ -- 25
+substring$ -- 588
+swap$ -- 101
+text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 108
-warning$ -- 1
-while$ -- 63
+type$ -- 356
+warning$ -- 10
+while$ -- 157
 width$ -- 0
-write$ -- 200
-(There were 3 warnings)
+write$ -- 234
+(There were 12 warnings)
