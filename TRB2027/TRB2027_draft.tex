@@ -1,80 +1,48 @@
-\documentclass[11pt,a4paper]{article}
+\documentclass[numbered]{trbunofficial}
 
-\usepackage[margin=1in]{geometry}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{lmodern}
-\usepackage{microtype}
-\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\csundef{openbox}
+\usepackage{amsthm}
 \usepackage{mathtools}
-\usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{array}
-\usepackage{enumitem}
-\usepackage{xcolor}
 \usepackage{float}
-\usepackage{caption}
-\usepackage[colorlinks=true, allcolors=black, breaklinks=true]{hyperref}
-\usepackage{authblk}
 \usepackage{tikz}
+
 \usetikzlibrary{arrows.meta,positioning,calc,fit}
 
-\captionsetup{font=footnotesize}
-
-\usepackage[
-    backend=biber,
-    style=authoryear-comp,
-    sorting=nyt,
-    maxcitenames=2,
-    maxbibnames=99,
-    giveninits=false,
-    uniquename=false,
-    uniquelist=false,
-    doi=true,
-    url=true,
-    isbn=false,
-    eprint=true
-]{biblatex}
-
-\addbibresource{references.bib}
-\DeclareDelimFormat{nameyeardelim}{\addspace}
-\setlength{\bibhang}{1.5em}
-\DeclareFieldFormat[article,inproceedings,incollection]{title}{\mkbibquote{#1}}
-\DeclareFieldFormat[book,report,thesis,misc]{title}{\mkbibemph{#1}}
-\DefineBibliographyStrings{english}{
-  andothers = {et\addabbrvspace al\adddot}
-}
-
+% Theorem environments
 \newtheorem{proposition}{Proposition}
 \newtheorem{corollary}{Corollary}
 \newtheorem{definition}{Definition}
 \newtheorem{remark}{Remark}
 \newtheorem{assumption}{Assumption}
 
-\newcommand{\X}{\ensuremath{\mathcal{X}}}
-\newcommand{\Z}{\ensuremath{\mathcal{Z}}}
-\newcommand{\ThetaSpace}{\ensuremath{\Theta}}
-\newcommand{\EtaSpace}{\ensuremath{\mathcal{E}}}
-\newcommand{\Mnominal}{\ensuremath{\mathcal{M}_{\mathrm{N}}}}
-\newcommand{\Gnuis}{\ensuremath{G_{\mathrm{nuis}}}}
-\newcommand{\R}{\ensuremath{\mathbb{R}}}
-\newcommand{\quotient}{\ensuremath{\mathcal{X}/G_{\mathrm{nuis}}}}
-\newcommand{\taumc}{\ensuremath{\tau_{\mathrm{MC}}}}
-\newcommand{\taustar}{\ensuremath{\tau_k^\star}}
-
-\title{
-\large
-\textbf{Fleet-Wide Condition Monitoring via Shared Nominal Representations and Local Radius Calibration}\\
-\medskip
-Enabling OEM-Centralized, Fleet-Deployed CBM
-}
-
-\author[1]{Eduardo Di Santi}
-\affil[1]{Department of Applied Mathematics, University of Colorado Boulder
-}
-\date{}
+% Mathematical notation
+\newcommand{\X}{\mathcal{X}} 
+\newcommand{\Z}{\mathcal{Z}}
+\newcommand{\ThetaSpace}{\Theta}
+\newcommand{\EtaSpace}{\mathcal{E}}
+\newcommand{\Mnominal}{\mathcal{M}_{\mathrm N}}
+\newcommand{\Gnuis}{G_{\mathrm{nuis}}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\quotient}{\mathcal{X}/G_{\mathrm{nuis}}}
+\newcommand{\taumc}{\tau_{\mathrm{MC}}}
+\newcommand{\taustar}{\tau_k^\star}
 
 \begin{document}
+
+\title{Fleet-Wide Condition Monitoring via Shared Nominal Representations and Local Radius Calibration\\[0.4em]
+\large Enabling OEM-Centralized, Fleet-Deployed CBM}
+
+\TRBauthor*
+{Eduardo Di Santi}
+{Department of Applied Mathematics, University of Colorado Boulder}
+{eduardo.disanti@colorado.edu}
+[Boulder, Colorado, USA]
+[]
+
+\AuthorHeaders{Di Santi}
+
 \maketitle
 
 %=====================================================================
@@ -370,7 +338,6 @@ the operational radius is asset-specific.
 
 \end{tikzpicture}%
 }
-
 \caption{
 Conventional fleet deployment requires engineering, validating,
 versioning and maintaining an independent nominal representation for
@@ -781,7 +748,7 @@ A departure begins at the first recording for which at least eight of the
 next ten recording-level residuals exceed the frozen operational radius.
 The declaration time is the final recording of that first qualifying
 window. Lead time is measured from the declaration time to the documented
-end of the experiment, using the 10-minute recording interval of the NASA
+end of the experiment, using the 10-minute acquisition interval of the NASA
 IMS trajectory. Post-departure exceedance is evaluated from the detected
 departure onset to the end of the run.
 
@@ -2110,6 +2077,8 @@ The representation is shared. The operational radius is individual.
 %\setlength{\bibitemsep}{0.4em plus 0.02em minus 0.02em}
 %\renewcommand{\bibfont}{\footnotesize}
 %\enlargethispage{3\baselineskip}
-\printbibliography
+
+\bibliographystyle{trb} 
+\bibliography{references}
 
 \end{document}

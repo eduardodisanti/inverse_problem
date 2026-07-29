@@ -1,15 +1,53 @@
-[0] Config.pm:307> INFO - This is Biber 2.19
-[0] Config.pm:310> INFO - Logfile is 'TRB2027_draft.blg'
-[30] biber-darwin:340> INFO - === Tue Jul 28, 2026, 21:23:13
-[38] Biber.pm:419> INFO - Reading 'TRB2027_draft.bcf'
-[75] Biber.pm:979> INFO - Found 18 citekeys in bib section 0
-[82] Biber.pm:4419> INFO - Processing section 0
-[87] Biber.pm:4610> INFO - Looking for bibtex file 'references.bib' for section 0
-[88] bibtex.pm:1713> INFO - LaTeX decoding ...
-[99] bibtex.pm:1519> INFO - Found BibTeX data source 'references.bib'
-[168] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[168] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[168] Biber.pm:4239> INFO - Sorting list 'nyt/global//global/global' of type 'entry' with template 'nyt' and locale 'en-US'
-[168] Biber.pm:4245> INFO - No sort tailoring available for locale 'en-US'
-[180] bbl.pm:660> INFO - Writing 'TRB2027_draft.bbl' with encoding 'UTF-8'
-[185] bbl.pm:763> INFO - Output to TRB2027_draft.bbl
+This is BibTeX, Version 0.99d (TeX Live 2023)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: TRB2027_draft.aux
+The style file: trb.bst
+Database file #1: references.bib
+Warning--entry type for "disanti2026quotient" isn't style-file defined
+--line 168 of file references.bib
+Warning--entry type for "disanti2026inverse" isn't style-file defined
+--line 178 of file references.bib
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Warning--empty journal in disanti2025blueprints
+You've used 18 entries,
+            3224 wiz_defined-function locations,
+            724 strings with 7531 characters,
+and the built_in function-call counts, 9998 in all, are:
+= -- 758
+> -- 423
+< -- 34
++ -- 151
+- -- 108
+* -- 772
+:= -- 1453
+add.period$ -- 33
+call.type$ -- 18
+change.case$ -- 78
+chr.to.int$ -- 17
+cite$ -- 19
+duplicate$ -- 867
+empty$ -- 706
+format.name$ -- 163
+if$ -- 2018
+int.to.chr$ -- 2
+int.to.str$ -- 19
+missing$ -- 164
+newline$ -- 58
+num.names$ -- 54
+pop$ -- 290
+preamble$ -- 1
+purify$ -- 90
+quote$ -- 0
+skip$ -- 307
+stack$ -- 0
+substring$ -- 503
+swap$ -- 495
+text.length$ -- 25
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 108
+warning$ -- 1
+while$ -- 63
+width$ -- 0
+write$ -- 200
+(There were 3 warnings)

@@ -1,748 +1,101 @@
-% $ biblatex auxiliary file $
-% $ biblatex bbl format version 3.2 $
-% Do not modify the above lines!
-%
-% This is an auxiliary file used by the 'biblatex' package.
-% This file may safely be deleted. It will be recreated by
-% biber as required.
-%
-\begingroup
-\makeatletter
-\@ifundefined{ver@biblatex.sty}
-  {\@latex@error
-     {Missing 'biblatex' package}
-     {The bibliography requires the 'biblatex' package.}
-      \aftergroup\endinput}
-  {}
-\endgroup
+\begin{thebibliography}{18}
+\providecommand{\natexlab}[1]{#1}
 
+\bibitem[{Jardine et~al.(2006)Jardine, Lin, and Banjevic}]{jardine2006}
+Jardine, Andrew K.~S., Daming Lin, and Dragan Banjevic, A Review on Machinery
+  Diagnostics and Prognostics Implementing Condition-Based Maintenance.
+  \emph{Mechanical Systems and Signal Processing}, Vol.~20, No.~7, 2006, pp.
+  1483--1510.
 
-\refsection{0}
-  \datalist[entry]{nyt/global//global/global}
-    \entry{bishop1994}{article}{}
-      \name{author}{1}{}{%
-        {{hash=9dfd0135a5e80aa6d81cea2c10fb7f73}{%
-           family={Bishop},
-           familyi={B\bibinitperiod},
-           given={Christopher\bibnamedelima M.},
-           giveni={C\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
-      }
-      \strng{namehash}{9dfd0135a5e80aa6d81cea2c10fb7f73}
-      \strng{fullhash}{9dfd0135a5e80aa6d81cea2c10fb7f73}
-      \strng{bibnamehash}{9dfd0135a5e80aa6d81cea2c10fb7f73}
-      \strng{authorbibnamehash}{9dfd0135a5e80aa6d81cea2c10fb7f73}
-      \strng{authornamehash}{9dfd0135a5e80aa6d81cea2c10fb7f73}
-      \strng{authorfullhash}{9dfd0135a5e80aa6d81cea2c10fb7f73}
-      \field{sortinit}{B}
-      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{IEE Proceedings -- Vision, Image and Signal Processing}
-      \field{number}{4}
-      \field{title}{Novelty Detection and Neural Network Validation}
-      \field{volume}{141}
-      \field{year}{1994}
-      \field{pages}{217\bibrangedash 222}
-      \range{pages}{6}
-      \verb{doi}
-      \verb 10.1049/ip-vis:19941330
-      \endverb
-    \endentry
-    \entry{bronstein2021}{article}{}
-      \name{author}{4}{}{%
-        {{hash=a0c6e9e0629d03c0bfec15575c55c598}{%
-           family={Bronstein},
-           familyi={B\bibinitperiod},
-           given={Michael\bibnamedelima M.},
-           giveni={M\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
-        {{hash=c83b564e32475f10dcc91be7e66d3e81}{%
-           family={Bruna},
-           familyi={B\bibinitperiod},
-           given={Joan},
-           giveni={J\bibinitperiod}}}%
-        {{hash=f9073aa7e4e4e473ab8161f05ad4b05f}{%
-           family={Cohen},
-           familyi={C\bibinitperiod},
-           given={Taco},
-           giveni={T\bibinitperiod}}}%
-        {{hash=b1208a71c9b067bcef8fb29c15a09b5d}{%
-           family={Veličković},
-           familyi={V\bibinitperiod},
-           given={Petar},
-           giveni={P\bibinitperiod}}}%
-      }
-      \strng{namehash}{05a51a90956c059ac7e527028e6aa670}
-      \strng{fullhash}{f173790f35b0ed4e4202fcc033dd717f}
-      \strng{bibnamehash}{f173790f35b0ed4e4202fcc033dd717f}
-      \strng{authorbibnamehash}{f173790f35b0ed4e4202fcc033dd717f}
-      \strng{authornamehash}{05a51a90956c059ac7e527028e6aa670}
-      \strng{authorfullhash}{f173790f35b0ed4e4202fcc033dd717f}
-      \field{sortinit}{B}
-      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{eprinttype}{arXiv}
-      \field{journaltitle}{arXiv preprint}
-      \field{title}{Geometric Deep Learning: Grids, Groups, Graphs, Geodesics, and Gauges}
-      \field{year}{2021}
-      \verb{eprint}
-      \verb 2104.13478
-      \endverb
-    \endentry
-    \entry{li2023invariant}{inproceedings}{}
-      \name{author}{5}{}{%
-        {{hash=3dd969762f5b616933a59d97d60b216c}{%
-           family={Carvalho},
-           familyi={C\bibinitperiod},
-           given={João\bibnamedelimb B.\bibnamedelimi S.},
-           giveni={J\bibinitperiod\bibinitdelim B\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
-        {{hash=4b9e02770ea6f2a2ff82c1f1435cfd79}{%
-           family={Zhang},
-           familyi={Z\bibinitperiod},
-           given={Mengtao},
-           giveni={M\bibinitperiod}}}%
-        {{hash=ee138ca080a9c1ce13f51180337d3e34}{%
-           family={Geyer},
-           familyi={G\bibinitperiod},
-           given={Robin},
-           giveni={R\bibinitperiod}}}%
-        {{hash=7a577001380263a376e454c4e91d4d0d}{%
-           family={Cotrini},
-           familyi={C\bibinitperiod},
-           given={Carlos},
-           giveni={C\bibinitperiod}}}%
-        {{hash=335c89d2252c8ad41635e8f3315696d1}{%
-           family={Buhmann},
-           familyi={B\bibinitperiod},
-           given={Joachim\bibnamedelima M.},
-           giveni={J\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
-      }
-      \strng{namehash}{40e8d66f9c45473381e12b2ccee7b817}
-      \strng{fullhash}{3728e5f9107904695c6f073e277e108d}
-      \strng{bibnamehash}{3728e5f9107904695c6f073e277e108d}
-      \strng{authorbibnamehash}{3728e5f9107904695c6f073e277e108d}
-      \strng{authornamehash}{40e8d66f9c45473381e12b2ccee7b817}
-      \strng{authorfullhash}{3728e5f9107904695c6f073e277e108d}
-      \field{sortinit}{C}
-      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{booktitle}{Advances in Neural Information Processing Systems}
-      \field{title}{Invariant Anomaly Detection under Distribution Shifts: A Causal Perspective}
-      \field{volume}{36}
-      \field{year}{2023}
-    \endentry
-    \entry{chandola2009}{article}{}
-      \name{author}{3}{}{%
-        {{hash=818074037ed2f89ce51237af38dec11f}{%
-           family={Chandola},
-           familyi={C\bibinitperiod},
-           given={Varun},
-           giveni={V\bibinitperiod}}}%
-        {{hash=4ddb7b9c38d8c15a70bc573ba4e51ea9}{%
-           family={Banerjee},
-           familyi={B\bibinitperiod},
-           given={Arindam},
-           giveni={A\bibinitperiod}}}%
-        {{hash=efb90d78e35ff61d3bc639f5c6f3d822}{%
-           family={Kumar},
-           familyi={K\bibinitperiod},
-           given={Vipin},
-           giveni={V\bibinitperiod}}}%
-      }
-      \strng{namehash}{3843f6427d6ca01b54e95297405107bb}
-      \strng{fullhash}{135c55bbecd240d054a5541e3cf77609}
-      \strng{bibnamehash}{135c55bbecd240d054a5541e3cf77609}
-      \strng{authorbibnamehash}{135c55bbecd240d054a5541e3cf77609}
-      \strng{authornamehash}{3843f6427d6ca01b54e95297405107bb}
-      \strng{authorfullhash}{135c55bbecd240d054a5541e3cf77609}
-      \field{sortinit}{C}
-      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{ACM Computing Surveys}
-      \field{number}{3}
-      \field{title}{Anomaly Detection: A Survey}
-      \field{volume}{41}
-      \field{year}{2009}
-      \field{pages}{15:1\bibrangedash 15:58}
-      \range{pages}{-1}
-      \verb{doi}
-      \verb 10.1145/1541880.1541882
-      \endverb
-    \endentry
-    \entry{disanti2025blueprints}{article}{}
-      \name{author}{1}{}{%
-        {{hash=d7624ed290ebb2251bf0deddf23f183d}{%
-           family={Di\bibnamedelima Santi},
-           familyi={D\bibinitperiod\bibinitdelim S\bibinitperiod},
-           given={Eduardo},
-           giveni={E\bibinitperiod}}}%
-      }
-      \strng{namehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{fullhash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{bibnamehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{authorbibnamehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{authornamehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{authorfullhash}{d7624ed290ebb2251bf0deddf23f183d}
-      \field{extraname}{1}
-      \field{sortinit}{D}
-      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{eprinttype}{arxiv}
-      \field{title}{The Blueprints of Intelligence: A Functional-Topological Foundation for Perception and Representation}
-      \field{year}{2025}
-      \verb{eprint}
-      \verb 2512.05089
-      \endverb
-    \endentry
-    \entry{disanti2026quotient}{report}{}
-      \name{author}{1}{}{%
-        {{hash=d7624ed290ebb2251bf0deddf23f183d}{%
-           family={Di\bibnamedelima Santi},
-           familyi={D\bibinitperiod\bibinitdelim S\bibinitperiod},
-           given={Eduardo},
-           giveni={E\bibinitperiod}}}%
-      }
-      \list{institution}{1}{%
-        {University of Colorado Boulder}%
-      }
-      \strng{namehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{fullhash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{bibnamehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{authorbibnamehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{authornamehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{authorfullhash}{d7624ed290ebb2251bf0deddf23f183d}
-      \field{extraname}{2}
-      \field{sortinit}{D}
-      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
-      \field{extradate}{1}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{title}{Anomaly Detection as an Inverse Problem on Quotient Spaces: Equivalence Relations and Functional Manifolds as a General Diagnostic Framework}
-      \field{type}{Technical Report}
-      \field{urlday}{17}
-      \field{urlmonth}{7}
-      \field{urlyear}{2026}
-      \field{year}{2026}
-      \field{urldateera}{ce}
-      \verb{urlraw}
-      \verb https://scholar.colorado.edu/concern/reports/7h149s02s
-      \endverb
-      \verb{url}
-      \verb https://scholar.colorado.edu/concern/reports/7h149s02s
-      \endverb
-    \endentry
-    \entry{disanti2026inverse}{report}{}
-      \name{author}{1}{}{%
-        {{hash=d7624ed290ebb2251bf0deddf23f183d}{%
-           family={Di\bibnamedelima Santi},
-           familyi={D\bibinitperiod\bibinitdelim S\bibinitperiod},
-           given={Eduardo},
-           giveni={E\bibinitperiod}}}%
-      }
-      \list{institution}{1}{%
-        {University of Colorado Boulder}%
-      }
-      \strng{namehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{fullhash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{bibnamehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{authorbibnamehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{authornamehash}{d7624ed290ebb2251bf0deddf23f183d}
-      \strng{authorfullhash}{d7624ed290ebb2251bf0deddf23f183d}
-      \field{extraname}{3}
-      \field{sortinit}{D}
-      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
-      \field{extradate}{2}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{title}{Self-Supervision, Manifold Saturation, and Emergent Operational Classes: Learning from Scarce Observations as Inverse Recovery of Compact Functional Structure}
-      \field{type}{Technical Report}
-      \field{urlday}{17}
-      \field{urlmonth}{7}
-      \field{urlyear}{2026}
-      \field{year}{2026}
-      \field{urldateera}{ce}
-      \verb{urlraw}
-      \verb https://scholar.colorado.edu/concern/reports/fn107102t
-      \endverb
-      \verb{url}
-      \verb https://scholar.colorado.edu/concern/reports/fn107102t
-      \endverb
-    \endentry
-    \entry{entezami2020}{article}{}
-      \name{author}{6}{}{%
-        {{hash=4d675a79aa7e2a659740233d8997e60e}{%
-           family={Entezami},
-           familyi={E\bibinitperiod},
-           given={Mani},
-           giveni={M\bibinitperiod}}}%
-        {{hash=e08ed4d528ae92b72459b693744a46e6}{%
-           family={Roberts},
-           familyi={R\bibinitperiod},
-           given={Clive},
-           giveni={C\bibinitperiod}}}%
-        {{hash=9453cd6a6156881917962c74f223865c}{%
-           family={Weston},
-           familyi={W\bibinitperiod},
-           given={Paul},
-           giveni={P\bibinitperiod}}}%
-        {{hash=1d10645bb93208e9e8bce8b73c8353bc}{%
-           family={Stewart},
-           familyi={S\bibinitperiod},
-           given={Edward},
-           giveni={E\bibinitperiod}}}%
-        {{hash=7d552fff33291d321c09beae76f7ed68}{%
-           family={Amini},
-           familyi={A\bibinitperiod},
-           given={Arash},
-           giveni={A\bibinitperiod}}}%
-        {{hash=9046ba3b2c365d3df2c74f0212bf5df9}{%
-           family={Papaelias},
-           familyi={P\bibinitperiod},
-           given={Mayorkinos},
-           giveni={M\bibinitperiod}}}%
-      }
-      \strng{namehash}{c2c3b0c63ba71488b915398d44a4d75a}
-      \strng{fullhash}{049a300c2424ef27739a5e48a0b11154}
-      \strng{bibnamehash}{049a300c2424ef27739a5e48a0b11154}
-      \strng{authorbibnamehash}{049a300c2424ef27739a5e48a0b11154}
-      \strng{authornamehash}{c2c3b0c63ba71488b915398d44a4d75a}
-      \strng{authorfullhash}{049a300c2424ef27739a5e48a0b11154}
-      \field{sortinit}{E}
-      \field{sortinithash}{8da8a182d344d5b9047633dfc0cc9131}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Proceedings of the Institution of Mechanical Engineers, Part F: Journal of Rail and Rapid Transit}
-      \field{title}{Perspectives on railway axle bearing condition monitoring}
-      \field{year}{2020}
-    \endentry
-    \entry{hinton2006}{article}{}
-      \name{author}{2}{}{%
-        {{hash=813bd95fe553e6079cd53a567b238287}{%
-           family={Hinton},
-           familyi={H\bibinitperiod},
-           given={Geoffrey\bibnamedelima E.},
-           giveni={G\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
-        {{hash=1eedb5d67ab6771125689502fd082a35}{%
-           family={Salakhutdinov},
-           familyi={S\bibinitperiod},
-           given={Ruslan\bibnamedelima R.},
-           giveni={R\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
-      }
-      \strng{namehash}{88bbb6297d8ca353791ca7e862805428}
-      \strng{fullhash}{88bbb6297d8ca353791ca7e862805428}
-      \strng{bibnamehash}{88bbb6297d8ca353791ca7e862805428}
-      \strng{authorbibnamehash}{88bbb6297d8ca353791ca7e862805428}
-      \strng{authornamehash}{88bbb6297d8ca353791ca7e862805428}
-      \strng{authorfullhash}{88bbb6297d8ca353791ca7e862805428}
-      \field{sortinit}{H}
-      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Science}
-      \field{number}{5786}
-      \field{title}{Reducing the Dimensionality of Data with Neural Networks}
-      \field{volume}{313}
-      \field{year}{2006}
-      \field{pages}{504\bibrangedash 507}
-      \range{pages}{4}
-      \verb{doi}
-      \verb 10.1126/science.1127647
-      \endverb
-    \endentry
-    \entry{nguyen2025subdomain}{article}{}
-      \name{author}{3}{}{%
-        {{hash=417071226747b840a53e6fb34bb9ee9f}{%
-           family={Hue},
-           familyi={H\bibinitperiod},
-           given={Nguyen\bibnamedelima Thi},
-           giveni={N\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
-        {{hash=7e375c1aee5586d862f05473a1ae14f4}{%
-           family={Thuan},
-           familyi={T\bibinitperiod},
-           given={Nguyen\bibnamedelima Duc},
-           giveni={N\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
-        {{hash=88960b706256a7e8a036f27fb97b3247}{%
-           family={Hong},
-           familyi={H\bibinitperiod},
-           given={Hoang\bibnamedelima Si},
-           giveni={H\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
-      }
-      \strng{namehash}{561ff67a35381266a98a53cb90111050}
-      \strng{fullhash}{a9c55becaf21348aa8bc1b87af7851d4}
-      \strng{bibnamehash}{a9c55becaf21348aa8bc1b87af7851d4}
-      \strng{authorbibnamehash}{a9c55becaf21348aa8bc1b87af7851d4}
-      \strng{authornamehash}{561ff67a35381266a98a53cb90111050}
-      \strng{authorfullhash}{a9c55becaf21348aa8bc1b87af7851d4}
-      \field{sortinit}{H}
-      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Journal of Vibration and Control}
-      \field{title}{Knowledge-driven subdomain adaptation for bearing fault diagnosis}
-      \field{year}{2025}
-    \endentry
-    \entry{jardine2006}{article}{}
-      \name{author}{3}{}{%
-        {{hash=3943f8833ce286ee0b3f33e7e0d76241}{%
-           family={Jardine},
-           familyi={J\bibinitperiod},
-           given={Andrew\bibnamedelimb K.\bibnamedelimi S.},
-           giveni={A\bibinitperiod\bibinitdelim K\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
-        {{hash=7fc20f814a5ad2766002b7a23b969e28}{%
-           family={Lin},
-           familyi={L\bibinitperiod},
-           given={Daming},
-           giveni={D\bibinitperiod}}}%
-        {{hash=7d38d59e065d806c0fe66ff4f801be42}{%
-           family={Banjevic},
-           familyi={B\bibinitperiod},
-           given={Dragan},
-           giveni={D\bibinitperiod}}}%
-      }
-      \strng{namehash}{0072d55e73b70a5614e996af7440007d}
-      \strng{fullhash}{6f5789a99839b81d8195ade7363ed00a}
-      \strng{bibnamehash}{6f5789a99839b81d8195ade7363ed00a}
-      \strng{authorbibnamehash}{6f5789a99839b81d8195ade7363ed00a}
-      \strng{authornamehash}{0072d55e73b70a5614e996af7440007d}
-      \strng{authorfullhash}{6f5789a99839b81d8195ade7363ed00a}
-      \field{sortinit}{J}
-      \field{sortinithash}{b2f54a9081ace9966a7cb9413811edb4}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Mechanical Systems and Signal Processing}
-      \field{number}{7}
-      \field{title}{A Review on Machinery Diagnostics and Prognostics Implementing Condition-Based Maintenance}
-      \field{volume}{20}
-      \field{year}{2006}
-      \field{pages}{1483\bibrangedash 1510}
-      \range{pages}{28}
-      \verb{doi}
-      \verb 10.1016/j.ymssp.2005.09.012
-      \endverb
-    \endentry
-    \entry{ning2026digitaltwin}{article}{}
-      \name{author}{5}{}{%
-        {{hash=7f767255518572617501e73a3ce27e69}{%
-           family={Ning},
-           familyi={N\bibinitperiod},
-           given={Siyuan},
-           giveni={S\bibinitperiod}}}%
-        {{hash=567dee5f618fbf8f791f8b60d3497940}{%
-           family={Qiao},
-           familyi={Q\bibinitperiod},
-           given={Zijian},
-           giveni={Z\bibinitperiod}}}%
-        {{hash=615f6c4c26953db2defd9f4f3f609450}{%
-           family={Peng},
-           familyi={P\bibinitperiod},
-           given={Bohao},
-           giveni={B\bibinitperiod}}}%
-        {{hash=314dafeca8c1fe6ac490a226e6275926}{%
-           family={Zhu},
-           familyi={Z\bibinitperiod},
-           given={Ronghua},
-           giveni={R\bibinitperiod}}}%
-        {{hash=bf6efb49c2fa5e6ce3eb9f6afa2b2747}{%
-           family={Zhang},
-           familyi={Z\bibinitperiod},
-           given={Cailiang},
-           giveni={C\bibinitperiod}}}%
-      }
-      \list{publisher}{1}{%
-        {Taylor \& Francis}%
-      }
-      \strng{namehash}{f3e46fec74bf998ae867417152a328b1}
-      \strng{fullhash}{ae105dcc710d6888b12091567c969330}
-      \strng{bibnamehash}{ae105dcc710d6888b12091567c969330}
-      \strng{authorbibnamehash}{ae105dcc710d6888b12091567c969330}
-      \strng{authornamehash}{f3e46fec74bf998ae867417152a328b1}
-      \strng{authorfullhash}{ae105dcc710d6888b12091567c969330}
-      \field{sortinit}{N}
-      \field{sortinithash}{22369a73d5f88983a108b63f07f37084}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Nondestructive Testing and Evaluation}
-      \field{number}{0}
-      \field{title}{A digital twin-driven cross-domain adaptation method for bearing intelligent fault diagnosis}
-      \field{volume}{0}
-      \field{year}{2026}
-      \field{pages}{1\bibrangedash 23}
-      \range{pages}{23}
-      \verb{doi}
-      \verb 10.1080/10589759.2025.2610726
-      \endverb
-      \verb{eprint}
-      \verb https://doi.org/10.1080/10589759.2025.2610726
-      \endverb
-      \verb{urlraw}
-      \verb https://doi.org/10.1080/10589759.2025.2610726
-      \endverb
-      \verb{url}
-      \verb https://doi.org/10.1080/10589759.2025.2610726
-      \endverb
-    \endentry
-    \entry{randall2011}{article}{}
-      \name{author}{2}{}{%
-        {{hash=ff9fdebf11515a32b4cd580da1b011a5}{%
-           family={Randall},
-           familyi={R\bibinitperiod},
-           given={Robert\bibnamedelima B.},
-           giveni={R\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
-        {{hash=cf445f5070d1454234211232c355eb6b}{%
-           family={Antoni},
-           familyi={A\bibinitperiod},
-           given={Jérôme},
-           giveni={J\bibinitperiod}}}%
-      }
-      \strng{namehash}{c95f1c1c6bcafa8b4b3be1c6249d1cfb}
-      \strng{fullhash}{c95f1c1c6bcafa8b4b3be1c6249d1cfb}
-      \strng{bibnamehash}{c95f1c1c6bcafa8b4b3be1c6249d1cfb}
-      \strng{authorbibnamehash}{c95f1c1c6bcafa8b4b3be1c6249d1cfb}
-      \strng{authornamehash}{c95f1c1c6bcafa8b4b3be1c6249d1cfb}
-      \strng{authorfullhash}{c95f1c1c6bcafa8b4b3be1c6249d1cfb}
-      \field{sortinit}{R}
-      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Mechanical Systems and Signal Processing}
-      \field{number}{2}
-      \field{title}{Rolling Element Bearing Diagnostics --- A Tutorial}
-      \field{volume}{25}
-      \field{year}{2011}
-      \field{pages}{485\bibrangedash 520}
-      \range{pages}{36}
-      \verb{doi}
-      \verb 10.1016/j.ymssp.2010.07.017
-      \endverb
-    \endentry
-    \entry{sakurada2014}{inproceedings}{}
-      \name{author}{2}{}{%
-        {{hash=a1b0918bcbaee18ebd732374d128f0e5}{%
-           family={Sakurada},
-           familyi={S\bibinitperiod},
-           given={Mayu},
-           giveni={M\bibinitperiod}}}%
-        {{hash=7d4c45cd43acdd6bf6e730677317a5c8}{%
-           family={Yairi},
-           familyi={Y\bibinitperiod},
-           given={Takehisa},
-           giveni={T\bibinitperiod}}}%
-      }
-      \list{publisher}{1}{%
-        {ACM}%
-      }
-      \strng{namehash}{27f4fcf9d91a2bc2fac190dc7c72b800}
-      \strng{fullhash}{27f4fcf9d91a2bc2fac190dc7c72b800}
-      \strng{bibnamehash}{27f4fcf9d91a2bc2fac190dc7c72b800}
-      \strng{authorbibnamehash}{27f4fcf9d91a2bc2fac190dc7c72b800}
-      \strng{authornamehash}{27f4fcf9d91a2bc2fac190dc7c72b800}
-      \strng{authorfullhash}{27f4fcf9d91a2bc2fac190dc7c72b800}
-      \field{sortinit}{S}
-      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{booktitle}{Proceedings of the 2nd Workshop on Machine Learning for Sensory Data Analysis}
-      \field{title}{Anomaly Detection Using Autoencoders with Nonlinear Dimensionality Reduction}
-      \field{year}{2014}
-      \field{pages}{4\bibrangedash 11}
-      \range{pages}{8}
-      \verb{doi}
-      \verb 10.1145/2689746.2689747
-      \endverb
-    \endentry
-    \entry{scholkopf1999}{inproceedings}{}
-      \name{author}{5}{}{%
-        {{hash=ca31cc11ec9370460148c3a9c48fce45}{%
-           family={Schölkopf},
-           familyi={S\bibinitperiod},
-           given={Bernhard},
-           giveni={B\bibinitperiod}}}%
-        {{hash=2e35ef7841aac7d181dcf0a232a11d6d}{%
-           family={Williamson},
-           familyi={W\bibinitperiod},
-           given={Robert\bibnamedelima C.},
-           giveni={R\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
-        {{hash=fb79b74540aea302c5a1a212a88331b1}{%
-           family={Smola},
-           familyi={S\bibinitperiod},
-           given={Alex\bibnamedelima J.},
-           giveni={A\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
-        {{hash=8feae4ec394a5f6905c74b1a7abff875}{%
-           family={Shawe-Taylor},
-           familyi={S\bibinithyphendelim T\bibinitperiod},
-           given={John},
-           giveni={J\bibinitperiod}}}%
-        {{hash=b18cccf0f11300769fc4b01f5fe5f13a}{%
-           family={Platt},
-           familyi={P\bibinitperiod},
-           given={John\bibnamedelima C.},
-           giveni={J\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
-      }
-      \strng{namehash}{a70215356a8de56cfef0850e9b43f897}
-      \strng{fullhash}{8571edb6e593fe1d2d752d78f2193d64}
-      \strng{bibnamehash}{8571edb6e593fe1d2d752d78f2193d64}
-      \strng{authorbibnamehash}{8571edb6e593fe1d2d752d78f2193d64}
-      \strng{authornamehash}{a70215356a8de56cfef0850e9b43f897}
-      \strng{authorfullhash}{8571edb6e593fe1d2d752d78f2193d64}
-      \field{sortinit}{S}
-      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{booktitle}{Advances in Neural Information Processing Systems}
-      \field{title}{Support Vector Method for Novelty Detection}
-      \field{volume}{12}
-      \field{year}{1999}
-    \endentry
-    \entry{smith2015}{article}{}
-      \name{author}{2}{}{%
-        {{hash=d3424ba2f4ab5307ea74d4024013dc05}{%
-           family={Smith},
-           familyi={S\bibinitperiod},
-           given={Wade\bibnamedelima A.},
-           giveni={W\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
-        {{hash=ff9fdebf11515a32b4cd580da1b011a5}{%
-           family={Randall},
-           familyi={R\bibinitperiod},
-           given={Robert\bibnamedelima B.},
-           giveni={R\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
-      }
-      \strng{namehash}{3b011d205165b0227b2b60077e42f105}
-      \strng{fullhash}{3b011d205165b0227b2b60077e42f105}
-      \strng{bibnamehash}{3b011d205165b0227b2b60077e42f105}
-      \strng{authorbibnamehash}{3b011d205165b0227b2b60077e42f105}
-      \strng{authornamehash}{3b011d205165b0227b2b60077e42f105}
-      \strng{authorfullhash}{3b011d205165b0227b2b60077e42f105}
-      \field{sortinit}{S}
-      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Mechanical Systems and Signal Processing}
-      \field{title}{Rolling Element Bearing Diagnostics Using the Case Western Reserve University Data: A Benchmark Study}
-      \field{volume}{64--65}
-      \field{year}{2015}
-      \field{pages}{100\bibrangedash 131}
-      \range{pages}{32}
-      \verb{doi}
-      \verb 10.1016/j.ymssp.2015.04.021
-      \endverb
-    \endentry
-    \entry{wang2026fleet}{article}{}
-      \true{moreauthor}
-      \true{morelabelname}
-      \name{author}{1}{}{%
-        {{hash=98163e4a6e74053cdf200fd7ef8d0dcb}{%
-           family={Wang},
-           familyi={W\bibinitperiod},
-           given={B.},
-           giveni={B\bibinitperiod}}}%
-      }
-      \strng{namehash}{5d1259c78994d0c0985264807578c798}
-      \strng{fullhash}{5d1259c78994d0c0985264807578c798}
-      \strng{bibnamehash}{5d1259c78994d0c0985264807578c798}
-      \strng{authorbibnamehash}{5d1259c78994d0c0985264807578c798}
-      \strng{authornamehash}{5d1259c78994d0c0985264807578c798}
-      \strng{authorfullhash}{5d1259c78994d0c0985264807578c798}
-      \field{sortinit}{W}
-      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Reliability Engineering \& System Safety}
-      \field{title}{Fleet-based transfer learning for anomaly detection in {[machinery]}}
-      \field{year}{2026}
-    \endentry
-    \entry{zhao2019}{article}{}
-      \name{author}{6}{}{%
-        {{hash=5db4068796cde560b4fd3829096ef6c5}{%
-           family={Zhao},
-           familyi={Z\bibinitperiod},
-           given={Rui},
-           giveni={R\bibinitperiod}}}%
-        {{hash=4e1638ee2dbd213e11cf2c81b8227e8b}{%
-           family={Yan},
-           familyi={Y\bibinitperiod},
-           given={Ruqiang},
-           giveni={R\bibinitperiod}}}%
-        {{hash=b34f5d07a143ff908f6731889336faf2}{%
-           family={Chen},
-           familyi={C\bibinitperiod},
-           given={Zhenghua},
-           giveni={Z\bibinitperiod}}}%
-        {{hash=67e409f5440ed1814db213256b249e30}{%
-           family={Mao},
-           familyi={M\bibinitperiod},
-           given={Kezhi},
-           giveni={K\bibinitperiod}}}%
-        {{hash=c26cc02bbb5db725a2c79cb200894d76}{%
-           family={Wang},
-           familyi={W\bibinitperiod},
-           given={Peng},
-           giveni={P\bibinitperiod}}}%
-        {{hash=00b0c099a74253beaee9273b2751e8d5}{%
-           family={Gao},
-           familyi={G\bibinitperiod},
-           given={Robert\bibnamedelima X.},
-           giveni={R\bibinitperiod\bibinitdelim X\bibinitperiod}}}%
-      }
-      \strng{namehash}{3de343d8a2fa22423e17519591e84e38}
-      \strng{fullhash}{2c51e247f92141aea21d2a0fa5f91790}
-      \strng{bibnamehash}{2c51e247f92141aea21d2a0fa5f91790}
-      \strng{authorbibnamehash}{2c51e247f92141aea21d2a0fa5f91790}
-      \strng{authornamehash}{3de343d8a2fa22423e17519591e84e38}
-      \strng{authorfullhash}{2c51e247f92141aea21d2a0fa5f91790}
-      \field{sortinit}{Z}
-      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Mechanical Systems and Signal Processing}
-      \field{title}{Deep Learning and Its Applications to Machine Health Monitoring}
-      \field{volume}{115}
-      \field{year}{2019}
-      \field{pages}{213\bibrangedash 237}
-      \range{pages}{25}
-      \verb{doi}
-      \verb 10.1016/j.ymssp.2018.05.050
-      \endverb
-    \endentry
-  \enddatalist
-\endrefsection
-\endinput
+\bibitem[{Zhao et~al.(2019)Zhao, Yan, Chen, Mao, Wang, and Gao}]{zhao2019}
+Zhao, Rui, Ruqiang Yan, Zhenghua Chen, Kezhi Mao, Peng Wang, and Robert~X. Gao,
+  Deep Learning and Its Applications to Machine Health Monitoring.
+  \emph{Mechanical Systems and Signal Processing}, Vol. 115, 2019, pp.
+  213--237.
 
+\bibitem[{Entezami et~al.(2020)Entezami, Roberts, Weston, Stewart, Amini, and
+  Papaelias}]{entezami2020}
+Entezami, Mani, Clive Roberts, Paul Weston, Edward Stewart, Arash Amini, and
+  Mayorkinos Papaelias, Perspectives on railway axle bearing condition
+  monitoring. \emph{Proceedings of the Institution of Mechanical Engineers,
+  Part F: Journal of Rail and Rapid Transit}, 2020.
+
+\bibitem[{Chandola et~al.(2009)Chandola, Banerjee, and Kumar}]{chandola2009}
+Chandola, Varun, Arindam Banerjee, and Vipin Kumar, Anomaly Detection: A
+  Survey. \emph{ACM Computing Surveys}, Vol.~41, No.~3, 2009, pp. 15:1--15:58.
+
+\bibitem[{Randall and Antoni(2011)}]{randall2011}
+Randall, Robert~B. and J{\'e}r{\^o}me Antoni, Rolling Element Bearing
+  Diagnostics --- A Tutorial. \emph{Mechanical Systems and Signal Processing},
+  Vol.~25, No.~2, 2011, pp. 485--520.
+
+\bibitem[{Di~Santi(2026{\natexlab{a}})}]{disanti2026quotient}
+Di~Santi, Eduardo, \emph{Anomaly Detection as an Inverse Problem on Quotient
+  Spaces: Equivalence Relations and Functional Manifolds as a General
+  Diagnostic Framework}, 2026{\natexlab{a}}.
+
+\bibitem[{Di~Santi(2026{\natexlab{b}})}]{disanti2026inverse}
+Di~Santi, Eduardo, \emph{Self-Supervision, Manifold Saturation, and Emergent
+  Operational Classes: Learning from Scarce Observations as Inverse Recovery of
+  Compact Functional Structure}, 2026{\natexlab{b}}.
+
+\bibitem[{Smith and Randall(2015)}]{smith2015}
+Smith, Wade~A. and Robert~B. Randall, Rolling Element Bearing Diagnostics Using
+  the Case Western Reserve University Data: A Benchmark Study. \emph{Mechanical
+  Systems and Signal Processing}, Vol. 64--65, 2015, pp. 100--131.
+
+\bibitem[{Sch{\"o}lkopf et~al.(1999)Sch{\"o}lkopf, Williamson, Smola,
+  Shawe-Taylor, and Platt}]{scholkopf1999}
+Sch{\"o}lkopf, Bernhard, Robert~C. Williamson, Alex~J. Smola, John
+  Shawe-Taylor, and John~C. Platt, Support Vector Method for Novelty Detection.
+  In \emph{Advances in Neural Information Processing Systems}, 1999, Vol.~12.
+
+\bibitem[{Bishop(1994)}]{bishop1994}
+Bishop, Christopher~M., Novelty Detection and Neural Network Validation.
+  \emph{IEE Proceedings -- Vision, Image and Signal Processing}, Vol. 141,
+  No.~4, 1994, pp. 217--222.
+
+\bibitem[{Hinton and Salakhutdinov(2006)}]{hinton2006}
+Hinton, Geoffrey~E. and Ruslan~R. Salakhutdinov, Reducing the Dimensionality of
+  Data with Neural Networks. \emph{Science}, Vol. 313, No. 5786, 2006, pp.
+  504--507.
+
+\bibitem[{Sakurada and Yairi(2014)}]{sakurada2014}
+Sakurada, Mayu and Takehisa Yairi, Anomaly Detection Using Autoencoders with
+  Nonlinear Dimensionality Reduction. In \emph{Proceedings of the 2nd Workshop
+  on Machine Learning for Sensory Data Analysis}, ACM, 2014, pp. 4--11.
+
+\bibitem[{Bronstein et~al.(2021)Bronstein, Bruna, Cohen, and
+  Veli{\v{c}}kovi{\'c}}]{bronstein2021}
+Bronstein, Michael~M., Joan Bruna, Taco Cohen, and Petar Veli{\v{c}}kovi{\'c},
+  Geometric Deep Learning: Grids, Groups, Graphs, Geodesics, and Gauges.
+  \emph{arXiv preprint}, 2021.
+
+\bibitem[{Carvalho et~al.(2023)Carvalho, Zhang, Geyer, Cotrini, and
+  Buhmann}]{li2023invariant}
+Carvalho, Jo{\~a}o B.~S., Mengtao Zhang, Robin Geyer, Carlos Cotrini, and
+  Joachim~M. Buhmann, Invariant Anomaly Detection under Distribution Shifts: A
+  Causal Perspective. In \emph{Advances in Neural Information Processing
+  Systems}, 2023, Vol.~36.
+
+\bibitem[{Wang et~al.(2026)}]{wang2026fleet}
+Wang, B. et~al., Fleet-based transfer learning for anomaly detection in
+  {[machinery]}. \emph{Reliability Engineering \& System Safety}, 2026.
+
+\bibitem[{Hue et~al.(2025)Hue, Thuan, and Hong}]{nguyen2025subdomain}
+Hue, Nguyen~Thi, Nguyen~Duc Thuan, and Hoang~Si Hong, Knowledge-driven
+  subdomain adaptation for bearing fault diagnosis. \emph{Journal of Vibration
+  and Control}, 2025.
+
+\bibitem[{Ning et~al.(2026)Ning, Qiao, Peng, Zhu, and
+  Zhang}]{ning2026digitaltwin}
+Ning, Siyuan, Zijian Qiao, Bohao Peng, Ronghua Zhu, and Cailiang Zhang, A
+  digital twin-driven cross-domain adaptation method for bearing intelligent
+  fault diagnosis. \emph{Nondestructive Testing and Evaluation}, Vol.~0, No.~0,
+  2026, pp. 1--23.
+
+\bibitem[{Di~Santi(2025)}]{disanti2025blueprints}
+Di~Santi, Eduardo, The Blueprints of Intelligence: A Functional-Topological
+  Foundation for Perception and Representation, 2025.
+
+\end{thebibliography}
