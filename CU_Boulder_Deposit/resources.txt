@@ -1,0 +1,290 @@
+================================================================================
+RESOURCES — Deposit Manifest
+================================================================================
+
+Work deposited
+--------------
+Title      : Fleet-Wide Condition Monitoring via Shared Nominal Representations
+             and Local Radius Calibration — Enabling OEM-Centralized,
+             Fleet-Deployed CBM
+Author     : Eduardo Di Santi
+Affiliation: Department of Applied Mathematics,
+             University of Colorado Boulder
+Contact    : eduardo.disanti@colorado.edu
+Year       : 2026
+Type       : Working paper (preprint). Not peer reviewed.
+Format     : PDF, 22 pages, letter (612 x 792 pt), 1 figure, 8 tables.
+             Typeset with LaTeX (pdfTeX 1.40.25 / TeX Live 2023) using the
+             unofficial TRB submission class (trbunofficial.cls).
+License    : MIT for the software in code/ and verification/ (see LICENSE).
+             Manuscript text and figures follow the CU Scholar deposit terms.
+
+Scope
+-----
+This deposit contains the manuscript source and compiled PDF, the software used
+to produce the reported results, a runnable verification suite, and the
+instructions required to obtain the two third-party datasets. Raw third-party
+data is NOT redistributed here.
+
+================================================================================
+0. BEFORE RUNNING ANYTHING — KERAS 2 IS REQUIRED
+================================================================================
+
+The autoencoder applies an L1 activity regularizer to its latent layer. Under
+Keras 3 that penalty drives the latent to zero: the model degenerates to
+predicting the per-feature mean and detects nothing, while still reporting a 2%
+healthy false-alarm rate. The failure is silent.
+
+TensorFlow 2.16 and later default to Keras 3.
+
+    pip install -r requirements.txt      # includes tf-keras
+    export TF_USE_LEGACY_KERAS=1
+    python verification/check_environment.py
+
+Every notebook opens with a guard cell that enforces this. Full explanation and
+measurements in REPRODUCIBILITY.md, Section 0.
+
+================================================================================
+1. TOP-LEVEL FILES
+================================================================================
+
+README.md
+    Overview, core findings, structure, quick start, data availability,
+    citation.
+
+REPRODUCIBILITY.md
+    The Keras 2 requirement; what can be verified without external data; what
+    requires it; both environments; determinism policy; six declared known
+    limitations; a log of every change made while preparing this deposit.
+
+requirements.txt
+    Python dependencies, with both the original and the independently verified
+    environment recorded.
+
+resources.txt
+    This manifest.
+
+CU_Scholar_deposit_form.txt
+    Ready-to-paste values for the CU Scholar deposit form: title, creator,
+    resource type, abstract, keywords, rights, related items. Not part of the
+    scholarly record; delete before depositing if you prefer.
+
+LICENSE
+    MIT, with an explicit scope note. Covers code/ and verification/ only.
+
+.gitignore
+    Excludes __pycache__, .DS_Store, LaTeX build artifacts, and the two
+    external dataset directories.
+
+================================================================================
+2. manuscript/ — MANUSCRIPT SOURCE AND OUTPUT
+================================================================================
+
+manuscript_draft.pdf
+    Compiled manuscript. 22 pages. The item of record.
+    Document properties are set (Title, Author, Subject, Keywords, plus an XMP
+    metadata stream) for repository and indexer harvesting.
+    NOTE: this is the 30 July 2026 build with metadata patched in place. It
+    predates the Data and Code Availability section now present in the .tex.
+    Rebuild before submitting elsewhere; see REPRODUCIBILITY.md item 5.
+
+manuscript_draft.tex
+    LaTeX source. Requires trbunofficial.cls, references.bib, and the newtx
+    package. Contains a \hypersetup block with the PDF document properties, a
+    Data and Code Availability section, and an Acknowledgment of Prior
+    Dissemination note. The availability statement carries no URL by design, so
+    it remains correct wherever the record lives.
+    Bibliography style: chicago.
+    Build:  pdflatex manuscript_draft
+            bibtex   manuscript_draft
+            pdflatex manuscript_draft
+            pdflatex manuscript_draft
+
+trbunofficial.cls
+    Document class required to compile the source.
+
+references.bib
+    29 entries. All 17 keys cited in the manuscript resolve against this file.
+    Both dataset providers are cited from the Data and Code Availability
+    section: smith2015 (CWRU) and ims2007 (NASA IMS).
+
+cwru_tau_convergence.pdf
+    Figure 1 — operational-radius convergence on CWRU. The only graphic
+    included by manuscript_draft.tex.
+
+anomaly_score_by_regime.png      sim_reconstruction_examples.png
+healthy_sim_reconstruction.png   sim_tau.png
+sim_blueprint_saturation.png     sim_training_curve.png
+sim_mc_threshold.png             sim_window_sensitivity.png
+sim_mse_distributions.png        training.png
+    Supplementary graphics produced by the notebooks. NOT referenced by
+    manuscript_draft.tex and not present in the compiled PDF. Retained as
+    visual evidence of the simulator, training and calibration behaviour.
+
+================================================================================
+3. code/ — SOFTWARE
+================================================================================
+
+bearing_simulator.py                                        (447 lines, Python)
+    Physics-motivated bearing vibration simulator (manuscript Section 8.3).
+    BearingParams, BearingSignalSimulator, and the CWRU_PARAMS / NASA_PARAMS
+    domain configurations. Generates nominal and fault-regime signals with
+    Monte Carlo nuisance over amplitude, phase, shaft speed, offset, envelope,
+    dropout, and a structural resonance.
+    Dependencies: numpy only. No external data. No deep-learning framework.
+
+operational_radius.py                                       (183 lines, Python)
+    AdaptiveOperationalRadius, operational_radius_convergence_trace, and
+    find_convergence_index — the online radius estimator and the
+    convergence-based commissioning stopping rule. Pure NumPy.
+    Previously duplicated inline in the two per-asset notebooks; both now
+    import from here.
+
+data_paths.py                                               (Python)
+    Single point of resolution for external dataset locations: environment
+    variable, then <deposit>/data/, then the legacy sibling layout used during
+    the original runs. Run directly to report what is currently resolvable.
+
+cwru_loader.py                                              (Python)
+    make_windows and the CWRU loaders, reproduced verbatim from the notebook
+    definitions so that the experiment module can be imported standalone.
+    Window geometry: 1200 samples at 12 kHz (100 ms), non-overlapping.
+
+generic_cwru_asset_specific_experiments.py                  (581 lines, Python)
+    Comparable-experiment framework for the "ideal but non-scalable"
+    asset-specific baseline: one detector per CWRU operating condition, on
+    identical windows and splits. Detectors share a fit/score interface;
+    supplied implementations are a Conv1D autoencoder, One-Class SVM, and
+    Elliptic Envelope. Global seeding via set_all_seeds(GLOBAL_SEED=42).
+
+bearing_autoencoder.ipynb                                   (40 cells)
+    Shared nominal representation. Trains the convolutional autoencoder on
+    simulated healthy signals only. Produces the fleet-wide transferable
+    artifact (shared_ae, shared_scaler, shared_sig_len, shared_tau_mc) that
+    the two per-asset notebooks consume. RUN THIS FIRST.
+    Carries stored executed output: threshold 0.115022 and detection rates of
+    2.0% healthy / 100% outer race / 100% inner race / 92.0% ball fault. These
+    are the reference values checked by verify_pipeline.py.
+    No external data required.
+
+bearing_autoencoder_cwru_per_asset.ipynb                    (33 cells)
+    CWRU per-asset commissioning and evaluation across the four operating
+    conditions. Compares threshold transfer, oracle calibration, One-Class SVM
+    and Elliptic Envelope. Produces cwru_tau_convergence.pdf (Figure 1).
+    REQUIRES CWRU data.
+
+bearing_autoencoder_NASA_per_asset.ipynb                    (29 cells)
+    NASA IMS run-to-failure deployment across four bearings, with domain
+    adaptation and lead-time analysis.
+    REQUIRES NASA IMS data.
+    Two protocol conventions coexist in this notebook; the reported results use
+    mean window aggregation and 8-of-10 persistence (cells 19, 22, 25 after the
+    guard cell was inserted). See REPRODUCIBILITY.md, Known Limitations item 4.
+
+generic_cwru_asset_specific_experiments.ipynb               (14 cells)
+    Notebook driver for the baseline framework. Its code differs from the .py
+    module; the .py file is the reference implementation.
+
+================================================================================
+4. verification/ — RUNNABLE CHECKS
+================================================================================
+
+All four run with no external data, no dataset licence and no GPU. Each exits 0
+on success, non-zero on failure, and prints every quantity it checked.
+
+check_environment.py                     < 5 s,  no framework needed
+    Interpreter, dependency versions, Keras 2 enforcement, dataset resolution.
+
+verify_simulator.py                      ~5 s,   NumPy only
+    Shape and finiteness across regimes and both domain configurations;
+    bit-identical replay under a fixed seed; seed sensitivity; Monte Carlo
+    nuisance activity; fault impulsiveness via high-pass kurtosis; argument
+    validation. Also documents the canonical() noise caveat.
+
+verify_commissioning.py                  ~10 s,  NumPy only
+    Argument validation; warm-up behaviour; estimator correctness against
+    np.percentile; convergence on stationary streams; behaviour under drift;
+    order invariance; per-asset scale recovery; and a quantified table of the
+    short-commissioning bias underlying Known Limitation 2.
+
+verify_pipeline.py                       ~2-3 min, TensorFlow + Keras 2
+    Stage A: regression test rebuilding the shared representation from the
+      simulator and checking it against the values recorded in
+      bearing_autoencoder.ipynb. Aborts with a diagnosis if the latent
+      collapses.
+    Stage B: transfers the absolute OEM threshold to a rescaled field asset;
+      reproduces the 100% false-alarm failure.
+    Stage C: commissions a local operational radius; reproduces the return to
+      a ~2% false-alarm rate with sub-1% agreement against the field oracle.
+    Stage D: exercises the three baseline detectors through evaluate_detector.
+      Skip with --quick.
+
+Last full run of this suite, on Python 3.10.12 / Linux x86-64 / CPU /
+TensorFlow 2.21.0 with tf-keras 2.21.0: all four scripts PASS. Stage A
+reproduced the recorded threshold to within 1.0% and all four recorded
+detection rates exactly.
+
+================================================================================
+5. data/ — EXTERNAL DATASET ACQUISITION
+================================================================================
+
+data/README.md carries the full instructions. Summary:
+
+No raw data is redistributed. Both datasets are third-party, publicly
+available, and remain governed by their original providers' terms.
+
+(a) CWRU Bearing Data Center — Drive-End dataset
+    https://engineering.case.edu/bearingdatacenter
+    Operating conditions: 1730, 1750, 1772, 1797 RPM, treated as four
+    independent deployment environments.
+    Windows: healthy 1,414 / ball 1,621 / inner race 1,621 / outer race 2,846.
+    FORMAT: the loaders read the NumPy (.npz) conversion, one directory per
+    operating condition ("1730 RPM/1730_Normal.npz", etc.), each archive
+    exposing the key "DE". The Data Center distributes .mat files; convert
+    them first.
+    Point at it with:  export CWRU_DATA_ROOT=/path/to/Data
+    Cite: Smith & Randall, Mech. Syst. Signal Process. 64-65:100-131 (2015),
+          doi:10.1016/j.ymssp.2015.04.021, plus the Data Center's own terms.
+
+(b) NASA IMS Bearing Data Set — Set No. 2
+    https://www.nasa.gov/intelligent-systems-division/discovery-and-systems-health/pcoe/pcoe-data-set-repository/
+    Four independently monitored bearings, 984 chronologically ordered
+    recordings each at 10-minute intervals.
+    FORMAT: extracted experiment directories, one timestamped file per
+    recording ("2nd_test/2004.02.12.10.32.39"). Only 2nd_test is enabled.
+    Point at it with:  export NASA_IMS_DATA_ROOT=/path/to/IMS
+    Cite: Lee, Qiu, Yu, Lin & Rexnord Technical Services, "IMS Bearing Data
+          Set", NASA Ames Prognostics Data Repository (2007).
+
+(c) Synthetic data — no download required. bearing_simulator.py generates its
+    own nominal and fault-regime signals at runtime.
+
+================================================================================
+6. RELATED DEPOSITS BY THE SAME AUTHOR
+================================================================================
+
+Anomaly Detection as an Inverse Problem on Quotient Spaces: Equivalence
+Relations and Functional Manifolds as a General Diagnostic Framework.
+Technical Report, University of Colorado Boulder, 2026.
+https://scholar.colorado.edu/concern/reports/7h149s02s
+
+Self-Supervision, Manifold Saturation, and Emergent Operational Classes:
+Learning from Scarce Observations as Inverse Recovery of Compact Functional
+Structure. Technical Report, University of Colorado Boulder, 2026.
+https://scholar.colorado.edu/concern/reports/fn107102t
+
+The Blueprints of Intelligence: A Functional-Topological Foundation for
+Perception and Representation. arXiv:2512.05089.
+
+The present work is the applied, fleet-deployment counterpart to the first
+report listed above; that report develops the quotient-space formalization
+this manuscript does not assume.
+
+================================================================================
+7. HOW TO CITE
+================================================================================
+
+Di Santi, E. (2026). Fleet-Wide Condition Monitoring via Shared Nominal
+Representations and Local Radius Calibration: Enabling OEM-Centralized,
+Fleet-Deployed CBM. Working paper, Department of Applied Mathematics,
+University of Colorado Boulder. [CU Scholar handle assigned on deposit]

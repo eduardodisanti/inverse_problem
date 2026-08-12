@@ -1,0 +1,73 @@
+# Reproducibility package — Python dependencies
+#
+# Fleet-Wide Condition Monitoring via Shared Nominal Representations and
+# Local Radius Calibration. Eduardo Di Santi, University of Colorado Boulder.
+#
+# ===========================================================================
+# KERAS 2 IS REQUIRED. 
+# ===========================================================================
+#
+# The autoencoder applies an L1 activity regularizer to its latent layer.
+# Under Keras 3 that penalty drives the latent to zero: the model degenerates
+# to predicting the per-feature mean, validation loss plateaus near 0.95
+# instead of 0.066, and no fault is detected.
+#
+# The failure is SILENT. A collapsed autoencoder still reports a ~2% healthy
+# false-alarm rate, because a constant predictor trivially satisfies its own
+# percentile. Only the detection rates reveal it, by falling to the false-alarm
+# rate.
+#
+# TensorFlow 2.16 and later default to Keras 3, so on any modern TensorFlow
+# you must install tf-keras and set the environment variable:
+#
+#     pip install -r requirements.txt
+#     export TF_USE_LEGACY_KERAS=1
+#
+# Confirm before running anything:
+#
+#     python verification/check_environment.py
+#
+# ---------------------------------------------------------------------------
+# Environments — see REPRODUCIBILITY.md, "Environments"
+# ---------------------------------------------------------------------------
+#
+# ORIGINAL (produced the reported figures)
+#   Python        3.11.1
+#   tensorflow    2.16.2      with tensorflow-metal on Apple M2 Pro
+#   keras         2           (the tf.keras of that install)
+#   Recorded in the executed notebook outputs. The numpy, pandas, matplotlib
+#   and scikit-learn versions of that run were not recorded.
+#
+# VERIFIED (re-run end to end while preparing this deposit)
+#   Python        3.10.12     Linux x86-64, CPU only
+#   numpy         2.2.6
+#   pandas        2.3.3
+#   matplotlib    3.10.9
+#   scikit-learn  1.7.2
+#   tensorflow    2.21.0
+#   tf-keras      2.21.0      with TF_USE_LEGACY_KERAS=1
+#
+#   Under this environment verification/verify_pipeline.py reproduces the
+#   values recorded in bearing_autoencoder.ipynb: threshold 0.115474 against
+#   the recorded 0.115022 (0.4% apart), and detection rates of 2.0% healthy,
+#   100% outer race, 100% inner race, 91.3% ball fault against the recorded
+#   2.0 / 100 / 100 / 92.0.
+
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+scikit-learn>=1.3
+
+tensorflow>=2.16
+
+# Provides Keras 2 for TensorFlow 2.16+. Required; see the note above.
+# Activate with TF_USE_LEGACY_KERAS=1.
+tf-keras>=2.16
+
+# Apple Silicon GPU acceleration, as used in the original run.
+# Optional: the package runs on CPU without it.
+# tensorflow-metal>=1.1 ; sys_platform == "darwin" and platform_machine == "arm64"
+
+# Required only to open and execute the .ipynb files. The verification scripts
+# and the .py modules do not need it.
+# jupyterlab>=4.0

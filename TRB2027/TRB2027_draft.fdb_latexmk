@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex TRB2027_draft"] 1785356573 "TRB2027_draft.aux" "TRB2027_draft.bbl" "TRB2027_draft" 1785356592 0
+["bibtex TRB2027_draft"] 1785424709 "TRB2027_draft.aux" "TRB2027_draft.bbl" "TRB2027_draft" 1785424710 0
   "./references.bib" 1785331331 9443 e366fb69d8ee98fb45d41f1e0e18bdcc ""
   "/usr/local/texlive/2023/texmf-dist/bibtex/bst/chicago/chicago.bst" 1198629289 37416 2ae04276c51f11eda70770f4081293b7 ""
-  "TRB2027_draft.aux" 1785356592 25689 e22bac315c0a36b9fb6324d79c41dfc5 "pdflatex"
+  "TRB2027_draft.aux" 1785424710 16050 b9cceabcbc55c75d579440063720c0a5 "pdflatex"
   (generated)
   "TRB2027_draft.bbl"
   "TRB2027_draft.blg"
   (rewritten before read)
-["pdflatex"] 1785356591 "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" "TRB2027_draft.pdf" "TRB2027_draft" 1785356592 0
-  "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" 1785356591 70944 4329d6fcaf7692cf08736fdb0f5d3b3d ""
+["pdflatex"] 1785424709 "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" "TRB2027_draft.pdf" "TRB2027_draft" 1785424710 0
+  "/Users/eduardodisanti/git/inverse_problem/TRB2027/TRB2027_draft.tex" 1785424707 70934 f193619846c13b488109ed0811e8d0f8 ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/newtx/ntx-ec-tlf.enc" 1640468671 2914 8283dfc24eaf1964346f843d7605c2b0 ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/newtx/ntx-ot1-tlf.enc" 1422827479 2083 60e36f8eac802fcaf19eabe2633b406e ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/tex-gyre/q-ts1.enc" 1529098226 3124 3813fd4c981d99822890a2861b0d274c ""
@@ -250,10 +250,10 @@
   "/usr/local/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1699445358 4623355 b8cad38412faebe1ce5b780a45db67bd ""
   "/usr/local/texlive/2023/texmf-var/web2c/pdftex/pdflatex.fmt" 1699445304 7883459 18e43aa00442b33783c454a42303b016 ""
   "/usr/local/texlive/2023/texmf.cnf" 1678822455 577 1b2b1af17af2508fb20dd85783af4050 ""
-  "TRB2027_draft.aux" 1785356592 25689 e22bac315c0a36b9fb6324d79c41dfc5 "pdflatex"
-  "TRB2027_draft.bbl" 1785356573 5376 0fa74c17689318707a22a34b6cef3551 "bibtex TRB2027_draft"
-  "TRB2027_draft.out" 1785356592 3560 c4b0a6d7f9a4da2ff7451c2bad685acf "pdflatex"
-  "TRB2027_draft.tex" 1785356591 70944 4329d6fcaf7692cf08736fdb0f5d3b3d ""
+  "TRB2027_draft.aux" 1785424710 16050 b9cceabcbc55c75d579440063720c0a5 "pdflatex"
+  "TRB2027_draft.bbl" 1785424709 5376 0fa74c17689318707a22a34b6cef3551 "bibtex TRB2027_draft"
+  "TRB2027_draft.out" 1785424710 3560 c4b0a6d7f9a4da2ff7451c2bad685acf "pdflatex"
+  "TRB2027_draft.tex" 1785424707 70934 f193619846c13b488109ed0811e8d0f8 ""
   "cwru_tau_convergence.pdf" 1785169240 26431 d516667e4fbc85c42304d7e949bb2011 ""
   "trbunofficial.cls" 1785323376 9319 c9bf79cff3a75312fc38901161b38765 ""
   (generated)

@@ -15,7 +15,7 @@
 \newtheorem{remark}{Remark}
 
 % Mathematical notation
-\newcommand{\X}{\mathcal{X}} 
+\newcommand{\X}{\mathcal{X}}  
 \newcommand{\Z}{\mathcal{Z}}
 \newcommand{\ThetaSpace}{\Theta}
 \newcommand{\EtaSpace}{\mathcal{E}}
@@ -26,10 +26,34 @@
 \newcommand{\taumc}{\tau_{\mathrm{MC}}}
 \newcommand{\taustar}{\tau_k^\star}
 
+%=====================================================================
+% PDF document properties.
+%
+% Repositories (CU Scholar, Google Scholar, and general PDF indexers) read
+% these fields. The class loads hyperref, so \hypersetup must come after it
+% and before \begin{document}.
+%=====================================================================
+\hypersetup{
+  pdftitle={Fleet-Wide Condition Monitoring via Shared Nominal
+            Representations and Local Radius Calibration:
+            Enabling OEM-Centralized, Fleet-Deployed CBM},
+  pdfauthor={Eduardo Di Santi},
+  pdfsubject={Condition-based maintenance; fleet deployment of
+              anomaly detection via a shared nominal representation and
+              locally calibrated operational radii},
+  pdfkeywords={condition monitoring; condition-based maintenance;
+               fleet deployment; anomaly detection; autoencoder;
+               representation transfer; operational radius; commissioning;
+               calibration; rolling-element bearings; CWRU; NASA IMS;
+               edge deployment},
+  pdfcreator={LaTeX with hyperref}, 
+  pdflang={en-US}
+}
+
 \begin{document}
 
 \title{Fleet-Wide Condition Monitoring via Shared Nominal Representations and Local Radius Calibration\\[0.4em]
-\large Enabling OEM-Centralized, Fleet-Deployed CBM}
+\large Enabling OEM-Centralized, Fleet-Deployed CBM} 
 
 \TRBauthor*
 {Eduardo Di Santi}
@@ -150,7 +174,6 @@ not learn a new representation, but estimates an asset-specific property of nomi
 under a fixed shared representation and calibration protocol, following the formulations
 introduced in our previous work \citep{disanti2026quotient,disanti2026inverse}.
 
-% >>> LA FIGURA 1 VA AQUÍ, SIN TOCAR <
 
 This formulation also changes the relevant experimental comparison. The appropriate reference is
 not another globally shared detector but an operationally unrealistic upper bound in which every
@@ -204,9 +227,9 @@ The remainder of the paper is organized as follows. Section~\ref{sec:related} re
 monitoring, one-class anomaly detection, adaptive calibration, and fleet deployment.
 Section~\ref{sec:method} introduces the deployment methodology.
 Section~\ref{sec:experimental_design} presents the experimental protocol.
-Section~\ref{sec:results} reports the deployment results.
-Section~\ref{sec:discussion} closes with a discussion of industrial implications, limitations,
-and future work.
+Section~\ref{sec:results} reports the deployment results, together with edge-deployment
+implications, limitations, and future work.
+Section~\ref{sec:conclusion} concludes.
 
 \section{Related Work}
 \label{sec:related}
@@ -1012,14 +1035,6 @@ for operating condition $k$. This quantity is unavailable during
 commissioning and is used only to assess agreement with the operating point
 that would be obtained under complete nominal knowledge.
 
-%All four CWRU operating conditions satisfy the convergence criterion before
-%the maximum commissioning budget is exhausted. Convergence is detected
-%after 49, 62, 58, and 49 windows for 1730, 1750, 1772, and
-%1797\,RPM, respectively, corresponding to a mean commissioning duration of
-%$54.5 \pm 6.6$ windows. The resulting operational radii differ from their
-%complete-data field-oracle references by only 1.64\%, 0.19\%, 1.06\%,
-%and 0.44\%, respectively.
-
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=\linewidth]{cwru_tau_convergence.pdf}
@@ -1386,6 +1401,7 @@ that an observation lies outside the nominal neighbourhood.
 
 %=====================================================================
 \section{Conclusion}
+\label{sec:conclusion}
 %=====================================================================
 
 We presented a day-one deployment methodology for nominal condition monitoring across
@@ -1416,6 +1432,38 @@ calibration automatically, without operator intervention or manual threshold tun
 
 Conventional CBM deployments typically require asset-specific engineering of models and alarm thresholds. The present results suggest that this engineering effort can instead be replaced by a standardized commissioning procedure in which every asset estimates its own operational radius while reusing a common nominal representation.
 The representation is shared. The operational radius is individual.
+
+%=====================================================================
+\section*{Data and Code Availability}
+%=====================================================================
+\addcontentsline{toc}{section}{Data and Code Availability}
+
+The reproducibility package accompanying this deposit contains the
+physics-motivated bearing simulator, the shared-representation training
+notebook, the per-asset commissioning notebooks for both datasets, the
+asset-specific baseline detectors, and a verification suite that reproduces
+the simulated-domain results without any external download. Software is
+released under the MIT License. Package contents, the required software
+environment, and the declared limitations of the reported calibration are
+documented in the accompanying \texttt{README}, \texttt{REPRODUCIBILITY} and
+\texttt{resources} files.
+
+Neither of the two evaluation datasets is redistributed. Both are publicly
+available from their originators and remain governed by their terms. The
+rolling-element bearing data is the Drive-End dataset of the Case Western
+Reserve University Bearing Data Center \citep{smith2015}, used at 1730, 1750,
+1772 and 1797~RPM. The run-to-failure data is Set~No.~2 of the Intelligent
+Maintenance Systems bearing dataset from the NASA Ames Prognostics Data
+Repository \citep{ims2007}. Acquisition instructions and the expected on-disk
+layout for each are given in the package.
+
+%=====================================================================
+\section*{Acknowledgment of Prior Dissemination}
+%=====================================================================
+\addcontentsline{toc}{section}{Acknowledgment of Prior Dissemination}
+
+This document is a working paper deposited in an institutional repository. It
+has not been peer reviewed and has not been published elsewhere.
 
 %\vspace{-0.3cm}
 %\setlength{\bibhang}{1em}

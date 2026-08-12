@@ -1190,7 +1190,6 @@ OUTPUT TRB2027_draft.out
 INPUT /usr/local/texlive/2023/texmf-dist/tex/latex/graphics/graphicx.sty
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/tfm/public/newtx/ntx-Regular-tlf-t1.tfm
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/tfm/public/newtx/ntx-Bold-tlf-t1.tfm
-INPUT /usr/local/texlive/2023/texmf-dist/fonts/tfm/public/newtx/ntx-Regular-tlf-t1.tfm
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/tfm/public/newtx/ntx-Bold-tlf-t1.tfm
 INPUT /usr/local/texlive/2023/texmf-dist/tex/latex/newtx/ot1minntx.fd
 INPUT /usr/local/texlive/2023/texmf-dist/tex/latex/newtx/ot1minntx.fd
